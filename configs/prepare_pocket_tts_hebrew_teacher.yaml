@@ -1,0 +1,29 @@
+prepare_ivritai:
+  # Portable paths. Set both variables before running this checked-in profile.
+  input_folder: "${CROWD_RECITAL_ROOT}"
+  output_dataset_name: "${POCKET_TTS_PREPARED_DIR}"
+  audio_filename_glob: "audio.wav"
+  segments_filename_glob: "transcript.aligned.json"
+
+  # Experimental 24-layer teacher profile. Slices close on aligned segment boundaries,
+  # so target 26 seconds measured about 23 seconds on this corpus. Pocket TTS training
+  # should use --head-samples 500 to cover the 40-second maximum at 12.5 latent Hz.
+  min_duration: 4.0
+  target_duration: 26.0
+  max_duration: 40.0
+
+  validation_split_size: 0
+  strip_markup: true
+  max_latin_letter_ratio: 0.15
+  max_source_entries: null
+  source_selection: "spread"
+  num_proc: 1
+  per_proc_per_chunk_size: 10
+  per_sample_quality_threshold: 0.6
+  per_segment_quality_threshold: 0.6
+  copy_metadata_fields: ["user_id", "biological_sex"]
+  exclude_by_md: []
+  push_to_hub: false
+  push_as_public: false
+  clear_output_dataset_cache_files: false
+  log_level: "INFO"

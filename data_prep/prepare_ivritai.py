@@ -1,24 +1,32 @@
 from dataclasses import dataclass
+import io
 import json
-from random import shuffle, uniform
 import logging
+import os
+import re
+from random import uniform
 from pathlib import Path
+import shutil
+import statistics
+from subprocess import CalledProcessError, run
+import sys
 from typing import Iterator
 import uuid
-import statistics
-import io
-import sys
 
+import numpy as np
+import soundfile as sf
 from tqdm import tqdm
 from datasets import (
     Dataset,
     DatasetDict,
     concatenate_datasets,
+    load_from_disk,
     Value as ValueColumnType,
     Features,
 )
 from datasets.exceptions import DatasetGenerationError
 from huggingface_hub import DatasetCard, DatasetCardData, upload_file
+
 try:
     # Original import path used in clean_f5 environment.
     from f5_tts.train.datasets.heb_norm.hebrew_tts_normalizer import (
@@ -64,12 +72,36 @@ class Segment:
         return bool(self.words and len(self.words) > 0)
 
     def __post_init__(self):
-        self.words = [
-            SegmentWords(**w) if isinstance(w, dict) else w for w in self.words
-        ]
+        self.words = [SegmentWords(**w) if isinstance(w, dict) else w for w in self.words]
 
 
 logger = logging.getLogger(__name__)
+
+_CONFIG_ENV_RE = re.compile(r"\$\{[^}]+\}")
+_CONFIG_PATH_KEYS = {
+    "input_folder",
+    "output_dataset_name",
+    "parts_dir",
+    "dataset_license_file",
+}
+
+
+def _expand_config_value(value):
+    if isinstance(value, str):
+        expanded = os.path.expanduser(os.path.expandvars(value))
+        unresolved = _CONFIG_ENV_RE.search(expanded)
+        if unresolved:
+            variable = unresolved.group(0)
+            raise ValueError(
+                f"Config references unset environment variable {variable}. "
+                "Set it before running the preparation command."
+            )
+        return expanded
+    if isinstance(value, list):
+        return [_expand_config_value(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _expand_config_value(item) for key, item in value.items()}
+    return value
 
 
 def _load_cli_config(config_path: str) -> dict:
@@ -86,14 +118,11 @@ def _load_cli_config(config_path: str) -> dict:
                 import yaml
             except ImportError as exc:
                 raise ImportError(
-                    "YAML config requested but PyYAML is not installed. "
-                    "Install with: pip install pyyaml"
+                    "YAML config requested but PyYAML is not installed. Install with: pip install pyyaml"
                 ) from exc
             config = yaml.safe_load(f)
         else:
-            raise ValueError(
-                f"Unsupported config extension '{suffix}'. Use .json/.yaml/.yml"
-            )
+            raise ValueError(f"Unsupported config extension '{suffix}'. Use .json/.yaml/.yml")
 
     if not isinstance(config, dict):
         raise ValueError("Config root must be a JSON/YAML object.")
@@ -101,7 +130,18 @@ def _load_cli_config(config_path: str) -> dict:
     # Optional nesting: allow top-level {"prepare_ivritai": {...}}
     nested = config.get("prepare_ivritai")
     if isinstance(nested, dict):
-        return nested
+        config = nested
+
+    config = _expand_config_value(config)
+    # Relative paths in a checked-in config are resolved from that config file, not from
+    # whichever working directory happens to launch the job.
+    for key in _CONFIG_PATH_KEYS:
+        value = config.get(key)
+        if not value or key == "output_dataset_name" and config.get("push_to_hub"):
+            continue
+        path = Path(value)
+        if not path.is_absolute():
+            config[key] = str((config_path_obj.parent / path).resolve())
     return config
 
 
@@ -131,23 +171,18 @@ def _load_data_manifest(
         search_within_folder = segments_file.parent
         found_audio_files = list(search_within_folder.glob(audio_filename_glob))
         # expect only one audio file
-        assert (
-            len(found_audio_files) == 1
-        ), f"Expected 1 audio file, found {len(found_audio_files)} for {segments_file} (taking first)"
+        assert len(found_audio_files) == 1, (
+            f"Expected 1 audio file, found {len(found_audio_files)} for {segments_file} (taking first)"
+        )
         audio_files.extend(found_audio_files[:1])
         # expect only one metadata file
         found_metadata_files = list(search_within_folder.glob(metadata_glob))
-        assert (
-            len(found_metadata_files) == 1
-        ), f"Expected 1 metadata file, found {len(found_metadata_files)} for {segments_file} (taking first)"
+        assert len(found_metadata_files) == 1, (
+            f"Expected 1 metadata file, found {len(found_metadata_files)} for {segments_file} (taking first)"
+        )
         metadata_files.extend(found_metadata_files[:1])
     return list(zip(audio_files, segments_files, metadata_files))
 
-
-from subprocess import CalledProcessError, run, PIPE, DEVNULL
-
-import numpy as np
-import soundfile as sf
 
 TARGET_SAMPLE_RATE = 24_000
 
@@ -200,7 +235,7 @@ def get_segment_word_scores(segment: Segment) -> list[float]:
     Get the word scores for a segment.
     This is a helper function to extract the word scores from a segment.
     """
-    if not segment.has_words:
+    if not segment.has_words():
         return []
 
     # Extract word scores from the segment
@@ -244,9 +279,7 @@ class DurationController:
     Each process maintains its own controller instance to adapt based on local statistics.
     """
 
-    def __init__(
-        self, min_duration: float, max_duration: float, target_duration: float
-    ):
+    def __init__(self, min_duration: float, max_duration: float, target_duration: float):
         self.min_duration = min_duration
         self.max_duration = max_duration
         self.target_duration = target_duration
@@ -290,8 +323,11 @@ class DurationController:
         self.completed_durations.append(duration)
 
     def record_rejected_slice(self):
-        """Record when a slice is rejected due to quality filtering."""
-        self.completed_durations.pop()
+        """Undo the last recorded slice when it is rejected by quality filtering."""
+        # Slices with duration 0 were never recorded, so guard against popping an
+        # unrelated entry (or raising IndexError and losing the whole source).
+        if self.completed_durations:
+            self.completed_durations.pop()
 
 
 def generate_slices(
@@ -311,14 +347,10 @@ def generate_slices(
         # and validate it's duration.
         if curr_input_segment_idx < len(input_segments):
             curr_input_segment_duration = (
-                input_segments[curr_input_segment_idx].end
-                - input_segments[curr_input_segment_idx].start
+                input_segments[curr_input_segment_idx].end - input_segments[curr_input_segment_idx].start
             )
             # If the first segment to work on is too long for a single slice or of 0 length we must skip it.
-            if (
-                curr_input_segment_duration > max_duration
-                or curr_input_segment_duration == 0
-            ):
+            if curr_input_segment_duration > max_duration or curr_input_segment_duration == 0:
                 # skip if any segment ahead
                 if curr_input_segment_idx + 1 < len(input_segments):
                     next_slice_start = input_segments[curr_input_segment_idx + 1].start
@@ -346,16 +378,24 @@ def generate_slices(
             # Fallback to max_duration (original behavior)
             current_slice_target = max_duration
 
+        # The sampled target is an average, so it can land below the length of the very
+        # first segment of this slice. That segment then never fits, the slice closes
+        # empty, and next_slice_start is set back to the same segment start - an infinite
+        # loop that grows `slices` until memory runs out. Stretch this one slice up to
+        # max_duration so the first segment always fits when it possibly can. Segments
+        # longer than max_duration are already skipped by the guard above.
+        if curr_input_segment_idx < len(input_segments):
+            first_segment_span = min(input_segments[curr_input_segment_idx].end, audio_duration) - slice_start
+            if current_slice_target < first_segment_span <= max_duration:
+                current_slice_target = first_segment_span
+
         # normal slice length is the expected slice hop - but this could be overridden below. See comments.
         next_slice_start = slice_start + current_slice_target
         # clip the slice end to the total audio duration
         slice_end = min(next_slice_start, audio_duration)
 
         # While more segments to work on and the current segment start is within the slice
-        while (
-            curr_input_segment_idx < len(input_segments)
-            and input_segments[curr_input_segment_idx].start < slice_end
-        ):
+        while curr_input_segment_idx < len(input_segments) and input_segments[curr_input_segment_idx].start < slice_end:
             curr_input_segment = input_segments[curr_input_segment_idx]
 
             # track the source segments used in this slice for quality analysis after slice completion
@@ -370,14 +410,14 @@ def generate_slices(
             curr_input_segment_end = min(curr_input_segment.end, audio_duration)
 
             # If this input segment fully fits within the slice, include it.
-            if curr_input_segment_end <= slice_end:
-                slice_segment["end"] = min(
-                    max_duration, curr_input_segment_end - slice_start
-                )  # relative to slice
+            # The tolerance matters: slice_end is computed as slice_start + target, so when
+            # the target was stretched to exactly cover this segment the sum can land an
+            # ulp below the segment end (5.860 + 8.740 = 14.599999999999998 < 14.600). The
+            # segment would then never fit any slice and the cursor would not advance.
+            if curr_input_segment_end <= slice_end + 1e-6:
+                slice_segment["end"] = min(max_duration, curr_input_segment_end - slice_start)  # relative to slice
                 slice_segment["text"] = curr_input_segment.text
-                slice_segment["word_scores"] = get_segment_word_scores(
-                    curr_input_segment
-                )
+                slice_segment["word_scores"] = get_segment_word_scores(curr_input_segment)
                 # entire segment is included - advance to next input segment
                 curr_input_segment_idx += 1
             else:
@@ -409,9 +449,7 @@ def generate_slices(
         # If we didn't break out of the segment loop, calculate the actual slice duration
         # (slice was closed due to reaching slice_end or end of segments)
         if curr_slice["duration"] == 0.0 and curr_slice_source_segment_idxs:
-            last_segment_end = min(
-                input_segments[curr_slice_source_segment_idxs[-1]].end, audio_duration
-            )
+            last_segment_end = min(input_segments[curr_slice_source_segment_idxs[-1]].end, audio_duration)
             curr_slice["duration"] = last_segment_end - slice_start
 
         # Record the ACTUAL slice duration for adaptive control feedback
@@ -422,24 +460,17 @@ def generate_slices(
             duration_controller.record_completed_slice(curr_slice["duration"])
 
         # Slice Quality Control
-        slice_quality_score = calculate_segments_quality_score(
-            curr_slice_source_segments
-        )
+        slice_quality_score = calculate_segments_quality_score(curr_slice_source_segments)
 
         # Check if the slice quality is below threshold to abandon it and force a new slice
-        if (
-            curr_slice_source_segments
-            and slice_quality_score < per_segment_quality_threshold
-        ):
+        if curr_slice_source_segments and slice_quality_score < per_segment_quality_threshold:
             # This slice is suspected as low quality
 
             # Look for a segment with good quality to start the next slice
             # skip the first segment in the slice (otherwise we probably are going
             # to just repeat the same slice)
             found_good_segment = False
-            for seg_idx_within_slice, seg_of_slice in enumerate(
-                curr_slice_source_segments
-            ):
+            for seg_idx_within_slice, seg_of_slice in enumerate(curr_slice_source_segments):
                 if seg_idx_within_slice == 0:
                     continue
 
@@ -448,22 +479,16 @@ def generate_slices(
                 if segment_score >= per_segment_quality_threshold:
                     # Found a good enough segment, start next slice from here
                     next_slice_start = seg_of_slice.start
-                    curr_input_segment_idx = curr_slice_source_segment_idxs[
-                        seg_idx_within_slice
-                    ]
+                    curr_input_segment_idx = curr_slice_source_segment_idxs[seg_idx_within_slice]
                     found_good_segment = True
                     break
 
             # If no good segment found, start from the end of the last checked segment
             if not found_good_segment:
-                next_segment_idx_after_slice_segments = (
-                    curr_slice_source_segment_idxs[-1] + 1
-                )
+                next_segment_idx_after_slice_segments = curr_slice_source_segment_idxs[-1] + 1
                 # if any segment ahead
                 if next_segment_idx_after_slice_segments < len(input_segments):
-                    next_slice_start = input_segments[
-                        next_segment_idx_after_slice_segments
-                    ].start
+                    next_slice_start = input_segments[next_segment_idx_after_slice_segments].start
                     curr_input_segment_idx = next_segment_idx_after_slice_segments
                 # or there are more segments - stop slicing
                 else:
@@ -473,15 +498,22 @@ def generate_slices(
             curr_slice_segments.clear()
 
             # Record that we rejected this slice due to quality
-            if duration_controller:
+            if duration_controller and curr_slice["duration"] > 0:
                 duration_controller.record_rejected_slice()
+
+        # Every path above must move the cursor forward. If one ever does not, fail here
+        # in milliseconds instead of appending slices until the process runs out of memory.
+        if next_slice_start <= slice_start:
+            raise RuntimeError(
+                f"generate_slices made no progress at {slice_start:.3f}s "
+                f"(segment index {curr_input_segment_idx}, audio {audio_duration:.3f}s). "
+                "This is the non-advancing slice bug; do not remove this guard."
+            )
 
     return slices
 
 
-def merge_slice_segments(
-    slices: list[dict], merge_below_gap_threshold: float = 0.3
-) -> list[dict]:
+def merge_slice_segments(slices: list[dict], merge_below_gap_threshold: float = 0.3) -> list[dict]:
     """
     Merge segments within each slice that are close together.
 
@@ -499,9 +531,7 @@ def merge_slice_segments(
 
     for slice_data in slices:
         # Create a new slice with the same properties as the original, but copy it to avoid modifying the original
-        new_slice = {
-            key: value for key, value in slice_data.items() if key != "segments"
-        }
+        new_slice = {key: value for key, value in slice_data.items() if key != "segments"}
         new_slice["segments"] = []
 
         segments = slice_data.get("segments", [])
@@ -540,6 +570,11 @@ def merge_slice_segments(
                 # Merge current segment into previous segment
                 prev_segment["end"] = current_segment["end"]
                 prev_segment["text"] = prev_segment["text"] + current_segment["text"]
+                # Carry the merged segment's word scores over, otherwise the example
+                # quality score would only reflect the first segment of the merge chain.
+                prev_segment["word_scores"] = list(prev_segment.get("word_scores", [])) + list(
+                    current_segment.get("word_scores", [])
+                )
 
                 # Remove the current segment as it's now merged
                 result_segments.pop(i)
@@ -554,9 +589,7 @@ def merge_slice_segments(
     return result_slices
 
 
-def get_slice_audio_waveform(
-    audio_waveform: np.ndarray, slice_start_sec: float, slice_length_sec: float
-) -> np.ndarray:
+def get_slice_audio_waveform(audio_waveform: np.ndarray, slice_start_sec: float, slice_length_sec: float) -> np.ndarray:
     """Slice mono waveform using time range (seconds)."""
     start_sample = max(0, int(round(slice_start_sec * TARGET_SAMPLE_RATE)))
     end_sample = max(
@@ -588,7 +621,7 @@ cleanup_options = TTSNormalizeOptions(
     keep_punctuations=True,
     attach_punctuations_to_token=True,
     stt_compat_mode=False,
-    remove_parentheses=False
+    remove_parentheses=False,
 )
 
 
@@ -599,12 +632,47 @@ def cleanup_text(text: str) -> str:
     return normalize_tts_text(text, options=cleanup_options, word_replacements=word_replacement_cache)
 
 
+WIKI_MARKUP_RE = re.compile(r"={2,}")
+HEBREW_LETTER_RE = re.compile(r"[א-ת]")
+LATIN_LETTER_RE = re.compile(r"[A-Za-z]")
+
+
+def strip_wiki_markup(text: str) -> str:
+    """
+    Remove Wikipedia section markers ('== הערות שוליים ==') from transcript text.
+
+    Only the '=' characters are removed, never the words between them: the transcript is a
+    forced alignment of what was actually said, and reciters do read section headings aloud.
+    Dropping the words would desynchronize the text from the audio.
+    """
+    if "=" not in text:
+        return text
+    return re.sub(r"\s{2,}", " ", WIKI_MARKUP_RE.sub(" ", text)).strip()
+
+
+def latin_letter_ratio(text: str) -> float:
+    """
+    Fraction of alphabetic characters that are Latin rather than Hebrew.
+
+    Measured over letters only so that punctuation, digits and spacing do not dilute the
+    signal. Returns 0.0 for text with no letters at all.
+    """
+    latin = len(LATIN_LETTER_RE.findall(text))
+    hebrew = len(HEBREW_LETTER_RE.findall(text))
+    total = latin + hebrew
+    if total == 0:
+        return 0.0
+    return latin / total
+
+
 def generate_examples_from_slices(
     slices,
     audio_waveform: np.ndarray,
     metadata: dict,
     min_duration: float = 0.0,
     copy_metadata_fields: list[str] = [],
+    strip_markup: bool = False,
+    max_latin_letter_ratio: float = 1.0,
 ) -> Iterator[dict]:
     source_id = metadata.get("source_id", "unknown")
     source_entry_id = metadata.get("source_entry_id", str(uuid.uuid4()))
@@ -628,25 +696,38 @@ def generate_examples_from_slices(
                 for segment in slice["segments"]:
                     if "text" in segment:
                         slice_text += segment["text"]
-                all_word_scores = [
-                    score
-                    for segment in slice["segments"]
-                    for score in segment.get("word_scores", [])
-                ]
+                all_word_scores = [score for segment in slice["segments"] for score in segment.get("word_scores", [])]
                 segments_quality_score = calculate_median_quality_score(all_word_scores)
                 slice_duration = slice.get("duration", 0.0)
                 if slice_duration < min_duration:
+                    prev_example = None
                     continue
-                slice_audio_waveform = get_slice_audio_waveform(
-                    audio_waveform, float(slice["seek"]), slice_duration
-                )
+
+                if strip_markup:
+                    slice_text = strip_wiki_markup(slice_text)
+
+                # A Hebrew-only SentencePiece vocabulary fragments Latin-script runs badly,
+                # and the reciter did not read them as English. Drop Latin-dominant slices
+                # rather than training on them.
+                normalized_text = cleanup_text(slice_text)
+                slice_latin_ratio = latin_letter_ratio(normalized_text)
+                if slice_latin_ratio > max_latin_letter_ratio:
+                    logger.debug(
+                        f"Dropping slice seek {float(slice['seek']):.2f} in "
+                        f"{source_id}/{source_entry_id}: latin letter ratio "
+                        f"{slice_latin_ratio:.2f} > {max_latin_letter_ratio:.2f}"
+                    )
+                    prev_example = None
+                    continue
+
+                slice_audio_waveform = get_slice_audio_waveform(audio_waveform, float(slice["seek"]), slice_duration)
                 slice_audio_bytes = encode_wav_bytes(slice_audio_waveform)
                 example = {
                     "audio": {
                         "bytes": slice_audio_bytes,
                         "path": f"{source_entry_id}.wav",
                     },
-                    "text": cleanup_text(slice_text),
+                    "text": normalized_text,
                     "raw_text": slice_text,
                     "metadata": {
                         "seek": float(slice["seek"]),
@@ -663,9 +744,7 @@ def generate_examples_from_slices(
                     example["has_prev"] = True
                 if copy_metadata_fields:
                     for field_to_copy in copy_metadata_fields:
-                        example["metadata"][field_to_copy] = metadata.get(
-                            field_to_copy, None
-                        )
+                        example["metadata"][field_to_copy] = metadata.get(field_to_copy, None)
                 yield example
                 prev_example = example
             except Exception as e:
@@ -691,9 +770,7 @@ def parse_exclude_filter(filter_str: str) -> tuple[str, str, str]:
     """
     parts = filter_str.split(":", 2)
     if len(parts) != 3:
-        raise ValueError(
-            f"Invalid filter format: {filter_str}. Expected 'field_path:eq:value'"
-        )
+        raise ValueError(f"Invalid filter format: {filter_str}. Expected 'field_path:eq:value'")
     field_path, operator, value = parts
     if operator != "eq":
         raise ValueError(f"Unsupported operator: {operator}. Only 'eq' is supported")
@@ -724,9 +801,7 @@ def get_nested_value(obj: dict, field_path: str):
         return None
 
 
-def should_exclude_entry(
-    metadata: dict, exclude_filters: list[tuple[str, str, str]]
-) -> bool:
+def should_exclude_entry(metadata: dict, exclude_filters: list[tuple[str, str, str]]) -> bool:
     """
     Check if an entry should be excluded based on metadata filters.
 
@@ -763,6 +838,11 @@ def prepare_training_dataset(
     per_segment_quality_threshold: float = 0,
     copy_metadata_fields: list[str] = [],
     exclude_filters: list[str] = [],
+    source_selection: str = "shortest",
+    source_selection_seed: int = 0,
+    strip_markup: bool = False,
+    max_latin_letter_ratio: float = 1.0,
+    parts_dir: Path | None = None,
 ) -> Dataset:
     """
     Prepare captioned datasets from the input folder.
@@ -793,16 +873,32 @@ def prepare_training_dataset(
                 return 0.0
             return float(duration)
         except Exception:
-            logger.warning(
-                f"Could not read duration from metadata {metadata_file}, using 0.0"
-            )
+            logger.warning(f"Could not read duration from metadata {metadata_file}, using 0.0")
             return 0.0
 
     input_manifest = sorted(input_manifest, key=_get_manifest_duration)
 
-    # Limit the number of source entries to process
-    if max_source_entries:
-        input_manifest = input_manifest[:max_source_entries]
+    # Limit the number of source entries to process.
+    # The manifest is sorted by duration, so the default "shortest" selection picks the
+    # shortest recordings. That is fine for chunk balancing on a full run, but it makes a
+    # small pilot unrepresentative: the shortest sources are typically below min_duration
+    # and yield no examples at all. "spread" and "random" give a representative pilot.
+    if max_source_entries and max_source_entries < len(input_manifest):
+        if source_selection == "shortest":
+            input_manifest = input_manifest[:max_source_entries]
+        elif source_selection == "spread":
+            step = len(input_manifest) / max_source_entries
+            idxs = sorted({int(i * step) for i in range(max_source_entries)})
+            input_manifest = [input_manifest[i] for i in idxs]
+        elif source_selection == "random":
+            from random import Random
+
+            sampled = list(input_manifest)
+            Random(source_selection_seed).shuffle(sampled)
+            input_manifest = sorted(sampled[:max_source_entries], key=_get_manifest_duration)
+        else:
+            raise ValueError(f"Unknown source_selection '{source_selection}'. Use 'shortest', 'spread', or 'random'.")
+        logger.info(f"Selected {len(input_manifest)} source entries using source_selection='{source_selection}'")
 
     # Aim for reasonable entries per worker within each chunk
     manifest_processing_chunk_size = num_proc * per_proc_per_chunk_size
@@ -826,9 +922,7 @@ def prepare_training_dataset(
 
                 # Check if entry should be excluded based on metadata filters
                 if should_exclude_entry(metadata, exclude_filters):
-                    logger.debug(
-                        f"Excluding sample {audio_file} based on metadata filters"
-                    )
+                    logger.debug(f"Excluding sample {audio_file} based on metadata filters")
                     continue
 
                 # Load captions
@@ -836,8 +930,7 @@ def prepare_training_dataset(
                 with open(segments_data_file, "r", encoding="utf-8") as segs_file:
                     segs_json = json.load(segs_file)
                     segments: list[Segment] = [
-                        Segment(**s) if isinstance(s, dict) else s
-                        for s in segs_json["segments"]
+                        Segment(**s) if isinstance(s, dict) else s for s in segs_json["segments"]
                     ]
 
                 # Get sample quality score
@@ -854,9 +947,7 @@ def prepare_training_dataset(
                     continue
 
                 # Load audio as mono waveform in target sample rate
-                audio_waveform = load_audio_in_target_format(
-                    str(audio_file), sr=TARGET_SAMPLE_RATE
-                )
+                audio_waveform = load_audio_in_target_format(str(audio_file), sr=TARGET_SAMPLE_RATE)
                 audio_duration = len(audio_waveform) / TARGET_SAMPLE_RATE
 
                 # Create slices of the captions with the intended slice
@@ -877,6 +968,8 @@ def prepare_training_dataset(
                     metadata,
                     min_duration=min_duration,
                     copy_metadata_fields=copy_metadata_fields,
+                    strip_markup=strip_markup,
+                    max_latin_letter_ratio=max_latin_letter_ratio,
                 ):
                     yielded_at_least_one = True
                     yield example
@@ -913,10 +1006,38 @@ def prepare_training_dataset(
     # 3. Concatenate the memory-mapped datasets at the end
     # This trades off some disk I/O for better memory usage, while still
     # maintaining parallel generation within each chunk.
+    # Each completed chunk is written to its own part directory immediately, with a
+    # sidecar json recording exactly which source entries went into it. A crash therefore
+    # costs at most one chunk, and a rerun skips every part whose sidecar still matches
+    # the chunk it would regenerate. Without this the whole run had to succeed end to end;
+    # a failure at 51% produced nothing.
+    if parts_dir is not None:
+        parts_dir = Path(parts_dir)
+        parts_dir.mkdir(parents=True, exist_ok=True)
+
     all_datasets = []
-    for input_manifest_chunk in tqdm(
-        input_manifest_chunks, desc="Generating input manifest chunks"
+    reused_parts = 0
+    for chunk_index, input_manifest_chunk in enumerate(
+        tqdm(input_manifest_chunks, desc="Generating input manifest chunks")
     ):
+        part_path = sidecar_path = None
+        chunk_signature = [str(segments_file) for _a, segments_file, _m in input_manifest_chunk]
+        if parts_dir is not None:
+            part_path = parts_dir / f"part_{chunk_index:05d}"
+            sidecar_path = parts_dir / f"part_{chunk_index:05d}.json"
+            if sidecar_path.exists():
+                try:
+                    sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+                except json.JSONDecodeError:
+                    sidecar = None
+                if sidecar and sidecar.get("sources") == chunk_signature:
+                    reused_parts += 1
+                    if sidecar.get("empty"):
+                        continue
+                    all_datasets.append(load_from_disk(str(part_path)))
+                    continue
+                logger.warning(f"Part {chunk_index} exists but its sources changed; regenerating.")
+
         try:
             dataset_features = Features(
                 {
@@ -939,9 +1060,7 @@ def prepare_training_dataset(
             )
             if copy_metadata_fields:
                 for field_to_copy in copy_metadata_fields:
-                    dataset_features["metadata"][field_to_copy] = ValueColumnType(
-                        dtype="string"
-                    )
+                    dataset_features["metadata"][field_to_copy] = ValueColumnType(dtype="string")
             generator_kwargs = {}
             if num_proc > 1:
                 if sys.platform.startswith("win"):
@@ -955,17 +1074,45 @@ def prepare_training_dataset(
                 gen_kwargs={"input_manifest_shards": list(input_manifest_chunk)},
                 features=dataset_features,
                 **generator_kwargs,
-            ).filter(
-                lambda example: example["text"]
-            )  # filter out empty examples
+            ).filter(lambda example: example["text"])  # filter out empty examples
         except (ValueError, DatasetGenerationError) as e:
             if "corresponds to no data" in str(e) or "An error occurred while generating the dataset" in str(e):
                 logger.info("Skipping dataset creation because no data was found.")
+                if sidecar_path is not None:
+                    sidecar_path.write_text(
+                        json.dumps({"sources": chunk_signature, "empty": True}),
+                        encoding="utf-8",
+                    )
                 continue
             else:
                 raise  # Re-raise unexpected errors
 
+        if part_path is not None:
+            if generated_dataset.num_rows == 0:
+                sidecar_path.write_text(
+                    json.dumps({"sources": chunk_signature, "empty": True}),
+                    encoding="utf-8",
+                )
+                continue
+            # save_to_disk cannot overwrite a directory it is reading from, and a stale
+            # part must not survive a regeneration.
+            if part_path.exists():
+                shutil.rmtree(part_path)
+            generated_dataset.save_to_disk(str(part_path))
+            # Reload from the saved copy so the in-memory generator output is released
+            # and only the memory-mapped part is held for the final concatenate.
+            del generated_dataset
+            generated_dataset = load_from_disk(str(part_path))
+            # Sidecar is written last, so a crash mid-save never looks complete.
+            sidecar_path.write_text(
+                json.dumps({"sources": chunk_signature, "empty": False, "rows": generated_dataset.num_rows}),
+                encoding="utf-8",
+            )
+
         all_datasets.append(generated_dataset)
+
+    if parts_dir is not None and reused_parts:
+        logger.info(f"Reused {reused_parts} previously completed part(s) from {parts_dir}")
 
     if not all_datasets:
         return None
@@ -1000,8 +1147,22 @@ if __name__ == "__main__":
         help="Maximum number of source entries to process",
     )
     parser.add_argument(
-        "--audio_filename_glob", default="audio.*", help="Glob pattern for audio files"
+        "--source_selection",
+        type=str,
+        default="shortest",
+        choices=["shortest", "spread", "random"],
+        help="How to pick entries when --max_source_entries is set. "
+        "'shortest' (default) keeps the legacy behaviour of taking the shortest "
+        "recordings; 'spread' samples evenly across the duration range; "
+        "'random' samples randomly. Use 'spread' or 'random' for pilots.",
     )
+    parser.add_argument(
+        "--source_selection_seed",
+        type=int,
+        default=0,
+        help="Seed for --source_selection random",
+    )
+    parser.add_argument("--audio_filename_glob", default="audio.*", help="Glob pattern for audio files")
     parser.add_argument(
         "--segments_filename_glob",
         default="transcript.*.json",
@@ -1039,9 +1200,7 @@ if __name__ == "__main__":
         default=0,
         help="Split size for evaluation (between 0 and 1)",
     )
-    parser.add_argument(
-        "--num_proc", type=int, default=1, help="Number of processes to use"
-    )
+    parser.add_argument("--num_proc", type=int, default=1, help="Number of processes to use")
     parser.add_argument(
         "--per_proc_per_chunk_size",
         type=int,
@@ -1053,6 +1212,29 @@ if __name__ == "__main__":
             "If each sample is large (minutes of audio), this number should be decreased. "
             "If each sample is small (seconds of audio), this number can be increased to increase parallelism efficiency. "
         ),
+    )
+    parser.add_argument(
+        "--strip_markup",
+        action="store_true",
+        help="Remove Wikipedia section markers ('==') from transcript text. Only the '=' "
+        "characters are removed; the words between them are kept because they were "
+        "actually spoken.",
+    )
+    parser.add_argument(
+        "--max_latin_letter_ratio",
+        type=float,
+        default=1.0,
+        help="Drop examples whose text exceeds this ratio of Latin letters to all letters "
+        "(Latin + Hebrew). Default 1.0 keeps everything. Use ~0.15 for Hebrew TTS, where "
+        "Latin-script runs are fragmented by a Hebrew-only SentencePiece vocabulary.",
+    )
+    parser.add_argument(
+        "--parts_dir",
+        type=str,
+        default=None,
+        help="Directory for per-chunk checkpoints. Each completed chunk is saved there "
+        "immediately, so a crash costs at most one chunk and a rerun resumes. Defaults to "
+        "<output_dataset_name>_parts when an output dataset name is given.",
     )
     parser.add_argument(
         "--per_sample_quality_threshold",
@@ -1078,9 +1260,7 @@ if __name__ == "__main__":
         default=[],
         help="Exclude entries by metadata property filters in format 'field_path:eq:value'. Multiple filters are joined with OR logic.",
     )
-    parser.add_argument(
-        "--push_to_hub", action="store_true", help="Push the dataset to the hub"
-    )
+    parser.add_argument("--push_to_hub", action="store_true", help="Push the dataset to the hub")
     parser.add_argument(
         "--output_dataset_name",
         type=str,
@@ -1123,20 +1303,14 @@ if __name__ == "__main__":
         nargs="+",
         help="Task categories for the dataset card",
     )
-    parser.add_argument(
-        "--dataset_card_pretty_name", type=str, help="Pretty name for the dataset card"
-    )
-    parser.add_argument(
-        "--push_as_public", action="store_true", help="Push the dataset as public"
-    )
+    parser.add_argument("--dataset_card_pretty_name", type=str, help="Pretty name for the dataset card")
+    parser.add_argument("--push_as_public", action="store_true", help="Push the dataset as public")
     parser.add_argument(
         "--clear_output_dataset_cache_files",
         action="store_true",
         help="Clear the HF cache for the output dataset on disk",
     )
-    parser.add_argument(
-        "--log_level", type=str, default="INFO", help="Log level of the general logger."
-    )
+    parser.add_argument("--log_level", type=str, default="INFO", help="Log level of the general logger.")
 
     args = parser.parse_args()
 
@@ -1157,6 +1331,16 @@ if __name__ == "__main__":
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
+    # Resolve where per-chunk checkpoints live. Defaults next to the output dataset so a
+    # rerun of the same command resumes without extra flags.
+    resolved_parts_dir = None
+    if args.parts_dir:
+        resolved_parts_dir = Path(args.parts_dir)
+    elif args.output_dataset_name and not args.push_to_hub:
+        resolved_parts_dir = Path(str(args.output_dataset_name) + "_parts")
+    if resolved_parts_dir:
+        logger.info(f"Per-chunk checkpoints: {resolved_parts_dir}")
+
     # Parse exclude filters
     parsed_exclude_filters = []
     if args.exclude_by_md:
@@ -1171,9 +1355,7 @@ if __name__ == "__main__":
     # Handle backward compatibility for slice_length
     if args.slice_length is not None:
         logger.warning("--slice_length is deprecated, use --max_duration instead")
-        if (
-            args.max_duration == 30.0
-        ):  # Only override if user didn't set max_duration explicitly
+        if args.max_duration == 30.0:  # Only override if user didn't set max_duration explicitly
             args.max_duration = float(args.slice_length)
 
     # Prepare the dataset
@@ -1191,6 +1373,11 @@ if __name__ == "__main__":
         per_segment_quality_threshold=args.per_segment_quality_threshold,
         copy_metadata_fields=args.copy_metadata_fields,
         exclude_filters=parsed_exclude_filters,
+        source_selection=args.source_selection,
+        source_selection_seed=args.source_selection_seed,
+        strip_markup=args.strip_markup,
+        max_latin_letter_ratio=args.max_latin_letter_ratio,
+        parts_dir=resolved_parts_dir,
     )
 
     if output_dataset:
@@ -1217,15 +1404,11 @@ if __name__ == "__main__":
                 task_categories=args.dataset_card_task_categories,
                 pretty_name=args.dataset_card_pretty_name,
             )
-            dataset_card = DatasetCard.from_template(
-                card_data, template_path="assets/ivritai_dataset_card_template.md"
-            )
+            dataset_card = DatasetCard.from_template(card_data, template_path="assets/ivritai_dataset_card_template.md")
 
         if args.validation_split_size > 0:
             # If a validation split is requested, split the dataset in main
-            assert (
-                args.validation_split_size < 1.0
-            ), "validation_split_size must be a float between 0 and 1"
+            assert args.validation_split_size < 1.0, "validation_split_size must be a float between 0 and 1"
             temp = output_dataset.train_test_split(test_size=args.validation_split_size)
             output_dataset = DatasetDict({"train": temp["train"], "eval": temp["test"]})
 
@@ -1233,19 +1416,12 @@ if __name__ == "__main__":
             if args.push_to_hub:
                 if not args.push_as_public:
                     logger.warning("Pushing the dataset to the hub as private")
-                output_dataset.push_to_hub(
-                    args.output_dataset_name, private=not args.push_as_public
-                )
+                output_dataset.push_to_hub(args.output_dataset_name, private=not args.push_as_public)
                 # Push dataset card if it was created
                 if dataset_card:
-                    dataset_card.push_to_hub(
-                        repo_id=args.output_dataset_name, repo_type="dataset"
-                    )
+                    dataset_card.push_to_hub(repo_id=args.output_dataset_name, repo_type="dataset")
 
-                if (
-                    args.dataset_license_file
-                    and Path(args.dataset_license_file).exists()
-                ):
+                if args.dataset_license_file and Path(args.dataset_license_file).exists():
                     upload_file(
                         path_or_fileobj=args.dataset_license_file,
                         repo_id=args.output_dataset_name,
@@ -1256,9 +1432,7 @@ if __name__ == "__main__":
                 output_dataset.save_to_disk(args.output_dataset_name)
                 # Save dataset card if it was created
                 if dataset_card:
-                    logger.warning(
-                        "Dataset card will be saved locally since push_to_hub is not enabled"
-                    )
+                    logger.warning("Dataset card will be saved locally since push_to_hub is not enabled")
                     dataset_card.save(f"{args.output_dataset_name}/README.md")
 
             # report the created dataset sizes per split

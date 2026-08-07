@@ -2,6 +2,7 @@ gradio
 pandas
 datasets
 pydub
+pyyaml
 soundfile
 tqdm
 numpy

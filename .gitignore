@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest-tmp/
+.ruff_cache/
+.venv/
+venv/
+data/
+*_parts/
+*.arrow
+*.parquet
+*.wav
+*.flac
+*.mp3
+.env

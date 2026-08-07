@@ -1,6 +1,7 @@
 prepare_ivritai:
-  input_folder: "C:/Users/Asael/PycharmProjects/crowd-recital"
-  output_dataset_name: "C:/Users/Asael/PycharmProjects/tts-data-tools/data/CrowdRecital_ivritai"
+  # Set these environment variables before running the checked-in example.
+  input_folder: "${CROWD_RECITAL_ROOT}"
+  output_dataset_name: "${TTS_PREPARED_DIR}"
   audio_filename_glob: "audio.wav"
   segments_filename_glob: "transcript.aligned.json"
   max_duration: 30.0

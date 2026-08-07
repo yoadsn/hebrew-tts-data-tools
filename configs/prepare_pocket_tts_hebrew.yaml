@@ -1,0 +1,42 @@
+prepare_ivritai:
+  # Portable paths. Set both variables before running this checked-in profile.
+  input_folder: "${CROWD_RECITAL_ROOT}"
+  output_dataset_name: "${POCKET_TTS_PREPARED_DIR}"
+  audio_filename_glob: "audio.wav"
+  segments_filename_glob: "transcript.aligned.json"
+
+  # Proven 6-layer/student data profile: approximately 7-8 second clips.
+  min_duration: 4.0
+  target_duration: 8.0
+  max_duration: 16.0
+
+  # Pocket TTS will make a source-grouped split after export so that the same
+  # recording/speaker source never appears in both training and validation.
+  validation_split_size: 0
+
+  # Text quality for a Hebrew-only 4000-piece SentencePiece vocabulary.
+  # strip_markup removes Wikipedia '==' section markers but keeps the words, which were
+  # actually read aloud. max_latin_letter_ratio drops Latin-dominant rows (about 2.4% of the
+  # 50-source pilot) while keeping rows with an incidental brand name.
+  strip_markup: true
+  max_latin_letter_ratio: 0.15
+
+  max_source_entries: null
+  # Pilots must not use the default 'shortest' selection: the manifest is sorted by duration,
+  # so 'shortest' picks recordings below min_duration and produces zero examples.
+  source_selection: "spread"
+  num_proc: 1
+  per_proc_per_chunk_size: 10
+  per_sample_quality_threshold: 0.6
+  per_segment_quality_threshold: 0.6
+  # user_id is the speaker key. It is REQUIRED downstream: metadata source_id is the constant
+  # string "recital" for all 2398 recordings, so the only real grouping keys are entry_id
+  # (one recording) and user_id (one speaker). Grouping by entry_id alone leaks speakers
+  # across the train/validation split. Copied fields are written as strings, so do not add
+  # numeric fields such as year_of_birth here.
+  copy_metadata_fields: ["user_id", "biological_sex"]
+  exclude_by_md: []
+  push_to_hub: false
+  push_as_public: false
+  clear_output_dataset_cache_files: false
+  log_level: "INFO"

@@ -205,9 +205,7 @@ with gr.Blocks(title="Hebrew Normalizer Auditor") as demo:
 if __name__ == "__main__":
     print("Starting Gradio app...")
     allowed_paths = [
-        str(CURRENT_DIR.parent), # F5-TTS root (allows access to ../data)
-        str(CURRENT_DIR / "data"), 
-        "C:\\Users\\Asael\\PycharmProjects\\F5-TTS\\data" # Explicit fallback
+        str(CURRENT_DIR.parent),
+        str(CURRENT_DIR / "data"),
     ]
-    # Use 127.0.0.1 for Windows compatibility
-    demo.launch(server_name="127.0.0.1", server_port=7860, share=True, allowed_paths=allowed_paths)
+    demo.launch(server_name="127.0.0.1", server_port=7860, share=False, allowed_paths=allowed_paths)
