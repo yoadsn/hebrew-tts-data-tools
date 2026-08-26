@@ -118,6 +118,50 @@ Quick normalizer check:
 python scripts/smoke_test_normalizer.py
 ```
 
+## Word-level forced alignment
+
+Pocket TTS needs to know *when* each word was said, not only what was said. From its
+`training/README.md`:
+
+> it's not enough to have pairs of `(speech audio, transcript)`, we also need to know when
+> exactly each word was said. This is because for training, the audio is cut into smaller
+> parts, and we need to know exactly what text corresponds to what part of the audio.
+
+The trainer does run without word timings -- it falls back to a random window for the voice
+prompt -- but it then loses the trailing-silence trim, which Kyutai identify as the reason a
+model "emits silence instead of EOS, so generations never terminate".
+
+CrowdRecital ships timings in `transcript.aligned.json`. Most other corpora do not, so align
+them yourself:
+
+```bash
+# Confirm a candidate model is a Hebrew char-level CTC head before spending GPU time
+PYTHONPATH=/path/to/pocket-tts python -m data_prep.align_hebrew in.jsonl out.jsonl --check-model
+
+# Align (input/output are Pocket TTS manifests)
+PYTHONPATH=/path/to/pocket-tts python -m data_prep.align_hebrew     manifest.jsonl manifest_aligned.jsonl     --model imvladikon/wav2vec2-xls-r-300m-hebrew --device cuda --batch-size 8
+```
+
+`--resume` appends and skips utterances already aligned, so preemptible jobs continue where
+they stopped.
+
+### Accuracy
+
+Wav2Vec2 is multilingual (XLS-R); only the CTC head and its 27-character vocabulary are
+Hebrew-specific. Measured against CrowdRecital's own timings, 40 utterances / 316 words:
+
+| boundary | median | p90 |
+|---|---|---|
+| word end | 19 ms | 71 ms |
+| word start | 74 ms | 158 ms |
+
+One frame at Pocket TTS's 12.5 Hz is 80 ms, so word ends land within a quarter of a frame.
+Ends are the accurate side, which is fortunate: `last_word_end` is what drives the silence
+trim. 5.7% of words returned no timing.
+
+Caveat: CrowdRecital's timings are themselves automatic, so this measures agreement between
+two aligners, not accuracy against hand labels.
+
 ## Handoff to Pocket TTS
 
 This tool produces the segmented Hugging Face dataset. Continue with the training repository:
