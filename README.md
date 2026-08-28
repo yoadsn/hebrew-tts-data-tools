@@ -9,33 +9,23 @@ parts, and model artifacts are intentionally ignored and must be transferred sep
 
 ## Requirements
 
-- Python 3.11 or 3.12
+- Python 3.12
+- [uv](https://docs.astral.sh/uv/) (installs and manages the interpreter and environment)
 - ffmpeg available on `PATH`
 - enough disk for the prepared audio (the 38.9-hour CrowdRecital build measured about 6.7 GB)
 
-Linux/server setup:
+Setup (creates a Python 3.12 `.venv` and installs dependencies):
 
 ```bash
 git clone https://github.com/asaelbarilan/hebrew-tts-data-tools.git
 cd hebrew-tts-data-tools
-python3.12 -m venv .venv
+uv sync
 source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
 ffmpeg -version
 ```
 
-Windows setup:
-
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-ffmpeg -version
-```
-
-For development and tests, install `requirements-dev.txt` instead.
+Development and test tools (pytest, ruff) live in the `dev` dependency group, which `uv sync`
+installs by default. Run tests with `uv run pytest tests -q`.
 
 ## Pocket TTS preparation
 
