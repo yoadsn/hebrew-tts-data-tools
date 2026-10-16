@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple, Set
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple, Set
 import csv
 import re
 
@@ -355,24 +355,74 @@ def load_word_replacements(path: Path | None = None) -> Dict[str, str]:
     path = path or Path(__file__).resolve().parent / "ex_reps_all.tsv"
     return load_word_replacements_tsv(path)
 
-def normalize_tts_text(
-    text: str,
-    *,
-    options: TTSNormalizeOptions = TTSNormalizeOptions(),
-    word_replacements: Optional[Dict[str, str]] = None,
-) -> str:
+
+# The helpers below take an optional per-character `owners` list (the index of the input word
+# each character came from) and keep it aligned with the text. `owners=None` is the plain
+# string path used by normalize_tts_text.
+
+def _delete_matches(
+    pattern: "re.Pattern[str]", text: str, owners: Optional[List[int]]
+) -> Tuple[str, Optional[List[int]]]:
+    if owners is None:
+        return pattern.sub("", text), None
+    kept: List[str] = []
+    kept_owners: List[int] = []
+    pos = 0
+    for m in pattern.finditer(text):
+        kept.append(text[pos:m.start()])
+        kept_owners.extend(owners[pos:m.start()])
+        pos = m.end()
+    kept.append(text[pos:])
+    kept_owners.extend(owners[pos:])
+    return "".join(kept), kept_owners
+
+
+def _collapse_whitespace(
+    text: str, owners: Optional[List[int]]
+) -> Tuple[str, Optional[List[int]]]:
+    if owners is None:
+        return re.sub(r"\s+", " ", text).strip(), None
+    out: List[str] = []
+    out_owners: List[int] = []
+    pos = 0
+    for m in re.finditer(r"\s+", text):
+        out.append(text[pos:m.start()])
+        out_owners.extend(owners[pos:m.start()])
+        out.append(" ")
+        out_owners.append(owners[m.start()])
+        pos = m.end()
+    out.append(text[pos:])
+    out_owners.extend(owners[pos:])
+    joined = "".join(out)
+    lead = len(joined) - len(joined.lstrip())
+    return joined.strip(), out_owners[lead:len(joined.rstrip())]
+
+
+def _preprocess(
+    text: str, options: TTSNormalizeOptions, owners: Optional[List[int]] = None
+) -> Tuple[str, Optional[List[int]]]:
+    """Character-level cleanup that runs before tokenization."""
     proc = text
     if options.normalize_unicode:
-        proc = _apply_unicode_cleanup(proc)
+        if owners is None:
+            proc = _apply_unicode_cleanup(proc)
+        else:
+            chars: List[str] = []
+            new_owners: List[int] = []
+            for ch, owner in zip(proc, owners):
+                rep = _CHAR_CONVERSION_DICT.get(ch, ch)
+                chars.append(rep)
+                new_owners.extend([owner] * len(rep))
+            proc, owners = "".join(chars), new_owners
     if options.remove_emojis:
-        proc = _remove_emojis(proc)
-    
-    # Strip parentheses/brackets content if requested
+        proc, owners = _delete_matches(_EMOJI_RE, proc, owners)
+
+    # Strip parentheses/brackets content if requested. These patterns can span words.
     if options.remove_parentheses:
-        proc = re.sub(r"\(.*?\)", "", proc)
+        proc, owners = _delete_matches(re.compile(r"\(.*?\)"), proc, owners)
     if options.remove_brackets:
-        proc = re.sub(r"\[.*?\]", "", proc)
-        
+        proc, owners = _delete_matches(re.compile(r"\[.*?\]"), proc, owners)
+
     if options.split_dashes_between_words:
         # Only split if BOTH sides are NOT digits (avoid splitting 050-123 or 2026-01)
         # Regex: Lookbehind for non-digit, Lookahead for non-digit
@@ -386,25 +436,29 @@ def normalize_tts_text(
                 return m.group(0) # Keep hyphen
             return f"{m.group(1)} {m.group(2)}" # Replace hyphen with space
         
+        # Every replacement keeps the length of the match, so `owners` stays aligned.
         proc = re.sub(r"(\S)-(\S)", repl, proc)
 
     if options.collapse_whitespace:
-        proc = re.sub(r"\s+", " ", proc).strip()
+        proc, owners = _collapse_whitespace(proc, owners)
 
-    if not proc:
-        return ""
+    return proc, owners
 
-    repl = word_replacements or {}
 
-    # STT Compat Mode (omitted for brevity, assume not used in this context)
-    if options.stt_compat_mode:
-        # ... logic ...
-        pass
-
-    # TTS Logic (Main)
-    raw_tokens = proc.split(" ")
+def _normalize_raw_tokens(
+    raw_tokens: List[str],
+    options: TTSNormalizeOptions,
+    repl: Dict[str, str],
+) -> Tuple[List[str], List[int]]:
+    """Run the token loop. Returns the output tokens and, for each, the index of the raw
+    token it came from."""
     out_tokens: List[str] = []
-    
+    out_sources: List[int] = []
+
+    def emit(token: str) -> None:
+        out_tokens.append(token)
+        out_sources.append(ind)
+
     punctuation_marks = set([".", ",", ":", ";", "!", "?", '"', "…", ")", "]", "}"])
 
     for ind, raw_tok in enumerate(raw_tokens):
@@ -466,10 +520,10 @@ def normalize_tts_text(
                     if options.attach_punctuations_to_token:
                         tok_out = f"{tok_out}{suffix_punct}"
                     else:
-                        out_tokens.append(tok_out)
-                        out_tokens.append(suffix_punct)
+                        emit(tok_out)
+                        emit(suffix_punct)
                         continue
-                out_tokens.append(tok_out)
+                emit(tok_out)
                 continue
 
         if options.expand_numbers:
@@ -513,13 +567,82 @@ def normalize_tts_text(
             if options.attach_punctuations_to_token:
                 tok_out = f"{tok_out}{suffix_punct}"
             else:
-                out_tokens.append(tok_out)
-                out_tokens.append(suffix_punct)
+                emit(tok_out)
+                emit(suffix_punct)
                 continue
 
-        out_tokens.append(tok_out)
+        emit(tok_out)
 
-    out = " ".join(out_tokens)
+    return out_tokens, out_sources
+
+
+def _join_output(tokens: List[str], options: TTSNormalizeOptions) -> str:
+    out = " ".join(tokens)
     if options.keep_punctuations:
         out = re.sub(r"\s+([.,?!])", r"\1", out)
     return out.strip()
+
+
+def normalize_tts_text(
+    text: str,
+    *,
+    options: TTSNormalizeOptions = TTSNormalizeOptions(),
+    word_replacements: Optional[Dict[str, str]] = None,
+) -> str:
+    proc, _ = _preprocess(text, options)
+    if not proc:
+        return ""
+
+    repl = word_replacements or {}
+
+    # STT Compat Mode (omitted for brevity, assume not used in this context)
+    if options.stt_compat_mode:
+        # ... logic ...
+        pass
+
+    # TTS Logic (Main)
+    out_tokens, _ = _normalize_raw_tokens(proc.split(" "), options, repl)
+    return _join_output(out_tokens, options)
+
+
+def normalize_tts_words(
+    words: Sequence[str],
+    *,
+    options: TTSNormalizeOptions = TTSNormalizeOptions(),
+    word_replacements: Optional[Dict[str, str]] = None,
+) -> List[str]:
+    """Normalize a sentence given as separate words, keeping each word's own result apart.
+
+    Number gender, `פי`/`מאה` handling, bracket removal and punctuation spacing all depend
+    on the neighbouring tokens, so words normalized one at a time come out different from
+    the same words normalized together. This runs the same pipeline as normalize_tts_text
+    over `" ".join(words)` and reports which input word each output token came from.
+
+    Returns one string per input word: "" when the word was dropped, several
+    space-separated tokens when it expanded (`1995`). Joining the non-empty results with a
+    space and applying the `\\s+([.,?!])` -> `\\1` rule across the boundaries (a result that
+    starts with punctuation belongs to the end of the previous one) reproduces
+    normalize_tts_text(" ".join(words)). A word is credited with the raw tokens that begin
+    in it; if brackets removed a word boundary, the merged token goes to the first word.
+    """
+    words = list(words)
+    if not words:
+        return []
+    owners: List[int] = []
+    for index, word in enumerate(words):
+        owners.extend([index] * (len(word) + 1))
+    del owners[-1]
+
+    proc, owners = _preprocess(" ".join(words), options, owners)
+    results: List[List[str]] = [[] for _ in words]
+    if proc:
+        raw_tokens = proc.split(" ")
+        token_owners: List[int] = []
+        offset = 0
+        for tok in raw_tokens:
+            token_owners.append(owners[min(offset, len(owners) - 1)])
+            offset += len(tok) + 1
+        out_tokens, out_sources = _normalize_raw_tokens(raw_tokens, options, word_replacements or {})
+        for token, source in zip(out_tokens, out_sources):
+            results[token_owners[source]].append(token)
+    return [_join_output(tokens, options) for tokens in results]

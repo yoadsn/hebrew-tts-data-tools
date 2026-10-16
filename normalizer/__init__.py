@@ -1,1 +1,6 @@
-from .hebrew_tts_normalizer import TTSNormalizeOptions, load_word_replacements, normalize_tts_text
+from .hebrew_tts_normalizer import (
+    TTSNormalizeOptions,
+    load_word_replacements,
+    normalize_tts_text,
+    normalize_tts_words,
+)
