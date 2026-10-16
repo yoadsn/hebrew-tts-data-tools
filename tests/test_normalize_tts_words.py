@@ -73,7 +73,7 @@ def test_words_join_back_to_the_whole_sentence(name: str, sentence: str) -> None
 def test_each_result_belongs_to_its_own_word() -> None:
     options = OPTIONS["training"]
     assert normalize_tts_words(["14", "ימים"], options=options) == ["ארבעה עשר", "ימים"]
-    assert normalize_tts_words(["ב-15", "ימים"], options=options) == ["ב חמישה עשר", "ימים"]
+    assert normalize_tts_words(["ב-15", "ימים"], options=options) == ["בחמישה עשר", "ימים"]
     assert normalize_tts_words(["1995"], options=options) == ["אלף תשע מאות תשעים וחמש"]
     assert normalize_tts_words(["x", '"', "y"], options=options) == ["x", "", "y"]
     assert normalize_tts_words([], options=options) == []
@@ -82,3 +82,27 @@ def test_each_result_belongs_to_its_own_word() -> None:
 def test_removed_brackets_do_not_shift_the_other_words() -> None:
     options = OPTIONS["defaults"]
     assert normalize_tts_words(["a", "[b", "c]", "d"], options=options) == ["a", "", "", "d"]
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        # The number's own sentence end stops the gender lookahead.
+        ("בשנת 2024. הנתונים", "בשנת אלפיים עשרים וארבע. הנתונים"),
+        ("בשנת 2024 הנתונים", "בשנת אלפיים עשרים וארבעה הנתונים"),
+        # A prefix stays attached to the number.
+        ("ל-2 ימים", "לשני ימים"),
+        ("ב-15 ימים ו-15 שנים", "בחמישה עשר ימים וחמש עשרה שנים"),
+        ("ב-15% מהאנשים", "בחמישה עשר אחוז מהאנשים"),
+        # Only a plain number keeps the hyphen; anything else is split as before.
+        ("ב-NASA", "ב NASA"),
+        ("ו-050-1234567", "ו אפס חמש אפס אחת שתיים שלוש ארבע חמש שש שבע"),
+        # Short dates are DD-MM; out-of-range pairs are ranges.
+        ("27-01", "עשרים ושבע לראשון"),
+        ("20-25", "עשרים עשרים וחמש"),
+        ("0-5", "אפס חמש"),
+        ("5-13", "חמש שלוש עשרה"),
+    ],
+)
+def test_expansions(text: str, expected: str) -> None:
+    assert normalize_tts_text(text, options=OPTIONS["training"]) == expected

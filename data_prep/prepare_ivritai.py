@@ -620,7 +620,6 @@ cleanup_options = TTSNormalizeOptions(
     expand_numbers=True,
     keep_punctuations=True,
     attach_punctuations_to_token=True,
-    stt_compat_mode=False,
     remove_parentheses=False,
 )
 

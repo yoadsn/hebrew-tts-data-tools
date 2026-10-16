@@ -11,7 +11,7 @@ from typing import Dict, Iterable, List, Optional, Sequence, Tuple, Set
 import csv
 import re
 
-from hebrew_spoken_form import get_spoken_form
+from hebrew_spoken_form import get_spoken_form, is_preposition_prefix
 
 # --- Constants & Sets ---
 
@@ -76,6 +76,8 @@ _SUFFIX_PUNCT_MAP = {
     "!!!": "!", "…": ".",
 }
 
+_SENTENCE_END_PUNCT = (".", "?", "!")
+
 _DROP_PREFIX_MARKS = ('"', "(", "[", "{")
 _DROP_SUFFIX_MARKS = ('"', ")", "]", "}")
 
@@ -138,6 +140,10 @@ _MONTH_ORDINAL_MAP = {
 _NUM_UNIT_RE = re.compile(r"^([+-]?\d[\d,]*(?:\.\d+)?)(°[CF]|[A-Za-z%]{1,4})$")
 _PHONE_RE = re.compile(r"^0\d{1,2}-?\d{7}$")
 
+# What may follow "ב-" for the prefix to stay attached: a plain number, time or percent,
+# optionally followed by punctuation (ב-15, ב-15:30, ב-2.5%, ב-15.).
+_PREFIXED_NUMBER_TAIL_RE = re.compile(r"^\d+(?:[.,:]\d+)*[%₪$€]?[.,;:!?\"')\]}…]*$")
+
 @dataclass(frozen=True)
 class TTSNormalizeOptions:
     # cleanup
@@ -165,9 +171,6 @@ class TTSNormalizeOptions:
 
     # splitting (rarely needed; leave conservative)
     split_markers: Tuple[str, ...] = ("/", "-")
-
-    # compatibility mode
-    stt_compat_mode: bool = False
 
 
 def load_word_replacements_tsv(path: str | Path) -> Dict[str, str]:
@@ -398,6 +401,16 @@ def _collapse_whitespace(
     return joined.strip(), out_owners[lead:len(joined.rstrip())]
 
 
+def _is_prefixed_number(m: "re.Match[str]") -> bool:
+    """For a match of `(\\S)-(\\S)`: is the whole token a Hebrew prefix followed by a number?"""
+    text = m.string
+    start = text.rfind(" ", 0, m.start()) + 1
+    end = text.find(" ", m.end())
+    end = len(text) if end < 0 else end
+    head = text[start:m.start() + 1].lstrip("".join(_DROP_PREFIX_MARKS))
+    return is_preposition_prefix(head) and bool(_PREFIXED_NUMBER_TAIL_RE.match(text[m.start(2):end]))
+
+
 def _preprocess(
     text: str, options: TTSNormalizeOptions, owners: Optional[List[int]] = None
 ) -> Tuple[str, Optional[List[int]]]:
@@ -434,6 +447,9 @@ def _preprocess(
             # Check if both sides are digits
             if m.group(1).isdigit() and m.group(2).isdigit():
                 return m.group(0) # Keep hyphen
+            # Keep the hyphen in a prefixed number (ב-15) so get_spoken_form can attach the prefix.
+            if options.expand_numbers and m.group(2).isdigit() and _is_prefixed_number(m):
+                return m.group(0)
             return f"{m.group(1)} {m.group(2)}" # Replace hyphen with space
         
         # Every replacement keeps the length of the match, so `owners` stays aligned.
@@ -483,7 +499,8 @@ def _normalize_raw_tokens(
         elif prev_tok.endswith(__HEBREW_CENTURY_WORD):
              gender = "f0"
         
-        if ind + 1 < len(raw_tokens):
+        # The next word only tells us the counted noun within the same sentence.
+        if suffix_punct not in _SENTENCE_END_PUNCT and ind + 1 < len(raw_tokens):
             next_word = raw_tokens[ind + 1]
             while len(next_word) > 1 and next_word[-1] in punctuation_marks:
                 next_word = next_word[:-1]
@@ -595,12 +612,6 @@ def normalize_tts_text(
 
     repl = word_replacements or {}
 
-    # STT Compat Mode (omitted for brevity, assume not used in this context)
-    if options.stt_compat_mode:
-        # ... logic ...
-        pass
-
-    # TTS Logic (Main)
     out_tokens, _ = _normalize_raw_tokens(proc.split(" "), options, repl)
     return _join_output(out_tokens, options)
 

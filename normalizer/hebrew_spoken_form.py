@@ -44,7 +44,7 @@ __HEBREW_BILLION = 'מיליארד'
 __HEBREW_PREPOSITION_PREFIXES = [
 'מ-', 'ש-', 'ה-', 'ו-', 'כ-', 'ל-', 'ב-',
  'מה-', 'מכ-', 'שמ-', 'שה-', 'שכ-', 'של-', 'שב-',
-'ומ-', 'וש-', 'וה-', 'וכ-', 'ול-', 'וב-', 'כש-', 'וכש-', 'כשה-', 'כשמ-', 'כשב-', 'כשבכ-'
+'ומ-', 'וש-', 'וה-', 'וכ-', 'ול-', 'וב-', 'כש-', 'וכש-', 'כשה-', 'כשמ-', 'כשב-', 'כשבכ-',
  'לכ-', 'בכ-', 'כשבכ-', 'כשלכ-', 'שכ-', 'של-', 'שב-',
 ]
 
@@ -74,6 +74,11 @@ __HEBREW_ORDINALS_MASC = [
 '', 'ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי',
 'שישי', 'שביעי', 'שמיני', 'תשיעי', 'עשירי'
 ]
+
+def is_preposition_prefix(text: str) -> bool:
+    """True if `text` (without the dash) is a prefix that get_spoken_form can attach to a number."""
+    return (text + '-') in __HEBREW_PREPOSITION_PREFIXES
+
 
 def get_spoken_form(token: str, gender: str) -> Optional[str]:
     """
