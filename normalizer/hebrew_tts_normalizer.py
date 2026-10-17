@@ -76,7 +76,7 @@ _SUFFIX_PUNCT_MAP = {
     "!!!": "!", "…": ".",
 }
 
-_SENTENCE_END_PUNCT = (".", "?", "!")
+_OPENING_QUOTES = ("\"", "“", "«")
 
 _DROP_PREFIX_MARKS = ('"', "(", "[", "{")
 _DROP_SUFFIX_MARKS = ('"', ")", "]", "}")
@@ -711,8 +711,10 @@ def _normalize_raw_tokens(
         elif prev_tok.endswith(__HEBREW_CENTURY_WORD):
              gender = "f0"
         
-        # The next word only tells us the counted noun within the same sentence.
-        if suffix_punct not in _SENTENCE_END_PUNCT and ind + 1 < len(raw_tokens):
+        # The next word only tells us the counted noun when nothing separates the two: a comma,
+        # semicolon, colon or an opening quote ends the number's phrase ("2005; "מטענים"").
+        if (not suffix_punct and ind + 1 < len(raw_tokens)
+                and raw_tokens[ind + 1][:1] not in _OPENING_QUOTES):
             next_word = raw_tokens[ind + 1]
             while len(next_word) > 1 and next_word[-1] in punctuation_marks:
                 next_word = next_word[:-1]

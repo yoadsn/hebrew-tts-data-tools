@@ -170,6 +170,13 @@ def test_removed_brackets_do_not_shift_the_other_words() -> None:
         ),
         ("12ב(2)", "שתים עשרה בית שתיים"),
         ("3ץ", "שלוש צדי"),
+        # Punctuation or an opening quote between a number and the next word means the word is
+        # not the counted noun, so the number is not given that noun's gender.
+        ("2005 מטענים", "אלפיים וחמישה מטענים"),
+        ("2005, מטענים", "אלפיים וחמש, מטענים"),
+        ("2005; \"מטענים\"", "אלפיים וחמש, מטענים"),
+        ("2005 \"מטענים\"", "אלפיים וחמש מטענים"),
+        ("התשס\"ה, 2005; \"מטענים מוצקים בצובר\" כל מטען", "התשס\"ה, אלפיים וחמש, מטענים מוצקים בצובר כל מטען"),
         # Letters before digits make an identifier. Up to 3 digits are a number, more are read
         # digit by digit, and each suffix letter (up to 4) is read on its own.
         ("שמספרו R232D", "שמספרו אר מאתיים שלושים ושתיים די"),
