@@ -13,3 +13,4 @@ data/
 *.flac
 *.mp3
 .env
+.openchamber
