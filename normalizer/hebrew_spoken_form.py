@@ -10,7 +10,7 @@ import re
 __TIME_REGEX = r'^([\d]\d)\:(\d\d)$'
 
 __SEPARATED_NUMBER_REGEX = r'^(\-)?[1-9]\d{0,2}(\,\d{3})*(\.\d+)?$'
-__PLAIN_NUMBER_REGEX = r'^(\-)?\d+(\.\d+)?$'
+__PLAIN_NUMBER_REGEX = r'^(\-)?(\d+(\.\d+)?|\.\d+)$'
 
 __HEBREW_TO_20_FEM = [
 'אפס', 'אחת', 'שתיים', 'שלוש', 'ארבע', 'חמש', 'שש', 'שבע', 'שמונה', 'תשע',
@@ -60,8 +60,6 @@ __HEBREW_AND = 'ו'
 __HEBREW_MINUS = 'מינוס'
 __HEBREW_DECIAL_POINT = 'נקודה'
 
-__HEBREW_TIME_AM = 'בבוקר'
-__HEBREW_TIME_PM = 'אחר הצוהריים'
 __HEBREW_TIME_HALF = 'וחצי'
 __HEBREW_TIME_QUARTER = 'ורבע'
 
@@ -115,17 +113,15 @@ def get_spoken_form(token: str, gender: str) -> Optional[str]:
             return None
         
         # Make sure the hours are normalized to the range of 1--12.
-        pm_time = False
+        # No "morning"/"afternoon" is added: someone reading "14:00" aloud just says "two".
         if hours == 0:
             hours = 12
         elif hours > 12:
             hours -= 12
-            pm_time = True
             
         time_str = __HEBREW_TO_20_FEM[hours]
         
         # Add the minutes, if necessary.
-        add_am_pm = True
         if minutes == 15:
             time_str += ' ' + __HEBREW_TIME_QUARTER
         elif minutes == 30:
@@ -135,13 +131,6 @@ def get_spoken_form(token: str, gender: str) -> Optional[str]:
                 time_str += ' ' + __HEBREW_AND + _convert_integer(minutes, 'm')
             else:
                 time_str += ' ' + _convert_integer(minutes, 'f')
-            add_am_pm = False
-            
-        if add_am_pm:
-            if pm_time:
-                time_str += ' ' + __HEBREW_TIME_PM
-            else:
-                time_str += ' ' + __HEBREW_TIME_AM
                 
         return time_str
 
@@ -253,8 +242,9 @@ def _convert_integer(value: int, gender: str) -> str:
             spoken_form += __HEBREW_AND
         
     if value < 20:
-        # Special construct forms for 2
-        if value == 2:
+        # Special construct forms for 2, only when the 2 is the entire number:
+        # "שני ילדים" but "מאה ושניים ילדים".
+        if value == 2 and not spoken_form:
             if gender == 'mn': return 'שני'
             if gender == 'fn': return 'שתי'
 
@@ -278,16 +268,11 @@ def _convert_integer(value: int, gender: str) -> str:
     if units > 0:
         # Use the correct gender for the units.
         spoken_form += ' ' + __HEBREW_AND
+        # Here the 2 follows "ו", so it keeps its absolute form even before a plural noun.
         if gender == 'm' or gender == 'm0' or gender == 'mn':
-            if units == 2 and gender == 'mn':
-                spoken_form += 'שני'
-            else:
-                spoken_form += __HEBREW_TO_20_MASC[units]
+            spoken_form += __HEBREW_TO_20_MASC[units]
         else:
-            if units == 2 and gender == 'fn':
-                spoken_form += 'שתי'
-            else:
-                spoken_form += __HEBREW_TO_20_FEM[units]
+            spoken_form += __HEBREW_TO_20_FEM[units]
 
     return spoken_form
 
@@ -388,6 +373,9 @@ def _convert_number(token: str, gender: str) -> Optional[str]:
     if has_frac_part:
         if int_value == 0 and frac_part == '5':
              return 'חצי'
+        if token.startswith('.'):
+            # ".25" was written without a zero, so it is read without one: "נקודה עשרים וחמש".
+            return _convert_decimal_fraction(frac_part)
         spoken_form += ' ' + _convert_decimal_fraction(frac_part)
 
     return spoken_form
