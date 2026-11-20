@@ -66,7 +66,8 @@ def test_generation_is_deterministic_and_bounded():
         if "house" in pair["sampled"]:
             assert 1 <= pair["sampled"]["house"] <= 99999
     with pytest.raises(ValueError):
-        generate(1, 201)
+        generate(1, 100_001)
+    assert len({p["digits"] for p in generate(42, 500)}) == 500
     with pytest.raises(ValueError):
         generate(1, 1, [])
     with pytest.raises(ValueError):

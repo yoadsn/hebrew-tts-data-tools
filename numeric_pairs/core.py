@@ -953,12 +953,15 @@ def validate_pair(pair: dict[str, Any]) -> None:
         raise ValueError("Spoken sentence contains digits")
 
 
+MAX_GENERATE_COUNT = 100_000
+
+
 def generate(seed: int, count: int, archetypes: list[str] | None = None, *,
                address_lengths: tuple[int, ...] = (1, 2, 3),
               boundary_weight: float = 0.25,
               variant_weights: dict[str, float] | None = None) -> list[dict[str, Any]]:
-    if type(seed) is not int or type(count) is not int or not 1 <= count <= 200:
-        raise ValueError("Seed must be an integer and count must be between 1 and 200")
+    if type(seed) is not int or type(count) is not int or not 1 <= count <= MAX_GENERATE_COUNT:
+        raise ValueError(f"Seed must be an integer and count must be between 1 and {MAX_GENERATE_COUNT}")
     ids = list(dict.fromkeys(archetypes if archetypes is not None else [a.id for a in ARCHETYPES]))
     if not ids or any(name not in BY_ID for name in ids):
         raise ValueError("Select at least one known archetype")
@@ -968,23 +971,34 @@ def generate(seed: int, count: int, archetypes: list[str] | None = None, *,
         raise ValueError("Boundary weight must be between 0 and 1")
     weights = resolve_weights(variant_weights)
     result = []
+    seen_digits: set[str] = set()
     for index in range(count):
         cycle = index // len(ids)
         order = ids.copy()
         random.Random(f"{seed}:cycle:{cycle}:{CATALOG_VERSION}").shuffle(order)
         archetype_id = order[index % len(ids)]
-        rng = random.Random(f"{seed}:row:{index}:{CATALOG_VERSION}")
-        sampled = sample(archetype_id, rng, address_lengths=address_lengths,
-                         boundary_weight=boundary_weight)
-        reading_variant = "natural"
-        if archetype_id in weights and rng.random() < weights[archetype_id]:
-            reading_variant = "formal"
-        frames = compatible_frames(archetype_id, sampled)
-        start = rng.choice(tuple(dict.fromkeys(start for start, _, _ in frames)))
-        ending = rng.choice(tuple(dict.fromkeys(end for s, end, _ in frames if s == start)))
-        context = (start, ending)
-        continuation = rng.choice(CONTINUATION_CHOICES)
-        result.append(render(archetype_id, sampled, seed=seed, index=index,
-                             reading_variant=reading_variant, context=context,
-                             continuation=continuation))
+        pair = None
+        for attempt in range(64):
+            key = (f"{seed}:row:{index}:{CATALOG_VERSION}" if attempt == 0
+                   else f"{seed}:row:{index}:retry:{attempt}:{CATALOG_VERSION}")
+            rng = random.Random(key)
+            sampled = sample(archetype_id, rng, address_lengths=address_lengths,
+                             boundary_weight=boundary_weight)
+            reading_variant = "natural"
+            if archetype_id in weights and rng.random() < weights[archetype_id]:
+                reading_variant = "formal"
+            frames = compatible_frames(archetype_id, sampled)
+            start = rng.choice(tuple(dict.fromkeys(start for start, _, _ in frames)))
+            ending = rng.choice(tuple(dict.fromkeys(end for s, end, _ in frames if s == start)))
+            context = (start, ending)
+            continuation = rng.choice(CONTINUATION_CHOICES)
+            candidate = render(archetype_id, sampled, seed=seed, index=index,
+                               reading_variant=reading_variant, context=context,
+                               continuation=continuation)
+            pair = candidate
+            if candidate["digits"] not in seen_digits:
+                break
+        assert pair is not None
+        seen_digits.add(pair["digits"])
+        result.append(pair)
     return result
