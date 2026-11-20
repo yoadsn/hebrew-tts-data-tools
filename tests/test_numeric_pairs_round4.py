@@ -21,7 +21,7 @@ from numeric_pairs.naturalness import (
 
 def test_versions_bumped_for_round_four_and_five_revisions():
     assert CATALOG_VERSION == "starter-19"
-    assert RENDERER_VERSION == "18"
+    assert RENDERER_VERSION == "19"
 
 
 def test_round_four_snapshots_and_user_natural_overrides_are_preserved(tmp_path):

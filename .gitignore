@@ -19,3 +19,24 @@ data/
 /graft/
 
 .secrets
+
+# Local dataset/alignment/audit dumps and review-store data
+*.jsonl
+run-*.json
+run-*.tmp
+exports/
+candidates.json
+evaluation-sources.json
+.numeric_pairs_data/
+*audit*.csv
+*audit*.json
+
+# Temporary and throw-away scripts / scratch files
+tmp*
+temp*
+_tmp*
+scratch*
+throwaway*
+*.tmp
+*.bak
+*.log

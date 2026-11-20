@@ -20,7 +20,7 @@ from numeric_pairs.naturalness import (
 
 def test_versions_bumped_for_round_three_revisions():
     assert CATALOG_VERSION == "starter-19"
-    assert RENDERER_VERSION == "18"
+    assert RENDERER_VERSION == "19"
 
 
 def test_round_two_ratings_are_frozen(tmp_path):

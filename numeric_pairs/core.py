@@ -15,7 +15,7 @@ from .phone_formats import sample_phone, spoken_phone, validate_phone
 from .variants import DEFAULT_FORMAL_WEIGHTS, resolve_weights
 import re
 
-RENDERER_VERSION = "18"
+RENDERER_VERSION = "19"
 CONTINUATION_CHOICES = (0, 0, 0, 1, 1, 1, 1, 2, 2, 2)
 
 GENERAL_FRACTION_SPOKEN = {
