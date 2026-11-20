@@ -221,11 +221,9 @@ def _convert_integer(value: int, gender: str) -> str:
     if len(spoken_form) > 0 and spoken_form[-1] != ' ':
            spoken_form += ' '
 
-    add_and = False
     if value >= 100:
         hundreds = value // 100
         spoken_form += __HEBREW_HUNDREDS[hundreds]
-        add_and = (hundreds == 1)
         
         # Continue with the remainder.
         value %= 100
@@ -234,11 +232,14 @@ def _convert_integer(value: int, gender: str) -> str:
             return spoken_form
 
     # If we reached here, the (remaining) numerical value is less than 100.
+    # Add ו׳ החיבור only when this remainder is itself a single final component
+    # (1..19 or an exact multiple of 10); for 21..99 with nonzero units, the
+    # single ו׳ belongs before the units digit below ("מאה ארבעים ושלושה").
     if len(spoken_form) > 0:
         if spoken_form[-1] != ' ':
             spoken_form += ' '
         
-        if add_and or (value < 20) or (value % 10 == 0):
+        if (value < 20) or (value % 10 == 0):
             spoken_form += __HEBREW_AND
         
     if value < 20:
