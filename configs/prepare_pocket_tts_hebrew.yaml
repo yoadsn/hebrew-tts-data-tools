@@ -1,14 +1,14 @@
 prepare_ivritai:
   # Portable paths. Set both variables before running this checked-in profile.
-  input_folder: "${CROWD_RECITAL_ROOT}"
+  input_folder: "${IVRITAI_NORMALIZED_ROOT}"
   output_dataset_name: "${POCKET_TTS_PREPARED_DIR}"
-  audio_filename_glob: "audio.wav"
+  audio_filename_glob: "audio.*"
   segments_filename_glob: "transcript.aligned.json"
 
   # Proven 6-layer/student data profile: approximately 7-8 second clips.
   min_duration: 4.0
-  target_duration: 8.0
-  max_duration: 16.0
+  target_duration: 9.0
+  max_duration: 22.0
 
   # Pocket TTS will make a source-grouped split after export so that the same
   # recording/speaker source never appears in both training and validation.
@@ -25,7 +25,7 @@ prepare_ivritai:
   # Pilots must not use the default 'shortest' selection: the manifest is sorted by duration,
   # so 'shortest' picks recordings below min_duration and produces zero examples.
   source_selection: "spread"
-  num_proc: 1
+  num_proc: 40
   per_proc_per_chunk_size: 10
   per_sample_quality_threshold: 0.6
   per_segment_quality_threshold: 0.6
@@ -38,5 +38,5 @@ prepare_ivritai:
   exclude_by_md: []
   push_to_hub: false
   push_as_public: false
-  clear_output_dataset_cache_files: false
+  clear_output_dataset_cache_files: true
   log_level: "INFO"

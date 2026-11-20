@@ -118,6 +118,13 @@ Quick normalizer check:
 python scripts/smoke_test_normalizer.py
 ```
 
+Inspect normalization before/after on sampled transcripts (word-level diff via jiwer, needs
+`pip install -r requirements-dev.txt`):
+
+```bash
+python ui/normalization_inspector/server.py --data tmp-sample-normalized.jsonl --field text   # http://127.0.0.1:8765
+```
+
 ## Word-level forced alignment
 
 Pocket TTS needs to know *when* each word was said, not only what was said. From its

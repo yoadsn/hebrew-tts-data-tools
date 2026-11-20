@@ -1,0 +1,932 @@
+{
+  "5c2a8d892b307e29767a": {
+    "id": "26ea4970cad077467571",
+    "archetype_id": "explicit_hundredths",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "seconds": 2,
+      "hundredths": 80
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 7,
+      "end": 9
+    },
+    "continuation": 1,
+    "digits": "הרץ חצה את קו הסיום בזמן של 2 שניות ו-80 מאיות באצטדיון המרכזי, אחרי שהמתחרה שיפר את השיא הקודם.",
+    "cardinal": "הרץ חצה את קו הסיום בזמן של שתיים שניות ושמונים מאיות באצטדיון המרכזי, אחרי שהמתחרה שיפר את השיא הקודם.",
+    "alignments": [
+      {
+        "slot": "hundredths",
+        "kind": "duration",
+        "value": "2 שניות ו-80 מאיות",
+        "reading": "explicit-hundredths",
+        "digits_span": [
+          28,
+          46
+        ],
+        "cardinal_span": [
+          28,
+          53
+        ],
+        "digits_text": "2 שניות ו-80 מאיות",
+        "cardinal_text": "שתיים שניות ושמונים מאיות"
+      }
+    ]
+  },
+  "551472b3b820752acf46": {
+    "id": "f92dfaad097fd657224c",
+    "archetype_id": "purchase",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "מגבת",
+        "plural": "מגבות",
+        "gender": "f"
+      },
+      "quantity": 2
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 2,
+      "end": 14
+    },
+    "continuation": 2,
+    "digits": "בסוף השבוע קניתי 2 מגבות במסגרת המבצע, כדי שכל הפריטים שנדרשו יהיו מוכנים בזמן בלי שנצטרך לצאת לקנייה נוספת.",
+    "cardinal": "בסוף השבוע קניתי שתי מגבות במסגרת המבצע, כדי שכל הפריטים שנדרשו יהיו מוכנים בזמן בלי שנצטרך לצאת לקנייה נוספת.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "quantity",
+        "value": 2,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          17,
+          24
+        ],
+        "cardinal_span": [
+          17,
+          26
+        ],
+        "digits_text": "2 מגבות",
+        "cardinal_text": "שתי מגבות"
+      }
+    ]
+  },
+  "53cdd6557992bb45ed1e": {
+    "id": "cf2a53ce94e368501542",
+    "archetype_id": "decimal_temp",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "whole": 27,
+      "fractional": "25"
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "reading_variant": "natural",
+    "context": {
+      "start": 4,
+      "end": 3
+    },
+    "continuation": 0,
+    "digits": "בשעות הצהריים נמדדו 27.25 מעלות בשעות הבוקר.",
+    "cardinal": "בשעות הצהריים נמדדו עשרים ושבע ורבע מעלות בשעות הבוקר.",
+    "alignments": [
+      {
+        "slot": "temperature",
+        "kind": "decimal",
+        "value": "27.25",
+        "reading": "natural-fractional-temperature",
+        "digits_span": [
+          20,
+          25
+        ],
+        "cardinal_span": [
+          20,
+          35
+        ],
+        "digits_text": "27.25",
+        "cardinal_text": "עשרים ושבע ורבע"
+      }
+    ]
+  },
+  "dc4e2c57edb3ec1b61d0": {
+    "id": "4bc6d5cdaa93299502d3",
+    "archetype_id": "negative_temp",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "magnitude": 17
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 7,
+      "end": 3
+    },
+    "continuation": 0,
+    "digits": "ברמת הגולן נמדדו בלילה -17 מעלות בשעות הבוקר.",
+    "cardinal": "ברמת הגולן נמדדו בלילה מינוס שבע עשרה מעלות בשעות הבוקר.",
+    "alignments": [
+      {
+        "slot": "temperature",
+        "kind": "signed",
+        "value": -17,
+        "reading": "minus-feminine",
+        "digits_span": [
+          23,
+          26
+        ],
+        "cardinal_span": [
+          23,
+          37
+        ],
+        "digits_text": "-17",
+        "cardinal_text": "מינוס שבע עשרה"
+      }
+    ]
+  },
+  "3a1412aefb5aa24aec4f": {
+    "id": "671ac7057b01a6f9c51e",
+    "archetype_id": "flight_number",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "flight": 206
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 4,
+      "end": 6
+    },
+    "continuation": 2,
+    "digits": "טיסת הערב שמספרה LY206 תמריא בשעות הבוקר, ואם יהיה שינוי בלוח ההמראות תופיע הודעה מעודכנת גם על המסכים בנמל.",
+    "cardinal": "טיסת הערב שמספרה אל ואיי שתיים אפס שש תמריא בשעות הבוקר, ואם יהיה שינוי בלוח ההמראות תופיע הודעה מעודכנת גם על המסכים בנמל.",
+    "alignments": [
+      {
+        "slot": "flight",
+        "kind": "identifier",
+        "value": 206,
+        "reading": "ly-digit-flight",
+        "digits_span": [
+          17,
+          22
+        ],
+        "cardinal_span": [
+          17,
+          37
+        ],
+        "digits_text": "LY206",
+        "cardinal_text": "אל ואיי שתיים אפס שש"
+      }
+    ]
+  },
+  "89d21d5ea7a283d4b55a": {
+    "id": "35c0d9d99cf5b2f5ea5d",
+    "archetype_id": "departure",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minute_of_day": 637
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 14,
+      "end": 9
+    },
+    "continuation": 0,
+    "digits": "רכבת הלילה יוצאת בשעה 10:37 בכל בוקר.",
+    "cardinal": "רכבת הלילה יוצאת בשעה עשר שלושים ושבע בכל בוקר.",
+    "alignments": [
+      {
+        "slot": "minute_of_day",
+        "kind": "clock_time",
+        "value": "10:37",
+        "reading": "12-hour-no-daypart",
+        "digits_span": [
+          22,
+          27
+        ],
+        "cardinal_span": [
+          22,
+          37
+        ],
+        "digits_text": "10:37",
+        "cardinal_text": "עשר שלושים ושבע"
+      }
+    ]
+  },
+  "f6333f7dcac669c64771": {
+    "id": "ae7ffb40332c2cd85739",
+    "archetype_id": "score",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "score": "0:0"
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 12,
+      "end": 19
+    },
+    "continuation": 1,
+    "digits": "הנבחרת ניצחה בתוצאה 0:0 בטורניר הקיץ, למרות ששתי הקבוצות תקפו עד הסיום.",
+    "cardinal": "הנבחרת ניצחה בתוצאה אפס אפס בטורניר הקיץ, למרות ששתי הקבוצות תקפו עד הסיום.",
+    "alignments": [
+      {
+        "slot": "score",
+        "kind": "score",
+        "value": "0:0",
+        "reading": "score-sides",
+        "digits_span": [
+          20,
+          23
+        ],
+        "cardinal_span": [
+          20,
+          27
+        ],
+        "digits_text": "0:0",
+        "cardinal_text": "אפס אפס"
+      }
+    ]
+  },
+  "f90c230c8be75bc6b05a": {
+    "id": "c1b0d5a5d6acd972bdb1",
+    "archetype_id": "score",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "score": "4:2"
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 9,
+      "end": 4
+    },
+    "continuation": 1,
+    "digits": "המערכה הראשונה הסתיימה בתוצאה 4:2 בסיום תשעים דקות, למרות ששתי הקבוצות תקפו עד הסיום.",
+    "cardinal": "המערכה הראשונה הסתיימה בתוצאה ארבע שתיים בסיום תשעים דקות, למרות ששתי הקבוצות תקפו עד הסיום.",
+    "alignments": [
+      {
+        "slot": "score",
+        "kind": "score",
+        "value": "4:2",
+        "reading": "score-sides",
+        "digits_span": [
+          30,
+          33
+        ],
+        "cardinal_span": [
+          30,
+          40
+        ],
+        "digits_text": "4:2",
+        "cardinal_text": "ארבע שתיים"
+      }
+    ]
+  },
+  "e57e74d1820c5464ec96": {
+    "id": "9b5c9ff831f63e9e216a",
+    "archetype_id": "data_plan",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "gigabytes": 50,
+      "megabits": 500
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 12,
+      "end": 18
+    },
+    "continuation": 0,
+    "digits": "חבילת הגלישה בחו״ל כוללת 50GB במהירות 500Mb בכל רחבי הארץ.",
+    "cardinal": "חבילת הגלישה בחו״ל כוללת חמישים ג'יגה-בייט במהירות חמש מאות מגה ביט בכל רחבי הארץ.",
+    "alignments": [
+      {
+        "slot": "data_plan",
+        "kind": "measurement",
+        "value": "50GB במהירות 500Mb",
+        "reading": "data-units",
+        "digits_span": [
+          25,
+          43
+        ],
+        "cardinal_span": [
+          25,
+          67
+        ],
+        "digits_text": "50GB במהירות 500Mb",
+        "cardinal_text": "חמישים ג'יגה-בייט במהירות חמש מאות מגה ביט"
+      }
+    ]
+  },
+  "014314c2f6715eb6c2c0": {
+    "id": "49d0048cbe15abe5ba29",
+    "archetype_id": "version",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "major": 1,
+      "minor": 3,
+      "patch": 4
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "reading_variant": "natural",
+    "context": {
+      "start": 8,
+      "end": 12
+    },
+    "continuation": 2,
+    "digits": "התוסף תואם לגרסה 1.3.4 בחוזה החתום, ואפשר לראות בה גם את התיקונים שנוספו בעקבות הבדיקות האחרונות של הצוות.",
+    "cardinal": "התוסף תואם לגרסה אחת שלוש ארבע בחוזה החתום, ואפשר לראות בה גם את התיקונים שנוספו בעקבות הבדיקות האחרונות של הצוות.",
+    "alignments": [
+      {
+        "slot": "version",
+        "kind": "version",
+        "value": "1.3.4",
+        "reading": "natural-version-components",
+        "digits_span": [
+          17,
+          22
+        ],
+        "cardinal_span": [
+          17,
+          30
+        ],
+        "digits_text": "1.3.4",
+        "cardinal_text": "אחת שלוש ארבע"
+      }
+    ]
+  },
+  "e42b7c22bcc65508c35e": {
+    "id": "424fd1e6c8784147240d",
+    "archetype_id": "version",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "major": 18,
+      "minor": 5,
+      "patch": 2
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "reading_variant": "natural",
+    "context": {
+      "start": 14,
+      "end": 15
+    },
+    "continuation": 1,
+    "digits": "היישומון בחנות עודכן לגרסה 18.5.2 בגרסה המודפסת, אחרי שהצוות סיים לבדוק את העדכון.",
+    "cardinal": "היישומון בחנות עודכן לגרסה שמונה עשרה חמש שתיים בגרסה המודפסת, אחרי שהצוות סיים לבדוק את העדכון.",
+    "alignments": [
+      {
+        "slot": "version",
+        "kind": "version",
+        "value": "18.5.2",
+        "reading": "natural-version-components",
+        "digits_span": [
+          27,
+          33
+        ],
+        "cardinal_span": [
+          27,
+          47
+        ],
+        "digits_text": "18.5.2",
+        "cardinal_text": "שמונה עשרה חמש שתיים"
+      }
+    ]
+  },
+  "00777f6160c8bb40592d": {
+    "id": "0512175be642f83661d5",
+    "archetype_id": "fraction",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "fraction": "3/4"
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 6,
+      "end": 4
+    },
+    "continuation": 1,
+    "digits": "לבלילה שופכים 3/4 כוס קמח, ואז מערבבים עד שהתערובת נעשית אחידה.",
+    "cardinal": "לבלילה שופכים שלושה רבעים כוס קמח, ואז מערבבים עד שהתערובת נעשית אחידה.",
+    "alignments": [
+      {
+        "slot": "fraction",
+        "kind": "fraction",
+        "value": "3/4",
+        "reading": "curated-fraction",
+        "digits_span": [
+          14,
+          17
+        ],
+        "cardinal_span": [
+          14,
+          25
+        ],
+        "digits_text": "3/4",
+        "cardinal_text": "שלושה רבעים"
+      }
+    ]
+  },
+  "4a9706725cc92f84faba": {
+    "id": "c1370a5b2777c8462ecd",
+    "archetype_id": "pill_range",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minimum": 3,
+      "maximum": 6
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 12,
+      "end": 10
+    },
+    "continuation": 2,
+    "digits": "בבוקר או בערב לוקחים 3-6 גלולות בבוקר ובערב, אבל לפני שמתחילים בטיפול כדאי לקרוא שוב את ההוראות ולוודא שהן מובנות.",
+    "cardinal": "בבוקר או בערב לוקחים בין שלוש לשש גלולות בבוקר ובערב, אבל לפני שמתחילים בטיפול כדאי לקרוא שוב את ההוראות ולוודא שהן מובנות.",
+    "alignments": [
+      {
+        "slot": "pill_range",
+        "kind": "range",
+        "value": "3-6",
+        "reading": "between-feminine",
+        "digits_span": [
+          21,
+          24
+        ],
+        "cardinal_span": [
+          21,
+          33
+        ],
+        "digits_text": "3-6",
+        "cardinal_text": "בין שלוש לשש"
+      }
+    ]
+  },
+  "2bbc05347faea809049c": {
+    "id": "10abcf55ddd51c27840b",
+    "archetype_id": "pill_range",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minimum": 3,
+      "maximum": 4
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 17,
+      "end": 19
+    },
+    "continuation": 1,
+    "digits": "במידת הצורך לוקחים 3-4 גלולות באופן קבוע, ומעדכנים את הרופא במצב.",
+    "cardinal": "במידת הצורך לוקחים בין שלוש לארבע גלולות באופן קבוע, ומעדכנים את הרופא במצב.",
+    "alignments": [
+      {
+        "slot": "pill_range",
+        "kind": "range",
+        "value": "3-4",
+        "reading": "between-feminine",
+        "digits_span": [
+          19,
+          22
+        ],
+        "cardinal_span": [
+          19,
+          33
+        ],
+        "digits_text": "3-4",
+        "cardinal_text": "בין שלוש לארבע"
+      }
+    ]
+  },
+  "4a4b84faf126dd32929d": {
+    "id": "b4c04685c182621a4b74",
+    "archetype_id": "age_range",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "age_range": "6–12"
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 15,
+      "end": 6
+    },
+    "continuation": 1,
+    "digits": "המלגה מיועדת לסטודנטים בגילאי 6–12 לפי הודעת המשרד, כך שאפשר לבדוק מראש מי רשאי להירשם.",
+    "cardinal": "המלגה מיועדת לסטודנטים בגילאי שש עד שתים עשרה לפי הודעת המשרד, כך שאפשר לבדוק מראש מי רשאי להירשם.",
+    "alignments": [
+      {
+        "slot": "age_range",
+        "kind": "range",
+        "value": "6–12",
+        "reading": "feminine-age-range",
+        "digits_span": [
+          30,
+          34
+        ],
+        "cardinal_span": [
+          30,
+          45
+        ],
+        "digits_text": "6–12",
+        "cardinal_text": "שש עד שתים עשרה"
+      }
+    ]
+  },
+  "d05e26be6adce5b06569": {
+    "id": "b1a7873de9d8b548f288",
+    "archetype_id": "slash_address",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "street": "האורן",
+      "house": 368,
+      "apartment": 101
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 12,
+      "end": 21
+    },
+    "continuation": 2,
+    "digits": "הלקוח מתגורר ברחוב האורן 368/101 במסירה אישית, והכתובת הועברה מראש כדי שמי שמגיע למקום יוכל למצוא אותו בלי לבקש שוב הוראות.",
+    "cardinal": "הלקוח מתגורר ברחוב האורן שלוש מאות שישים ושמונה, דירה מאה ואחת במסירה אישית, והכתובת הועברה מראש כדי שמי שמגיע למקום יוכל למצוא אותו בלי לבקש שוב הוראות.",
+    "alignments": [
+      {
+        "slot": "address",
+        "kind": "address",
+        "value": "האורן 368/101",
+        "reading": "house-slash-apartment",
+        "digits_span": [
+          19,
+          32
+        ],
+        "cardinal_span": [
+          19,
+          62
+        ],
+        "digits_text": "האורן 368/101",
+        "cardinal_text": "האורן שלוש מאות שישים ושמונה, דירה מאה ואחת"
+      }
+    ]
+  },
+  "c91e3ee29568d8b3ea6e": {
+    "id": "0629682745a624187391",
+    "archetype_id": "address",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "street": "הרימון",
+      "house": 79
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 20,
+      "end": 12
+    },
+    "continuation": 0,
+    "digits": "בית הספר נמצא ברחוב הרימון 79 ליד בית הספר.",
+    "cardinal": "בית הספר נמצא ברחוב הרימון שבעים ותשע ליד בית הספר.",
+    "alignments": [
+      {
+        "slot": "house",
+        "kind": "cardinal",
+        "value": 79,
+        "reading": "cardinal",
+        "digits_span": [
+          27,
+          29
+        ],
+        "cardinal_span": [
+          27,
+          37
+        ],
+        "digits_text": "79",
+        "cardinal_text": "שבעים ותשע"
+      }
+    ]
+  },
+  "b5930457f7cbb31bbccb": {
+    "id": "9ac60e0ab1a713973f32",
+    "archetype_id": "address",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "street": "דיזנגוף",
+      "house": 56
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 9,
+      "end": 5
+    },
+    "continuation": 1,
+    "digits": "ההסעה עצרה ברחוב דיזנגוף 56 בקרבת השוק, והכתובת נשלחה גם למי שאמור להגיע לשם.",
+    "cardinal": "ההסעה עצרה ברחוב דיזנגוף חמישים ושש בקרבת השוק, והכתובת נשלחה גם למי שאמור להגיע לשם.",
+    "alignments": [
+      {
+        "slot": "house",
+        "kind": "cardinal",
+        "value": 56,
+        "reading": "cardinal",
+        "digits_span": [
+          25,
+          27
+        ],
+        "cardinal_span": [
+          25,
+          35
+        ],
+        "digits_text": "56",
+        "cardinal_text": "חמישים ושש"
+      }
+    ]
+  },
+  "a24cbe07347d80c7d8b9": {
+    "id": "79e077cd329a57b6e9c6",
+    "archetype_id": "slash_date",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "day": 1,
+      "month": "מאי",
+      "year": 2024
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 11,
+      "end": 7
+    },
+    "continuation": 1,
+    "digits": "מועד ההגשה נקבע ל-1/5/2024 באולם הכנסים, והפרטים המלאים יישלחו למשתתפים בהמשך.",
+    "cardinal": "מועד ההגשה נקבע לאחד במאי, אלפיים עשרים וארבע באולם הכנסים, והפרטים המלאים יישלחו למשתתפים בהמשך.",
+    "alignments": [
+      {
+        "slot": "slash_date",
+        "kind": "date",
+        "value": "1/5/2024",
+        "reading": "day-month-year-slash",
+        "digits_span": [
+          16,
+          26
+        ],
+        "cardinal_span": [
+          16,
+          45
+        ],
+        "digits_text": "ל-1/5/2024",
+        "cardinal_text": "לאחד במאי, אלפיים עשרים וארבע"
+      }
+    ]
+  },
+  "786b0b7cc2c3741c4a44": {
+    "id": "4b31cde2f82ed83f3a1b",
+    "archetype_id": "meeting_minute",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minute_of_day": 679
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 4,
+      "end": 14
+    },
+    "continuation": 0,
+    "digits": "שיחת הוועידה תתחיל ב-11:19 בחדר ההדרכה.",
+    "cardinal": "שיחת הוועידה תתחיל באחת עשרה ותשע עשרה דקות בחדר ההדרכה.",
+    "alignments": [
+      {
+        "slot": "minute_of_day",
+        "kind": "clock_time",
+        "value": "11:19",
+        "reading": "nonround-clock",
+        "digits_span": [
+          19,
+          26
+        ],
+        "cardinal_span": [
+          19,
+          43
+        ],
+        "digits_text": "ב-11:19",
+        "cardinal_text": "באחת עשרה ותשע עשרה דקות"
+      }
+    ]
+  },
+  "ed1a32da40e5bb6d6a4e": {
+    "id": "0df2a346f480767fc4fa",
+    "archetype_id": "opening_hours",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "start_hour": 8,
+      "end_hour": 12
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 3,
+      "end": 1
+    },
+    "continuation": 1,
+    "digits": "המוקד הטלפוני זמין בין 8:00–12:00 בכל יום, כדי שהמבקרים יוכלו לתכנן את ההגעה.",
+    "cardinal": "המוקד הטלפוני זמין בין שמונה לשתים עשרה בכל יום, כדי שהמבקרים יוכלו לתכנן את ההגעה.",
+    "alignments": [
+      {
+        "slot": "hours",
+        "kind": "time_range",
+        "value": "8:00–12:00",
+        "reading": "between-12-hour-clock",
+        "digits_span": [
+          23,
+          33
+        ],
+        "cardinal_span": [
+          23,
+          39
+        ],
+        "digits_text": "8:00–12:00",
+        "cardinal_text": "שמונה לשתים עשרה"
+      }
+    ]
+  },
+  "22300f83400bdc38ae52": {
+    "id": "b79dc7c3e43cd01b445a",
+    "archetype_id": "area",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "square_meters": 59
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "reading_variant": "natural",
+    "context": {
+      "start": 13,
+      "end": 14
+    },
+    "continuation": 0,
+    "digits": "שטח הכיתה הוא 59 מ\"ר לפי נתוני היצרן.",
+    "cardinal": "שטח הכיתה הוא חמישים ותשעה מטר רבוע לפי נתוני היצרן.",
+    "alignments": [
+      {
+        "slot": "square_meters",
+        "kind": "measurement",
+        "value": 59,
+        "reading": "natural-square-meter",
+        "digits_span": [
+          14,
+          20
+        ],
+        "cardinal_span": [
+          14,
+          35
+        ],
+        "digits_text": "59 מ\"ר",
+        "cardinal_text": "חמישים ותשעה מטר רבוע"
+      }
+    ]
+  },
+  "97bc02d9fe1986e5fc51": {
+    "id": "ca9379fb8a39a0bcc4f2",
+    "archetype_id": "distance",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "kilometers": 99
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 7,
+      "end": 10
+    },
+    "continuation": 1,
+    "digits": "המרחק בין שתי התחנות הוא 99 ק\"מ ברוטו, והנתון נרשם לצורך השוואה בהמשך.",
+    "cardinal": "המרחק בין שתי התחנות הוא תשעים ותשעה קילומטרים ברוטו, והנתון נרשם לצורך השוואה בהמשך.",
+    "alignments": [
+      {
+        "slot": "kilometers",
+        "kind": "measurement",
+        "value": 99,
+        "reading": "masculine-kilometers",
+        "digits_span": [
+          25,
+          31
+        ],
+        "cardinal_span": [
+          25,
+          46
+        ],
+        "digits_text": "99 ק\"מ",
+        "cardinal_text": "תשעים ותשעה קילומטרים"
+      }
+    ]
+  },
+  "159a1409414de62f101e": {
+    "id": "a76e20d434dafc3659d1",
+    "archetype_id": "bulk_purchase",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "תפוז",
+        "plural": "תפוזים",
+        "gender": "m"
+      },
+      "quantity": 1001
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 3,
+      "end": 6
+    },
+    "continuation": 1,
+    "digits": "לחידוש המלאי רכשנו 1001 תפוזים לצורך חידוש המלאי, והכמות נרשמה במערכת המלאי.",
+    "cardinal": "לחידוש המלאי רכשנו אלף ואחד תפוזים לצורך חידוש המלאי, והכמות נרשמה במערכת המלאי.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "quantity",
+        "value": 1001,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          19,
+          30
+        ],
+        "cardinal_span": [
+          19,
+          34
+        ],
+        "digits_text": "1001 תפוזים",
+        "cardinal_text": "אלף ואחד תפוזים"
+      }
+    ]
+  },
+  "22422f0e5eeceea2459d": {
+    "id": "9115d78d144f0a3e6914",
+    "archetype_id": "local_landline",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "phone": "000-1323"
+    },
+    "catalog_version": "starter-15",
+    "renderer_version": "14",
+    "context": {
+      "start": 0,
+      "end": 21
+    },
+    "continuation": 2,
+    "digits": "בטופס ההדגמה נרשם מספר מקומי דמה 000-1323 בטופס ההדגמה, כדי להמחיש את מבנה החיוג והצגת הספרות בלי לפרסם פרטי קשר של אדם אמיתי.",
+    "cardinal": "בטופס ההדגמה נרשם מספר מקומי דמה אפס אפס אפס, אחת שלוש שתיים שלוש בטופס ההדגמה, כדי להמחיש את מבנה החיוג והצגת הספרות בלי לפרסם פרטי קשר של אדם אמיתי.",
+    "alignments": [
+      {
+        "slot": "phone",
+        "kind": "identifier",
+        "value": "000-1323",
+        "reading": "digits-3-4",
+        "digits_span": [
+          33,
+          41
+        ],
+        "cardinal_span": [
+          33,
+          65
+        ],
+        "digits_text": "000-1323",
+        "cardinal_text": "אפס אפס אפס, אחת שלוש שתיים שלוש"
+      }
+    ]
+  }
+}

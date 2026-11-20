@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hebrew normalization inspector</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
+  <style>
+    :root {
+      --bg: #f6f7f9; --card: #fff; --border: #dde1e6; --text: #1d2430; --muted: #6b7280;
+      --del-bg: #fecaca; --del-fg: #7f1d1d;
+      --ins-bg: #bbf7d0; --ins-fg: #14532d;
+      --sub-bg: #fde68a; --sub-fg: #78350f;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; }
+    header { position: sticky; top: 0; z-index: 1; background: var(--card); border-bottom: 1px solid var(--border);
+             padding: 12px 24px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    header h1 { font-size: 17px; margin: 0; }
+    .meta { color: var(--muted); font-size: 13px; }
+    .spacer { flex: 1; }
+    button { font: inherit; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border);
+             background: var(--card); cursor: pointer; }
+    button.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+    button:disabled { opacity: .5; cursor: default; }
+    select { font: inherit; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border); }
+    main { max-width: 1200px; margin: 0 auto; padding: 20px 24px 60px; }
+    .legend { display: flex; gap: 12px; margin-bottom: 16px; font-size: 13px; align-items: center; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+            padding: 12px 16px; margin-bottom: 12px; }
+    .card .idx { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .row { display: grid; grid-template-columns: 64px 1fr; gap: 8px; padding: 4px 0; align-items: start; }
+    .label { color: var(--muted); font-size: 12px; text-transform: uppercase; padding-top: 4px; }
+    .text { direction: rtl; text-align: right; font-size: 18px; line-height: 2; }
+    .tok { padding: 1px 3px; border-radius: 4px; }
+    .tok.delete { background: var(--del-bg); color: var(--del-fg); }
+    .tok.insert { background: var(--ins-bg); color: var(--ins-fg); }
+    .tok.substitute { background: var(--sub-bg); color: var(--sub-fg); }
+    .tag { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 12px; }
+    .tag.delete { background: var(--del-bg); color: var(--del-fg); }
+    .tag.insert { background: var(--ins-bg); color: var(--ins-fg); }
+    .tag.substitute { background: var(--sub-bg); color: var(--sub-fg); }
+    .row.stored { border-top: 1px dashed var(--border); margin-top: 4px; padding-top: 8px; }
+    .unchanged { color: var(--muted); font-size: 12px; margin-left: 8px; }
+    .error { color: #b91c1c; }
+    .playground { border-color: #93c5fd; margin-bottom: 20px; }
+    textarea.input { width: 100%; font-family: inherit; padding: 6px 10px; border: 1px solid var(--border);
+                     border-radius: 6px; line-height: 1.6; resize: vertical; }
+    .card .idx button { margin-left: 10px; padding: 0 8px; font-size: 12px; }
+  </style>
+</head>
+<body x-data="inspector()">
+  <header>
+    <h1>Hebrew normalization inspector</h1>
+    <label class="meta">Filter
+      <select x-model="filter" @change="reset()">
+        <template x-for="f in info.filters" :key="f">
+          <option :value="f" x-text="{ digits: 'contains digits' }[f] || f"></option>
+        </template>
+      </select>
+    </label>
+    <span class="meta" x-show="info.rows">
+      <span x-text="info.rows"></span> rows ·
+      <span x-text="totalMatching"></span> match ·
+      <span x-text="samples.length"></span> shown ·
+      <span x-text="remaining"></span> left
+      · config: <span x-text="info.config"></span>
+      (strip_markup=<span x-text="info.strip_markup"></span>)
+    </span>
+    <span class="spacer"></span>
+    <button @click="reset()" :disabled="loading">Reset</button>
+    <button class="primary" @click="more()" :disabled="loading">
+      <span x-text="loading ? 'Loading…' : 'Load another 10'"></span>
+    </button>
+  </header>
+
+  <main>
+    <section class="card playground">
+      <div class="idx">
+        Playground
+        <span class="unchanged" x-show="loadedIndex !== null">loaded sample #<span x-text="loadedIndex"></span></span>
+      </div>
+      <div class="row">
+        <div class="label">Input</div>
+        <textarea class="text input" dir="rtl" rows="3" x-model="input" @input="onInput()"
+                  placeholder="Type or paste text, or use “Load into playground” on a sample below"></textarea>
+      </div>
+      <div class="row">
+        <div class="label">Output</div>
+        <div class="text" dir="rtl">
+          <template x-for="(t, i) in outputTokens" :key="i">
+            <span><span class="tok" :class="t.op" x-text="t.t"></span> </span>
+          </template>
+        </div>
+      </div>
+      <p class="error" x-show="playgroundError" x-text="playgroundError"></p>
+    </section>
+
+    <div class="legend">
+      <span class="tag delete">removed / changed (before)</span>
+      <span class="tag insert">added (after)</span>
+      <span class="tag substitute">replaced</span>
+      <span class="meta">"Stored" row appears only when it differs from "After"; colors there are relative to "After".</span>
+    </div>
+
+    <p class="error" x-show="error" x-text="error"></p>
+
+    <template x-for="s in samples" :key="s.index + '-' + s.seq">
+      <div class="card">
+        <div class="idx">
+          #<span x-text="s.index"></span>
+          <span class="unchanged" x-show="!s.changed">unchanged</span>
+          <button @click="loadIntoPlayground(s)">Load into playground</button>
+        </div>
+        <div class="row">
+          <div class="label">Before</div>
+          <div class="text" dir="rtl">
+            <template x-for="(t, i) in s.before_tokens" :key="i">
+              <span><span class="tok" :class="t.op" x-text="t.t"></span> </span>
+            </template>
+          </div>
+        </div>
+        <div class="row">
+          <div class="label">After</div>
+          <div class="text" dir="rtl">
+            <template x-for="(t, i) in s.after_tokens" :key="i">
+              <span><span class="tok" :class="t.op" x-text="t.t"></span> </span>
+            </template>
+          </div>
+        </div>
+        <div class="row stored" x-show="s.stored !== null">
+          <div class="label">Stored</div>
+          <div class="text" dir="rtl">
+            <template x-for="(t, i) in s.stored_tokens || []" :key="i">
+              <span><span class="tok" :class="t.op" x-text="t.t"></span> </span>
+            </template>
+          </div>
+        </div>
+      </div>
+    </template>
+  </main>
+
+  <script>
+    function inspector() {
+      return {
+        info: { filters: ['digits'], rows: 0 },
+        filter: 'digits',
+        samples: [],
+        totalMatching: 0,
+        remaining: 0,
+        loading: false,
+        error: '',
+        seq: 0,
+        input: '',
+        outputTokens: [],
+        loadedIndex: null,
+        playgroundError: '',
+        inputSeq: 0,
+        timer: null,
+
+        async init() {
+          this.info = await (await fetch('/api/info')).json();
+          const wanted = new URLSearchParams(location.search).get('filter');
+          if (this.info.filters.includes(wanted)) this.filter = wanted;
+          await this.more();
+        },
+
+        async more() {
+          this.loading = true;
+          this.error = '';
+          try {
+            const res = await fetch(`/api/samples?filter=${this.filter}&n=10`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || res.statusText);
+            const seq = ++this.seq;
+            this.samples = data.samples.map(s => ({ ...s, seq }));
+            this.totalMatching = data.total_matching;
+            this.remaining = data.remaining;
+          } catch (e) {
+            this.error = e.message;
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        async reset() {
+          await fetch(`/api/reset?filter=${this.filter}`, { method: 'POST' });
+          await this.more();
+        },
+
+        loadIntoPlayground(sample) {
+          this.input = sample.before;
+          this.loadedIndex = sample.index;
+          this.normalizeInput();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+
+        onInput() {
+          this.loadedIndex = null;
+          clearTimeout(this.timer);
+          this.timer = setTimeout(() => this.normalizeInput(), 250);
+        },
+
+        async normalizeInput() {
+          const call = ++this.inputSeq;
+          try {
+            const res = await fetch('/api/normalize', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: this.input }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || res.statusText);
+            if (call !== this.inputSeq) return; // a newer edit is already in flight
+            this.outputTokens = data.after_tokens;
+            this.playgroundError = '';
+          } catch (e) {
+            if (call === this.inputSeq) this.playgroundError = e.message;
+          }
+        },
+      };
+    }
+  </script>
+</body>
+</html>

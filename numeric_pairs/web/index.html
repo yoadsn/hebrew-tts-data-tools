@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>מעבדת זוגות מספריים · עברית</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    :root { font-family: system-ui, -apple-system, "Arial", sans-serif; color: #19343a; background: #f5f7f5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .shell { max-width: 1240px; margin: auto; padding: 32px 28px 80px; }
+    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 26px; }
+    .eyebrow { color: #24756a; font-weight: 800; font-size: .77rem; letter-spacing: .06em; }
+    h1 { font-size: clamp(1.65rem, 3vw, 2.6rem); letter-spacing: -.04em; margin: 8px 0 6px; }
+    h2 { margin: 0 0 8px; font-size: 1.25rem; }
+    p { line-height: 1.65; }
+    .subtle, .muted { color: #668084; }
+    .subtle { margin: 0; }
+    .tag { background: #e2f0e9; border: 1px solid #c2dfd2; border-radius: 99px; padding: 8px 14px; color: #17604e; font-size: .8rem; white-space: nowrap; }
+    nav { display: flex; flex-wrap: wrap; gap: 7px; border-bottom: 1px solid #dae3df; margin-bottom: 25px; }
+    nav button { border: 0; border-bottom: 3px solid transparent; background: transparent; color: #5b7378; padding: 13px 15px; font-weight: 650; }
+    nav button.active { color: #146859; border-bottom-color: #168c73; }
+    nav button:disabled { opacity: .48; cursor: not-allowed; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1fr) 286px; gap: 20px; align-items: start; }
+    .panel, .sample { background: #fff; border: 1px solid #dce6e1; border-radius: 16px; box-shadow: 0 4px 15px #244e3910; }
+    .panel { padding: 22px; }
+    .sample { padding: 22px; margin-top: 14px; }
+    .panel + .panel { margin-top: 16px; }
+    .fields { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 22px 0; }
+    label.field { display: grid; gap: 7px; color: #425d61; font-size: .85rem; font-weight: 700; }
+    input[type=number], textarea, select { border: 1px solid #cbdcd5; border-radius: 9px; background: white; color: #19343a; padding: 10px 12px; min-height: 42px; }
+    input[type=number] { width: 115px; }
+    textarea { width: 100%; min-height: 70px; resize: vertical; }
+    .primary { border: 0; border-radius: 9px; background: #136f60; color: white; padding: 11px 18px; font-weight: 750; }
+    .primary:hover { background: #0c594e; }
+    .primary:disabled { opacity: .6; cursor: wait; }
+    .secondary { background: white; color: #28565a; border: 1px solid #cbdcd5; border-radius: 9px; padding: 9px 13px; }
+    .check { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #dae5df; border-radius: 9px; padding: 8px 10px; margin: 3px 0 3px 7px; }
+    .check input { accent-color: #168c73; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: .8rem; color: #60777b; }
+    .pill { border-radius: 99px; padding: 4px 9px; background: #edf4f0; color: #246755; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+    .view { border: 1px solid #e1e9e5; background: #fbfdfb; border-radius: 12px; padding: 16px; min-width: 0; }
+    .view small { display: block; color: #6f8584; margin-bottom: 10px; font-weight: 700; }
+    .sentence { font-size: 1.15rem; line-height: 1.9; overflow-wrap: anywhere; white-space: pre-wrap; }
+    mark { background: #d7f1e5; color: #115548; border-bottom: 2px solid #219c78; border-radius: 3px; padding: 2px 0; }
+    .feedback { border-top: 1px solid #e5ece8; padding-top: 16px; margin-top: 20px; }
+    .feedback button { margin: 10px 0 0 7px; }
+    .selected { border-color: #168c73; background: #e8f6ee; color: #136050; }
+    .error { color: #ae3139; background: #fff1f0; border: 1px solid #f4cdca; padding: 12px; border-radius: 9px; margin: 10px 0; }
+    .success { color: #136f60; }
+    .archive { display: block; width: 100%; text-align: right; margin: 8px 0; }
+    .empty { text-align: center; padding: 72px 20px; color: #6e8382; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+    .metric { background: #eef6f1; border-radius: 12px; padding: 16px; }
+    .metric strong { display: block; font-size: 1.8rem; color: #116453; }
+    .coverage-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .coverage-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .coverage-list span { display: inline-flex; gap: 8px; padding: 7px 11px; background: #edf4f0; border-radius: 8px; }
+    .design-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+    .design-list { margin: 8px 0 0; padding-inline-start: 23px; line-height: 1.8; }
+    .design-list li { padding: 3px 0; overflow-wrap: anywhere; }
+    .design-structure { display: block; white-space: pre-wrap; overflow-wrap: anywhere; background: #f1f6f3; border-radius: 9px; padding: 13px; margin: 12px 0; line-height: 1.8; }
+    .design-structure, .design-rule { unicode-bidi: plaintext; }
+    details.panel > summary { cursor: pointer; font-weight: 750; font-size: 1.25rem; }
+    [x-cloak] { display: none !important; }
+    @media (max-width: 800px) { .grid, .pair, .coverage-grid, .design-grid { grid-template-columns: 1fr; } .metric-grid { grid-template-columns: repeat(2, 1fr); } .shell { padding: 20px 15px 50px; } header { align-items: start; flex-direction: column; } }
+  </style>
+</head>
+<body x-data="workbench()" x-init="init()">
+<main class="shell">
+  <header><div><div class="eyebrow">HEBREW NUMERIC PAIRS / LAB 01</div><h1>מעבדת זוגות מספריים</h1><p class="subtle">משפט אחד, שני ייצוגים, מיפוי מדויק לכל ביטוי מספרי.</p></div><span class="tag" x-text="catalog ? 'קטלוג ' + catalog.catalog_version : 'טוען קטלוג…'"></span></header>
+  <nav aria-label="שלבי העבודה">
+    <button :class="{active:tab==='archetypes'}" @click="tab='archetypes'">01 · ארכיטיפים</button>
+    <button :class="{active:tab==='generate'}" @click="tab='generate'">02 · יצירה</button>
+    <button :class="{active:tab==='review'}" @click="tab='review'">03 · סקירה <span x-show="run" x-text="'('+(run?.pairs?.length||0)+')'"></span></button>
+    <button :class="{active:tab==='coverage'}" @click="tab='coverage'">04 · כיסוי</button>
+    <button :class="{active:tab==='candidates'}" @click="tab='candidates'; loadCandidates()">05 · מועמדים</button>
+    <button :class="{active:tab==='naturalness'}" @click="tab='naturalness'; loadNaturalness()">06 · טבעיות הדיבור</button>
+    <button :class="{active:tab==='export'}" @click="tab='export'">07 · ייצוא</button>
+  </nav>
+  <p class="error" role="alert" x-show="error" x-text="error" x-cloak></p>
+
+  <section x-show="tab==='archetypes'" x-cloak>
+    <details class="panel"><summary>מפת התרחישים · עשרה תחומים</summary><p class="subtle">המסמך מתאר עשרה תחומים; מספר מבנים מכל תחום כבר ניתנים ליצירה. תתי-מקרים שמופיעים כ״להמשך״ עדיין לא נבדקו ואין להניח שהם נוצרו.</p>
+      <div class="coverage-grid" style="margin-top:18px"><template x-for="area in catalog?.scenario_areas || []" :key="area.title"><div class="view"><strong x-text="area.title"></strong><p x-text="area.implemented.map(id => titleFor(id)).join(' · ')"></p><small x-text="'להמשך: ' + area.pending"></small></div></template></div>
+    </details>
+    <div class="panel" style="margin-top:16px"><h2>מבנים זמינים ליצירה</h2><p class="subtle">פתחו ארכיטיפ כדי לראות את התבנית, אפשרויות ההחלפה, כללי הערכים ודוגמאות קצרות וארוכות. התצוגה מקדימה בלבד: היא אינה יוצרת הרצה או שומרת משוב.</p>
+      <label class="field" style="margin-top:16px">חיפוש ארכיטיפ <input class="secondary" type="search" x-model="archetypeQuery" aria-label="חיפוש ארכיטיפ" placeholder="שם, מזהה או תחום" style="max-width:320px"></label>
+      <p class="muted" x-text="filteredArchetypes().length + ' ארכיטיפים מוצגים'"></p>
+    </div>
+    <template x-for="item in filteredArchetypes()" :key="item.id"><article class="sample"><div class="row"><h2 x-text="item.title"></h2><span class="pill" x-text="item.category"></span></div><p x-text="item.description"></p><div class="meta">שדות: <span x-text="item.slots.join(' · ')"></span></div>
+      <button class="secondary" style="margin-top:16px" :aria-expanded="openArchetype === item.id" @click="toggleDesign(item.id)" x-text="openArchetype === item.id ? 'הסתרת תבניות וכללים' : 'הצגת תבניות, בנקי מילים וכללים'"></button>
+      <template x-if="openArchetype === item.id && designs[item.id]"><div class="feedback" style="margin-top:16px">
+        <h3>מבנה הבסיס והמשבצות</h3><p class="subtle">הסוגריים המסולסלים מסמנים רכיב שנדגם; רק המסגרת החיצונית מתחלפת. רכיבים פנימיים וקריאות מספריות נשארים צמודים לארכיטיפ.</p>
+        <code class="design-structure" x-text="designs[item.id].template"></code>
+        <div class="design-grid">
+          <div class="view"><strong>פתיחות אפשריות</strong><ol class="design-list"><template x-for="(part, i) in designs[item.id].starts" :key="i"><li x-text="part"></li></template></ol></div>
+          <div class="view"><strong>סיומות אפשריות</strong><p class="muted" x-show="designs[item.id].end_bank" x-text="'בנק משותף ' + designs[item.id].end_bank + ' · גם ב: ' + designs[item.id].end_users.map(id => titleFor(id)).join(' · ')"></p><ol class="design-list"><template x-for="(part, i) in designs[item.id].ends" :key="i"><li x-text="part"></li></template></ol></div>
+        </div>
+        <div class="view"><strong>קבוצות תאימות בין פתיחות, סיומות והמשכים</strong><p class="subtle">המספרים הם המיקומים ברשימות למעלה. כל קבוצה מתארת צירופים שנדגמים יחד; התנאים התלויים בכמות או בשם עצם מוצגים בכללי הדגימה.</p><ul class="design-list"><template x-for="(group, i) in designs[item.id].frame_groups" :key="i"><li><b x-text="group.name + ': '"></b><span x-text="'פתיחות ' + group.starts.map(n => n + 1).join(', ') + ' · סיומות ' + group.ends.map(n => n + 1).join(', ')"></span><small x-text="' · המשכים: ' + group.continuations.map(part => part || 'ללא').join(' | ')"></small></li></template></ul></div>
+        <div class="view"><strong>תוספות אורך אחרי הסיומת</strong><p class="subtle"><span x-text="designs[item.id].continuation_weights.map((weight, i) => ['קצר','בינוני','ארוך'][i] + ' ' + weight + '%').join(' · ')"></span>. אותה קבוצת תוספות משותפת גם ל: <span x-text="designs[item.id].continuation_users.map(id => titleFor(id)).join(' · ')"></span></p><ol class="design-list"><template x-for="(part, i) in designs[item.id].continuations" :key="i"><li><b x-text="['קצר','בינוני','ארוך'][i] + ': '"></b><span x-text="part || 'ללא תוספת'"></span></li></template></ol></div>
+        <p class="subtle" x-show="designs[item.id].date_start_groups" x-text="'בתאריכים פתיחות מותאמות לתקופה: הווה (2020–2027), עבר ארכיוני (לפני 2020) עם תוספות על תיעוד היסטורי, ועתיד (אחרי 2027).'"></p>
+        <h3 style="margin-top:22px">בנקי ערכים וכללי דגימה</h3><p class="subtle">ברירת מחדל: הקראה טבעית. טווחי מספרים נדגמים לפי אורך ספרות, עם 25% משקל לערכי גבול; אורכי מספרי בתים ניתנים לשינוי בלשונית היצירה. אין כאן שימוש בקורפוס בזמן יצירה.</p><p class="muted" x-show="designs[item.id].formal_weight !== null" x-text="'לארכיטיפ הזה יש גם קריאה תקנית אופציונלית (משקל התחלתי ' + 100 * designs[item.id].formal_weight + '%); ניתן לשנות את המשקל בלשונית יצירה.'"></p>
+        <div class="view" x-show="designs[item.id].quantity_buckets"><strong>סוגי פריטים ותקרת קנייה אישית</strong><ul class="design-list"><template x-for="(bucket, name) in designs[item.id].quantity_buckets || {}" :key="name"><li x-text="name + ' · עד ' + bucket.max + ': ' + bucket.nouns.join(', ')"></li></template></ul></div>
+        <div class="design-grid"><template x-for="rule in designs[item.id].sampling" :key="rule.slot"><div class="view"><strong x-text="rule.slot"></strong><p class="muted" x-show="rule.when" x-text="'מופיע רק אם ' + rule.when + ' פעיל'"></p><p class="design-rule" x-show="rule.kind === 'range'" x-text="rule.kind === 'range' ? rule.lower + '–' + rule.upper + ' · ' + rule.rule : ''"></p><p class="design-rule" x-show="rule.kind === 'generator'" x-text="rule.kind === 'generator' ? rule.rule : ''"></p><p class="design-rule" x-show="rule.kind === 'pool' && rule.rule" x-text="rule.rule || ''"></p><div x-show="rule.kind === 'pool'" class="coverage-list"><template x-for="(option, i) in rule.values || []" :key="i"><span x-text="formatOption(option)"></span></template></div></div></template></div>
+        <h3>דוגמאות לתצוגה בלבד</h3><p class="subtle">דוגמאות קבועות להמחשת השילובים; אינן חלק מהרצה שמורה. כל ביטוי ממופה בדיוק לקריאתו.</p><template x-for="(example, i) in designs[item.id].examples" :key="i"><div class="view" style="margin-top:10px"><strong x-text="example.length"></strong><p dir="rtl" x-text="example.digits"></p><p dir="rtl" class="muted" x-text="example.cardinal"></p><div class="coverage-list"><template x-for="(alignment, j) in example.alignments" :key="j"><span><b x-text="alignment.slot + ': '"></b><span x-text="alignment.written + ' ← ' + alignment.spoken + ' (' + alignment.reading + ')'"></span></span></template></div></div></template>
+      </div></template>
+      <p class="muted" x-show="openArchetype === item.id && loadingDesign" x-cloak>טוען פרטי ארכיטיפ…</p>
+    </article></template>
+  </section>
+
+  <section x-show="tab==='generate'" x-cloak>
+    <div class="grid"><div class="panel"><h2>הרצת דגימה</h2><p class="subtle">אותו זרע, אותם ארכיטיפים ואותה גרסת קטלוג יפיקו בדיוק את אותם משפטים. עד 200 דוגמאות בהרצה.</p>
+      <div class="fields"><label class="field">זרע אקראי <input type="number" x-model.number="seed" step="1"></label><label class="field">מספר דוגמאות <input type="number" x-model.number="count" min="1" max="200"></label><button class="primary" :disabled="busy" @click="createRun()" x-text="busy ? 'מייצר…' : 'יצירת דוגמאות'"></button></div>
+      <div><strong>בחירת ארכיטיפים</strong><p class="subtle">יש לבחור לפחות אחד. ״טרם נדגמו״ מתייחס לכל ההרצות השמורות, גם אם לא נשארו ברשימת ההרצות האחרונות.</p><div class="feedback"><button class="secondary" @click="selectNeverRan()">בחירת ארכיטיפים שטרם נדגמו</button><button class="secondary" @click="selected = catalog.archetypes.map(a => a.id); count = selected.length">בחירת הכול</button><span class="muted" x-text="selected.length + ' נבחרו'"></span></div><template x-for="item in catalog?.archetypes || []" :key="item.id"><label class="check"><input type="checkbox" :value="item.id" x-model="selected"><span x-text="item.title"></span></label></template></div>
+      <div style="margin-top:22px"><strong>התפלגות מספרי בתים</strong><p class="subtle">אורך הספרות לבחירה; שאר הקטגוריות שומרות על תחום הערכים שלהן.</p><template x-for="n in [1,2,3,4,5]" :key="n"><label class="check"><input type="checkbox" :value="n" x-model="addressLengths"><span x-text="n + ' ספרות'"></span></label></template></div>
+      <label class="field" style="margin-top:18px">משקל ערכי גבול (לעומת ערך מקרי)<select x-model.number="boundaryWeight"><option value="0">0%</option><option value="0.25">25%</option><option value="0.5">50%</option><option value="1">100%</option></select></label>
+      <details style="margin-top:18px"><summary>סגנון הקראה: טבעי לעומת תקני</summary><p class="subtle">ברירת מחדל: 100% דיבור טבעי. הצורות התקניות שמורות, אך לא יידגמו כל עוד המשקל שלהן הוא 0%. שינוי המשקל ייצור הרצה נפרדת.</p>
+        <template x-for="id in Object.keys(catalog?.default_formal_weights || {})" :key="id"><label class="field" style="margin-top:12px"><span x-text="titleFor(id) + ' · משקל הצורה התקנית'"></span><select x-model.number="variantWeights[id]"><option value="0">0%</option><option value="0.1">10%</option><option value="0.25">25%</option><option value="0.5">50%</option><option value="1">100%</option></select></label></template>
+      </details>
+    </div><aside class="panel"><h2>הרצות קודמות</h2><p class="subtle" x-show="!runs.length">אין עדיין הרצות שמורות.</p><template x-for="item in runs" :key="item.id"><button class="secondary archive" @click="loadRun(item.id)"><strong x-text="item.count + ' משפטים'"></strong><br><small x-text="'זרע ' + item.seed + ' · ' + item.id.slice(0,8)"></small></button></template></aside></div>
+  </section>
+
+  <section x-show="tab==='review'" x-cloak>
+    <div class="panel row" x-show="run"><div><h2>סקירת דוגמאות</h2><span class="muted" x-text="run ? 'הרצה ' + run.id + ' · זרע ' + run.seed + ' · גרסה ' + run.catalog_version : ''"></span><p class="subtle">כל דוגמה תקינה כברירת מחדל. השתמשו בדחייה או בהצעת תיקון רק כשצריך.</p></div><button class="secondary" @click="rerun()">הרצה חוזרת</button></div>
+    <div class="panel empty" x-show="!run">אין דוגמאות להצגה. עברו ללשונית ״יצירה״ כדי להתחיל.</div>
+    <template x-for="pair in run?.pairs || []" :key="pair.id"><article class="sample"><div class="row"><div class="meta"><span class="pill" x-text="titleFor(pair.archetype_id)"></span><span x-text="'#' + (pair.index + 1)"></span><span x-text="pair.alignments.map(a => a.slot + ': ' + a.value).join(' · ')"></span><span class="pill" x-show="pair.reading_variant" x-text="pair.reading_variant === 'formal' ? 'קריאה תקנית' : 'קריאה טבעית'"></span></div><span class="pill" x-text="feedback[pair.id] ? verdictText(feedback[pair.id].verdict) : 'תקין כברירת מחדל'"></span></div>
+      <div class="pair"><div class="view"><small>צורה כתובה · ספרות</small><div class="sentence" dir="rtl" x-html="highlight(pair, 'digits')"></div></div><div class="view"><small>צורה נאמרת · מילים</small><div class="sentence" dir="rtl" x-html="highlight(pair, 'cardinal')"></div></div></div>
+      <div class="feedback"><label class="field">הערה או הצעת תיקון <textarea x-model="notes[pair.id]" placeholder="מה לא טבעי? איזו צורה עדיפה?" maxlength="2000"></textarea></label><button class="secondary" @click="submit(pair, 'reject')">לדחות</button><button class="secondary" @click="submit(pair, 'correct')">להציע תיקון</button><button class="secondary" x-show="feedback[pair.id] && feedback[pair.id].verdict !== 'accept'" @click="submit(pair, 'accept')">להחזיר לתקין</button><span class="success" x-show="saved===pair.id">המשוב נשמר</span></div>
+    </article></template>
+  </section>
+  <section x-show="tab==='coverage'" x-cloak>
+    <div class="panel empty" x-show="!run">בחרו הרצה קיימת או צרו דוגמאות כדי לראות את הכיסוי.</div>
+    <template x-if="coverage"><div><div class="panel"><h2>כיסוי ההרצה</h2><p class="subtle">דוגמאות ללא משוב נחשבות תקינות. דחייה ותיקון מפורש מחליפים את ברירת המחדל.</p><div class="metric-grid"><div class="metric"><strong x-text="coverage.total"></strong>סה״כ דוגמאות</div><div class="metric"><strong x-text="coverage.valid"></strong>תקינות (כולל ברירת מחדל)</div><div class="metric"><strong x-text="coverage.rejected"></strong>נדחו</div><div class="metric"><strong x-text="coverage.needs_correction"></strong>דורשות תיקון</div></div><small class="muted" x-text="coverage.implicit_valid + ' תקינות ללא סימון; ' + coverage.explicit_valid + ' סומנו כתקינות במפורש'"></small><p class="error" x-show="coverage.qa_failures.length" x-text="coverage.qa_failures.length + ' שגיאות אימות פנימיות'"></p></div>
+      <div class="coverage-grid" style="margin-top:14px"><template x-for="group in coverageGroups()" :key="group.title"><div class="panel"><h2 x-text="group.title"></h2><div class="coverage-list"><template x-for="entry in group.entries" :key="entry[0]"><span><b x-text="entry[0]"></b><span x-text="entry[1]"></span></span></template></div><p class="muted" x-show="!group.entries.length">אין עדיין נתונים.</p></div></template></div>
+    </div></template>
+  </section>
+  <section x-show="tab==='candidates'" x-cloak>
+    <div class="panel"><h2>מועמדים מתוך קורפוס</h2><p class="subtle">הדביקו רק משפטים שהשימוש בהם הותר, ללא מידע אישי. מזהים ארוכים ומספרי טלפון מוסתרים, אבל זו אינה בדיקת פרטיות מלאה. אישור מועמד אינו מוסיף אותו אוטומטית למחולל.</p>
+      <div class="fields"><label class="field">שם מקור <input class="secondary" x-model="corpus.source" maxlength="300" placeholder="שם קורפוס / אוסף"></label><label class="field">רישיון <input class="secondary" x-model="corpus.license" maxlength="300" placeholder="למשל CC BY"></label><label class="field">מגבלות שימוש <input class="secondary" x-model="corpus.restrictions" maxlength="300" placeholder="אם יש"></label></div>
+      <label class="field">משפט אחד בכל שורה (עד 100 שורות / 20,000 תווים)<textarea x-model="corpus.sentences" maxlength="20000" placeholder="הפגישה תתחיל בשעה 15:16."></textarea></label>
+      <label class="field" style="margin-top:14px">ייעוד הקורפוס <select x-model="corpus.purpose"><option value="derivation">גזירת מועמדים</option><option value="evaluation">הערכה שמורה בצד (ללא גזירת מועמדים)</option></select></label>
+      <label class="check"><input type="checkbox" x-model="corpus.approved_for_derivation">אני מאשר/ת שימוש למטרה שבחרתי ושאין בטקסט מידע אישי</label>
+      <div style="margin-top:14px"><button class="primary" :disabled="busy" @click="importCandidates()">חילוץ מועמדים</button></div>
+      <p class="success" x-show="candidateMessage" x-text="candidateMessage"></p>
+    </div>
+    <div class="panel empty" x-show="!candidates.length">עדיין לא נמצאו מועמדים. ניתן להזין משפטים מורשים לבדיקה.</div>
+    <template x-for="candidate in candidates" :key="candidate.id"><article class="sample"><div class="row"><h2 x-text="candidate.pattern"></h2><span class="pill" x-text="candidate.status === 'pending' ? 'ממתין לבדיקה' : candidate.status === 'approved' ? 'אושר כהצעה' : 'נדחה'"></span></div>
+      <p class="muted" x-text="candidate.kind + ' · ' + candidate.count + ' מופעים'"></p><div class="coverage-list"><template x-for="example in candidate.evidence" :key="example"><span x-text="example"></span></template></div>
+      <p class="subtle" x-text="candidate.provenance.map(p => p.source + ' · ' + p.license + (p.restrictions ? ' · ' + p.restrictions : '')).join(' | ')"></p>
+      <div class="coverage-grid" style="margin-top:18px"><template x-for="field in candidateFields" :key="field.key"><label class="field"><span x-text="field.title"></span><input class="secondary" x-model="candidateDrafts[candidate.id][field.key]" maxlength="2000"></label></template></div>
+      <div class="feedback"><label class="field">הערת סוקר/ת <textarea x-model="candidateDrafts[candidate.id].note" maxlength="2000"></textarea></label><button class="secondary" @click="reviewCandidate(candidate, 'rejected')">דחיית מועמד</button><button class="primary" @click="reviewCandidate(candidate, 'approved')">אישור כהצעה בלבד</button></div>
+    </article></template>
+  </section>
+  <section x-show="tab==='naturalness'" x-cloak>
+    <div class="panel"><h2>בדיקת טבעיות הדיבור</h2><p class="subtle">משפטים שסומנו לבדיקה לשונית, לא קביעות שהמשפט שגוי. דירוגיכם נשמרים בנפרד ממשוב ההרצות ואינם משנים את המחולל או את הייצוא אוטומטית.</p>
+      <p class="muted" x-text="naturalness.length + ' דוגמאות לבדיקה · ' + naturalness.filter(item => item.rating).length + ' דורגו'"></p>
+      <label class="field">הצגה <select x-model="naturalnessFilter"><option value="unrated">טרם דורגו</option><option value="all">הכול</option><option value="rated">דורגו</option></select></label>
+    </div>
+    <div class="panel empty" x-show="!naturalness.length">אין עדיין דוגמאות מסומנות לבדיקה.</div>
+    <div class="panel empty" x-show="naturalness.length && !filteredNaturalness().length">אין דוגמאות במסנן שנבחר.</div>
+    <template x-for="item in filteredNaturalness()" :key="item.id"><article class="sample">
+      <div class="row"><span class="pill" x-text="titleFor(item.pair.archetype_id)"></span><span class="pill" x-text="'סבב ' + item.round"></span><span class="pill" x-show="item.rating" x-text="item.rating ? naturalnessVerdict(item.rating.verdict) : ''"></span></div>
+      <div class="pair"><div class="view"><small>צורה כתובה</small><div class="sentence" dir="rtl" x-html="highlight(item.pair, 'digits')"></div></div><div class="view"><small>צורה נאמרת</small><div class="sentence" dir="rtl" x-html="highlight(item.pair, 'cardinal')"></div></div></div>
+      <p><strong>למה סומן לבדיקה:</strong> <span x-text="item.reason"></span></p><p class="muted"><strong>הצעה בלבד:</strong> <span x-text="item.suggestion"></span></p>
+      <div class="feedback"><label class="field">ההערה שלך <textarea x-model="naturalnessNotes[item.id]" maxlength="2000" placeholder="מה נשמע טבעי או לא? אפשר להציע ניסוח אחר."></textarea></label>
+        <button class="secondary" @click="rateNaturalness(item, 'natural')">טבעי</button><button class="secondary" @click="rateNaturalness(item, 'unnatural')">לא טבעי</button><button class="secondary" @click="rateNaturalness(item, 'unsure')">לא בטוח/ה</button><span class="success" x-show="saved===item.id">הדירוג נשמר</span></div>
+    </article></template>
+  </section>
+  <section x-show="tab==='export'" x-cloak>
+    <div class="panel"><h2>ייצוא מערך נתונים</h2><p class="subtle">דוגמאות שלא סומנו תקינות כברירת מחדל; דחיות והצעות תיקון אינן מיוצאות. הפיצול שומר משפחות קטגוריות שלמות בצד, ולכן דורש לפחות שלוש קטגוריות תקינות. אישור תיקון אינו משנה אוטומטית את המשפט הגולמי.</p>
+      <p x-show="run" x-text="run ? 'הרצה: ' + run.id + ' · גרסת קטלוג: ' + run.catalog_version : ''"></p>
+      <button class="primary" :disabled="!run || busy" @click="exportRun()">יצירת ייצוא להרצה הנבחרת</button>
+      <div x-show="exportResult" style="margin-top:18px"><div class="metric-grid"><template x-for="[name,count] in Object.entries(exportResult?.manifest?.splits || {})" :key="name"><div class="metric"><strong x-text="count"></strong><span x-text="name"></span></div></template></div>
+        <p class="subtle" x-text="exportResult ? exportResult.manifest.exported + ' מתוך ' + exportResult.manifest.generated + ' דוגמאות עברו את שערי האיכות' : ''"></p>
+        <div class="coverage-list"><template x-for="filename in ['manifest.json','train.jsonl','dev.jsonl','test.jsonl']" :key="filename"><a class="secondary" :href="exportResult ? '/api/exports/'+exportResult.id+'/'+filename : '#'" x-text="filename" download></a></template></div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+function workbench() { return {
+  tab: 'archetypes', catalog: null, run: null, runs: [], coverage: null, feedback: {}, notes: {}, seed: 42, count: 69,
+  selected: [], addressLengths: [1,2,3], boundaryWeight: .25, variantWeights: {}, error: '', busy: false, saved: '',
+  candidates: [], candidateDrafts: {}, candidateMessage: '',
+  naturalness: [], naturalnessNotes: {}, naturalnessFilter: 'unrated',
+  exportResult: null, archetypeQuery: '', openArchetype: null, loadingDesign: false, designs: {},
+  candidateFields: [{key:'grammar',title:'דקדוק'}, {key:'slots',title:'משבצות סמנטיות'}, {key:'safe_ranges',title:'טווחי החלפה בטוחים'}, {key:'written_policy',title:'כללי כתיבה'}, {key:'spoken_policy',title:'כללי הקראה'}],
+  corpus: {sentences:'', source:'', license:'', restrictions:'', approved_for_derivation:false, purpose:'derivation'},
+  async request(url, options) {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'בקשה נכשלה');
+    return data;
+  },
+  async init() { try { this.catalog = await this.request('/api/catalog'); this.count = this.catalog.archetypes.length; this.selected = this.catalog.archetypes.map(a => a.id); this.variantWeights = {...this.catalog.default_formal_weights}; this.runs = await this.request('/api/runs'); } catch(e) { this.error = e.message; } },
+  async selectNeverRan() { this.error = ''; try { const data = await this.request('/api/archetypes/never-ran'); this.selected = data.archetypes; if (this.selected.length) this.count = this.selected.length; else this.error = 'כל הארכיטיפים כבר נדגמו לפחות פעם אחת. ניתן לבחור אותם ידנית או לבחור הכול.'; } catch(e) { this.error = e.message; } },
+  filteredArchetypes() { const query = this.archetypeQuery.trim().toLowerCase(); return (this.catalog?.archetypes || []).filter(item => !query || [item.title,item.id,item.category,item.description].some(text => text.toLowerCase().includes(query))); },
+  formatOption(value) { return typeof value === 'object' ? Object.entries(value).map(([key, text]) => key + ': ' + text).join(' · ') : String(value); },
+  async toggleDesign(id) { if (this.openArchetype === id) { this.openArchetype = null; return; } this.openArchetype = id; this.error = ''; if (this.designs[id]) return;
+    this.loadingDesign = true; try { this.designs[id] = await this.request('/api/archetypes/' + encodeURIComponent(id) + '/design'); } catch(e) { this.error = e.message; } finally { this.loadingDesign = false; } },
+  filteredNaturalness() { return this.naturalness.filter(item => this.naturalnessFilter === 'all' || (this.naturalnessFilter === 'rated' ? !!item.rating : !item.rating || this.saved === item.id)); },
+  naturalnessVerdict(value) { return ({natural:'טבעי', unnatural:'לא טבעי', unsure:'לא בטוח/ה'})[value] || value; },
+  async loadNaturalness() { this.error = ''; try { this.naturalness = await this.request('/api/naturalness');
+    for (const item of this.naturalness) this.naturalnessNotes[item.id] ??= item.rating?.note || '';
+  } catch(e) { this.error = e.message; } },
+  async rateNaturalness(item, verdict) { this.error = ''; this.saved = '';
+    try { item.rating = await this.request('/api/naturalness/' + item.id + '/rating', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({verdict, note:this.naturalnessNotes[item.id] || ''})}); this.saved = item.id;
+    } catch(e) { this.error = e.message; } },
+  async createRun() {
+    this.error = ''; this.busy = true;
+    try {
+      const data = await this.request('/api/runs', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({seed:this.seed, count:this.count, archetypes:this.selected, address_lengths:this.addressLengths.map(Number), boundary_weight:this.boundaryWeight, variant_weights:this.variantWeights})});
+      await this.loadRun(data.id); this.runs = await this.request('/api/runs'); this.tab = 'review';
+    } catch(e) { this.error = e.message; } finally { this.busy = false; }
+  },
+  async loadRun(id) {
+    this.error = '';
+    try { const data = await this.request('/api/runs/' + id); this.run = data; this.feedback = data.feedback;
+      this.seed = data.seed; this.count = data.count; this.selected = data.archetypes || this.catalog.archetypes.map(a => a.id);
+      this.addressLengths = data.address_lengths || [1,2,3]; this.boundaryWeight = data.boundary_weight ?? .25;
+      this.variantWeights = data.variant_weights || {...this.catalog.default_formal_weights};
+      this.coverage = await this.request('/api/runs/' + id + '/coverage');
+      this.notes = Object.fromEntries(Object.entries(data.feedback).map(([key, item]) => [key, item.note])); this.tab = 'review';
+    } catch(e) { this.error = e.message; }
+  },
+  rerun() { if (!this.run) return; if (this.run.catalog_version !== this.catalog.catalog_version || this.run.renderer_version !== this.catalog.renderer_version) { this.error = 'אין אפשרות לשחזר הרצה מגרסת קטלוג ישנה; אפשר ליצור הרצה חדשה.'; return; }
+    this.seed = this.run.seed; this.count = this.run.count; this.selected = this.run.archetypes || this.catalog.archetypes.map(a => a.id);
+    this.addressLengths = this.run.address_lengths || [1,2,3]; this.boundaryWeight = this.run.boundary_weight ?? .25;
+    this.variantWeights = this.run.variant_weights || {...this.catalog.default_formal_weights}; this.createRun(); },
+  titleFor(id) { return this.catalog?.archetypes.find(a => a.id === id)?.title || id; },
+  verdictText(v) { return ({accept:'אושר', reject:'נדחה', correct:'הוצע תיקון'})[v] || v; },
+  coverageGroups() { if (!this.coverage) return []; const c = this.coverage;
+    return [['קטגוריות',c.by_category],['ארכיטיפים',c.by_archetype],['סוגי ביטויים',c.by_kind],['אורך ספרות לפי סוג',c.digit_lengths],['קריאות',c.by_reading],['מין שמות עצם',c.noun_gender]]
+      .map(([title, data]) => ({title, entries:Object.entries(data)})); },
+  // Python spans count Unicode code points; Array.from does the same in JavaScript.
+  segments(pair, view) {
+    const chars = Array.from(pair[view]); const result = []; let offset = 0;
+    for (const alignment of pair.alignments) { const [start,end] = alignment[view+'_span'];
+      if (start > offset) result.push({text:chars.slice(offset,start).join(''), mark:false});
+      result.push({text:chars.slice(start,end).join(''), mark:true}); offset=end;
+    }
+    if (offset < chars.length) result.push({text:chars.slice(offset).join(''), mark:false}); return result;
+  },
+  highlight(pair, view) {
+    // HTML is created only after escaping text from the generator; no user text is injected.
+    const escape = text => text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    return this.segments(pair, view).map(s => s.mark ? '<mark>'+escape(s.text)+'</mark>' : escape(s.text)).join('');
+  },
+  async submit(pair, verdict) {
+    this.error = ''; this.saved = '';
+    try { const data = await this.request('/api/runs/'+this.run.id+'/feedback', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({pair_id:pair.id, verdict, note:this.notes[pair.id] || ''})});
+      this.feedback[pair.id] = data; this.saved = pair.id; this.coverage = await this.request('/api/runs/'+this.run.id+'/coverage');
+    } catch(e) { this.error = e.message; }
+  },
+  async loadCandidates() {
+    try { this.candidates = await this.request('/api/candidates');
+      for (const candidate of this.candidates) this.candidateDrafts[candidate.id] ??= {grammar:'', slots:'', safe_ranges:'', written_policy:'', spoken_policy:'', note:'', ...(candidate.review || {})};
+    } catch(e) { this.error = e.message; }
+  },
+  async importCandidates() {
+    this.error = ''; this.candidateMessage = ''; this.busy = true;
+    try { const found = await this.request('/api/candidates/import', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(this.corpus)});
+      this.candidateMessage = this.corpus.purpose === 'evaluation' ? 'הקורפוס נשמר בנפרד להערכה בלבד; לא נגזרו ממנו מועמדים' : found.length + ' תבניות מועמדות נמצאו'; this.corpus.sentences = ''; await this.loadCandidates();
+    } catch(e) { this.error = e.message; } finally { this.busy = false; }
+  },
+  async reviewCandidate(candidate, status) {
+    this.error = ''; try {
+      await this.request('/api/candidates/'+candidate.id+'/review', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...this.candidateDrafts[candidate.id], status})});
+      await this.loadCandidates();
+    } catch(e) { this.error = e.message; }
+  },
+  async exportRun() {
+    this.error = ''; this.busy = true; this.exportResult = null;
+    try { this.exportResult = await this.request('/api/runs/'+this.run.id+'/export', {method:'POST'}); }
+    catch(e) { this.error = e.message; } finally { this.busy = false; }
+  }
+}; }
+</script>
+</body>
+</html>

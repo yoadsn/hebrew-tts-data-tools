@@ -1,0 +1,1050 @@
+{
+  "9d654a5be5d17d18a80a": {
+    "id": "6c33b95d836841962b19",
+    "archetype_id": "departure",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minute_of_day": 1185
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 8,
+      "end": 20
+    },
+    "continuation": 0,
+    "digits": "הרכבת לבאר שבע יוצאת בשעה 19:45 בימים ראשון עד חמישי.",
+    "cardinal": "הרכבת לבאר שבע יוצאת בשעה רבע לשמונה בימים ראשון עד חמישי.",
+    "alignments": [
+      {
+        "slot": "minute_of_day",
+        "kind": "clock_time",
+        "value": "19:45",
+        "reading": "12-hour-no-daypart",
+        "digits_span": [
+          26,
+          31
+        ],
+        "cardinal_span": [
+          26,
+          36
+        ],
+        "digits_text": "19:45",
+        "cardinal_text": "רבע לשמונה"
+      }
+    ]
+  },
+  "7a3888bd4a85f4a5c16d": {
+    "id": "772cda44471ea861ed78",
+    "archetype_id": "fraction",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "fraction": "3/4"
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 10,
+      "end": 15
+    },
+    "continuation": 1,
+    "digits": "למחבת יוצקים 3/4 כוס ציר ירקות, ומערבבים היטב במהלך הבישול.",
+    "cardinal": "למחבת יוצקים שלושה רבעים כוס ציר ירקות, ומערבבים היטב במהלך הבישול.",
+    "alignments": [
+      {
+        "slot": "fraction",
+        "kind": "fraction",
+        "value": "3/4",
+        "reading": "curated-fraction",
+        "digits_span": [
+          13,
+          16
+        ],
+        "cardinal_span": [
+          13,
+          24
+        ],
+        "digits_text": "3/4",
+        "cardinal_text": "שלושה רבעים"
+      }
+    ]
+  },
+  "80722767c644e717ecfe": {
+    "id": "91f5396639a9aa579fc7",
+    "archetype_id": "road_route",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "road": 1,
+      "route": 87
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 0,
+      "end": 15
+    },
+    "continuation": 1,
+    "digits": "עברנו דרך כביש 1 ומשם המשכנו בקו 87 לפני שעות העומס, אחרי ששינינו את המסלול הרגיל.",
+    "cardinal": "עברנו דרך כביש אחת ומשם המשכנו בקו שמונים ושבע לפני שעות העומס, אחרי ששינינו את המסלול הרגיל.",
+    "alignments": [
+      {
+        "slot": "road",
+        "kind": "cardinal",
+        "value": 1,
+        "reading": "cardinal",
+        "digits_span": [
+          15,
+          16
+        ],
+        "cardinal_span": [
+          15,
+          18
+        ],
+        "digits_text": "1",
+        "cardinal_text": "אחת"
+      },
+      {
+        "slot": "route",
+        "kind": "cardinal",
+        "value": 87,
+        "reading": "cardinal",
+        "digits_span": [
+          33,
+          35
+        ],
+        "cardinal_span": [
+          35,
+          46
+        ],
+        "digits_text": "87",
+        "cardinal_text": "שמונים ושבע"
+      }
+    ]
+  },
+  "ec6b2d99d986b9162b9d": {
+    "id": "22219512345f96102801",
+    "archetype_id": "negative_temp",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "magnitude": 1
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 9,
+      "end": 9
+    },
+    "continuation": 1,
+    "digits": "בשיא הקור נמדדו -1 מעלות ברחבי האזור, ולכן כדאי להתלבש בהתאם לפני היציאה.",
+    "cardinal": "בשיא הקור נמדדו מינוס אחת מעלות ברחבי האזור, ולכן כדאי להתלבש בהתאם לפני היציאה.",
+    "alignments": [
+      {
+        "slot": "temperature",
+        "kind": "signed",
+        "value": -1,
+        "reading": "minus-feminine",
+        "digits_span": [
+          16,
+          18
+        ],
+        "cardinal_span": [
+          16,
+          25
+        ],
+        "digits_text": "-1",
+        "cardinal_text": "מינוס אחת"
+      }
+    ]
+  },
+  "b1567b84b2b9ced32f1b": {
+    "id": "0eb9ee699959fa18386b",
+    "archetype_id": "million_exact",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "number": 1428001
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 8,
+      "end": 16
+    },
+    "continuation": 1,
+    "digits": "במפקד הנתונים נרשמו 1,428,001 רשומות בסיום הסריקה, לאחר שהסתיים העדכון האחרון של המאגר.",
+    "cardinal": "במפקד הנתונים נרשמו מיליון, ארבע מאות עשרים ושמונה אלף, אחת רשומות בסיום הסריקה, לאחר שהסתיים העדכון האחרון של המאגר.",
+    "alignments": [
+      {
+        "slot": "number",
+        "kind": "large_quantity",
+        "value": "1,428,001",
+        "reading": "million-group-pauses",
+        "digits_span": [
+          20,
+          29
+        ],
+        "cardinal_span": [
+          20,
+          59
+        ],
+        "digits_text": "1,428,001",
+        "cardinal_text": "מיליון, ארבע מאות עשרים ושמונה אלף, אחת"
+      }
+    ]
+  },
+  "1a80737acd3b9cde04de": {
+    "id": "4c666cbf409a700851e2",
+    "archetype_id": "year",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "year": 2026
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 25,
+      "end": 19
+    },
+    "continuation": 2,
+    "digits": "האגודה נוסדה בשנת 2026 ומאז הוא פועל ברציפות, והפרט מופיע גם במסמכים המקוריים שנשמרו לצורך בדיקה מאוחרת יותר.",
+    "cardinal": "האגודה נוסדה בשנת אלפיים עשרים ושש ומאז הוא פועל ברציפות, והפרט מופיע גם במסמכים המקוריים שנשמרו לצורך בדיקה מאוחרת יותר.",
+    "alignments": [
+      {
+        "slot": "year",
+        "kind": "year",
+        "value": 2026,
+        "reading": "feminine-year",
+        "digits_span": [
+          18,
+          22
+        ],
+        "cardinal_span": [
+          18,
+          34
+        ],
+        "digits_text": "2026",
+        "cardinal_text": "אלפיים עשרים ושש"
+      }
+    ]
+  },
+  "4842e92de1dcfef8554d": {
+    "id": "de94d7609ee887713fb4",
+    "archetype_id": "age",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "age": 78
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 22,
+      "end": 11
+    },
+    "continuation": 2,
+    "digits": "השופטת הגיעה לגיל 78 בשבוע הבא, ולכבוד המאורע נשלחו הזמנות גם לקרובים שלא יצא להם להיפגש בזמן האחרון.",
+    "cardinal": "השופטת הגיעה לגיל שבעים ושמונה בשבוע הבא, ולכבוד המאורע נשלחו הזמנות גם לקרובים שלא יצא להם להיפגש בזמן האחרון.",
+    "alignments": [
+      {
+        "slot": "age",
+        "kind": "age",
+        "value": 78,
+        "reading": "feminine-age",
+        "digits_span": [
+          18,
+          20
+        ],
+        "cardinal_span": [
+          18,
+          30
+        ],
+        "digits_text": "78",
+        "cardinal_text": "שבעים ושמונה"
+      }
+    ]
+  },
+  "a3dc6b6ae5f0f7ec1ecb": {
+    "id": "a1ec958e83bfedc5b4e4",
+    "archetype_id": "survey",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "percent": 85
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 8,
+      "end": 10
+    },
+    "continuation": 1,
+    "digits": "בסקר הצרכנים, 85% מהעובדים העדיפו עבודה היברידית, אך לא כל הנשאלים ענו לשאלה הזאת.",
+    "cardinal": "בסקר הצרכנים, שמונים וחמישה אחוזים מהעובדים העדיפו עבודה היברידית, אך לא כל הנשאלים ענו לשאלה הזאת.",
+    "alignments": [
+      {
+        "slot": "percent",
+        "kind": "percentage",
+        "value": 85,
+        "reading": "masculine-percent",
+        "digits_span": [
+          14,
+          17
+        ],
+        "cardinal_span": [
+          14,
+          34
+        ],
+        "digits_text": "85%",
+        "cardinal_text": "שמונים וחמישה אחוזים"
+      }
+    ]
+  },
+  "053c67c09b08cae16cec": {
+    "id": "1509025ff3d6b0cc617d",
+    "archetype_id": "survey",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "percent": 100
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 3,
+      "end": 13
+    },
+    "continuation": 1,
+    "digits": "בסקר השנתי, 100% מהנשאלים הכירו את התוכנית, אך לא כל הנשאלים ענו לשאלה הזאת.",
+    "cardinal": "בסקר השנתי, מאה אחוזים מהנשאלים הכירו את התוכנית, אך לא כל הנשאלים ענו לשאלה הזאת.",
+    "alignments": [
+      {
+        "slot": "percent",
+        "kind": "percentage",
+        "value": 100,
+        "reading": "masculine-percent",
+        "digits_span": [
+          12,
+          16
+        ],
+        "cardinal_span": [
+          12,
+          22
+        ],
+        "digits_text": "100%",
+        "cardinal_text": "מאה אחוזים"
+      }
+    ]
+  },
+  "6d7dcb609433f1aa26ae": {
+    "id": "c030d3adf148033ce93e",
+    "archetype_id": "mobile",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "phone": "054-000-2380"
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 1,
+      "end": 18
+    },
+    "continuation": 1,
+    "digits": "לפרטים נוספים התקשרו למספר 054-000-2380 ברישומי המעבדה, אם צריך לברר פרטים לפני ההגעה.",
+    "cardinal": "לפרטים נוספים התקשרו למספר אפס חמש ארבע, אפס אפס אפס, שתיים שלוש שמונה אפס ברישומי המעבדה, אם צריך לברר פרטים לפני ההגעה.",
+    "alignments": [
+      {
+        "slot": "phone",
+        "kind": "identifier",
+        "value": "054-000-2380",
+        "reading": "digit-by-digit-3-3-4",
+        "digits_span": [
+          27,
+          39
+        ],
+        "cardinal_span": [
+          27,
+          74
+        ],
+        "digits_text": "054-000-2380",
+        "cardinal_text": "אפס חמש ארבע, אפס אפס אפס, שתיים שלוש שמונה אפס"
+      }
+    ]
+  },
+  "64bf6d7c08b0de72d9b8": {
+    "id": "32c5b31bb17b51e83673",
+    "archetype_id": "weight",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "weight": 8
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 12,
+      "end": 18
+    },
+    "continuation": 1,
+    "digits": "ארגז הכלים שוקל 8 ק\"ג לפי המפה המעודכנת, והנתון נרשם לצורך השוואה בהמשך.",
+    "cardinal": "ארגז הכלים שוקל שמונה קילוגרמים לפי המפה המעודכנת, והנתון נרשם לצורך השוואה בהמשך.",
+    "alignments": [
+      {
+        "slot": "weight",
+        "kind": "measurement",
+        "value": 8,
+        "reading": "masculine-kilograms",
+        "digits_span": [
+          16,
+          21
+        ],
+        "cardinal_span": [
+          16,
+          31
+        ],
+        "digits_text": "8 ק\"ג",
+        "cardinal_text": "שמונה קילוגרמים"
+      }
+    ]
+  },
+  "b16057c86b98a6d56d5f": {
+    "id": "b581072d6aa63ac89d59",
+    "archetype_id": "duration_half",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "duration": "2.5"
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "reading_variant": "natural",
+    "context": {
+      "start": 4,
+      "end": 11
+    },
+    "continuation": 2,
+    "digits": "המפגש ארך 2.5 שעות כפי שהעריכו מראש, אף על פי שהתכנון המקורי היה לסיים מוקדם יותר ולפנות זמן להמשך היום.",
+    "cardinal": "המפגש ארך שעתיים וחצי כפי שהעריכו מראש, אף על פי שהתכנון המקורי היה לסיים מוקדם יותר ולפנות זמן להמשך היום.",
+    "alignments": [
+      {
+        "slot": "duration",
+        "kind": "duration",
+        "value": "2.5",
+        "reading": "natural-hours-and-half",
+        "digits_span": [
+          10,
+          18
+        ],
+        "cardinal_span": [
+          10,
+          21
+        ],
+        "digits_text": "2.5 שעות",
+        "cardinal_text": "שעתיים וחצי"
+      }
+    ]
+  },
+  "568d787297fafb0a516b": {
+    "id": "84270f55e4aade2950c3",
+    "archetype_id": "decade",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "decade": 60
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 9,
+      "end": 8
+    },
+    "continuation": 2,
+    "digits": "המפעל המשפחתי נוסד בשנות ה-60 בנגב, וכך גם נכתב בתיאור שהועלה לאתר לפני שהיצירה הוצגה לציבור.",
+    "cardinal": "המפעל המשפחתי נוסד בשנות השישים בנגב, וכך גם נכתב בתיאור שהועלה לאתר לפני שהיצירה הוצגה לציבור.",
+    "alignments": [
+      {
+        "slot": "decade",
+        "kind": "date",
+        "value": 60,
+        "reading": "decade",
+        "digits_span": [
+          19,
+          29
+        ],
+        "cardinal_span": [
+          19,
+          31
+        ],
+        "digits_text": "בשנות ה-60",
+        "cardinal_text": "בשנות השישים"
+      }
+    ]
+  },
+  "18fffbd55f01cf8158c9": {
+    "id": "14d23b66eb56569df568",
+    "archetype_id": "decimal_temp",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "whole": 24,
+      "fractional": "5"
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "reading_variant": "natural",
+    "context": {
+      "start": 13,
+      "end": 11
+    },
+    "continuation": 1,
+    "digits": "באזור ירושלים נמדדו 24.5 מעלות סמוך לחוף, ולכן כדאי להתלבש בהתאם לפני היציאה.",
+    "cardinal": "באזור ירושלים נמדדו עשרים וארבע וחצי מעלות סמוך לחוף, ולכן כדאי להתלבש בהתאם לפני היציאה.",
+    "alignments": [
+      {
+        "slot": "temperature",
+        "kind": "decimal",
+        "value": "24.5",
+        "reading": "natural-fractional-temperature",
+        "digits_span": [
+          20,
+          24
+        ],
+        "cardinal_span": [
+          20,
+          36
+        ],
+        "digits_text": "24.5",
+        "cardinal_text": "עשרים וארבע וחצי"
+      }
+    ]
+  },
+  "1742fc3e3bf099ef8876": {
+    "id": "6b3ab65cd304bd9a457c",
+    "archetype_id": "departure",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minute_of_day": 256
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 1,
+      "end": 22
+    },
+    "continuation": 1,
+    "digits": "הרכבת אמורה לצאת בשעה 04:16 מרחבת החניון, ולכן כדאי להגיע לתחנה מעט קודם.",
+    "cardinal": "הרכבת אמורה לצאת בשעה ארבע ושש עשרה דקות מרחבת החניון, ולכן כדאי להגיע לתחנה מעט קודם.",
+    "alignments": [
+      {
+        "slot": "minute_of_day",
+        "kind": "clock_time",
+        "value": "04:16",
+        "reading": "12-hour-no-daypart",
+        "digits_span": [
+          22,
+          27
+        ],
+        "cardinal_span": [
+          22,
+          40
+        ],
+        "digits_text": "04:16",
+        "cardinal_text": "ארבע ושש עשרה דקות"
+      }
+    ]
+  },
+  "7a525c72dcf2a5d5237c": {
+    "id": "397d6b7a9fbc4939e335",
+    "archetype_id": "dollar_price",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "dollars": 11
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 13,
+      "end": 4
+    },
+    "continuation": 1,
+    "digits": "דמי הכניסה הם $11 כולל משלוח, והמחיר מופיע גם בפרטי ההזמנה.",
+    "cardinal": "דמי הכניסה הם אחד עשר דולר כולל משלוח, והמחיר מופיע גם בפרטי ההזמנה.",
+    "alignments": [
+      {
+        "slot": "dollars",
+        "kind": "money",
+        "value": 11,
+        "reading": "masculine-dollars",
+        "digits_span": [
+          14,
+          17
+        ],
+        "cardinal_span": [
+          14,
+          26
+        ],
+        "digits_text": "$11",
+        "cardinal_text": "אחד עשר דולר"
+      }
+    ]
+  },
+  "236c0e751262d16ba681": {
+    "id": "bb21b1f8e2b4733066fb",
+    "archetype_id": "numeric_calendar",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "day": 14,
+      "month_number": 4,
+      "spoken_style": "named"
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "reading_variant": "natural",
+    "context": {
+      "start": 10,
+      "end": 0
+    },
+    "continuation": 2,
+    "digits": "חופשת הקיץ שלנו מתחילה ב-14.4 במרכז העיר, וכבר בדקנו את זמני היציאה וההגעה כדי להתארגן מראש.",
+    "cardinal": "חופשת הקיץ שלנו מתחילה בארבע עשרה לאפריל במרכז העיר, וכבר בדקנו את זמני היציאה וההגעה כדי להתארגן מראש.",
+    "alignments": [
+      {
+        "slot": "day",
+        "kind": "date",
+        "value": "14.4",
+        "reading": "natural-named-month",
+        "digits_span": [
+          23,
+          29
+        ],
+        "cardinal_span": [
+          23,
+          40
+        ],
+        "digits_text": "ב-14.4",
+        "cardinal_text": "בארבע עשרה לאפריל"
+      }
+    ]
+  },
+  "1482c056044141149ac9": {
+    "id": "7083cbd860535ce34730",
+    "archetype_id": "stopwatch_minute",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minutes": 2,
+      "seconds": 59,
+      "hundredths": 66
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 4,
+      "end": 2
+    },
+    "continuation": 1,
+    "digits": "השחיין השלים את המשחה בזמן של 2:59.66 על המסלול, אחרי שהמתחרה שיפר את השיא הקודם.",
+    "cardinal": "השחיין השלים את המשחה בזמן של שתי דקות, חמישים ותשע שניות ושישים ושש מאיות על המסלול, אחרי שהמתחרה שיפר את השיא הקודם.",
+    "alignments": [
+      {
+        "slot": "stopwatch",
+        "kind": "duration",
+        "value": "2:59.66",
+        "reading": "minute-second-hundredth",
+        "digits_span": [
+          30,
+          37
+        ],
+        "cardinal_span": [
+          30,
+          74
+        ],
+        "digits_text": "2:59.66",
+        "cardinal_text": "שתי דקות, חמישים ותשע שניות ושישים ושש מאיות"
+      }
+    ]
+  },
+  "da26d785ca9d8a838797": {
+    "id": "d589a00763152ada160e",
+    "archetype_id": "score",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "score": "2:1"
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 8,
+      "end": 11
+    },
+    "continuation": 0,
+    "digits": "משחק הגביע הסתיים בתוצאה 2:1 במסגרת הליגה.",
+    "cardinal": "משחק הגביע הסתיים בתוצאה שתיים אחת במסגרת הליגה.",
+    "alignments": [
+      {
+        "slot": "score",
+        "kind": "score",
+        "value": "2:1",
+        "reading": "score-sides",
+        "digits_span": [
+          25,
+          28
+        ],
+        "cardinal_span": [
+          25,
+          34
+        ],
+        "digits_text": "2:1",
+        "cardinal_text": "שתיים אחת"
+      }
+    ]
+  },
+  "008770e96e9dcff52157": {
+    "id": "fd8d4a5255653fc68519",
+    "archetype_id": "minimum_age",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minimum_age": 28
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 6,
+      "end": 14
+    },
+    "continuation": 2,
+    "digits": "השכרת הרכב אפשרית לבני 28 ומעלה במרכז הקהילתי, ולכן חשוב לעבור על תנאי ההשתתפות לפני ששולחים את טופס ההרשמה.",
+    "cardinal": "השכרת הרכב אפשרית לבני עשרים ושמונה ומעלה במרכז הקהילתי, ולכן חשוב לעבור על תנאי ההשתתפות לפני ששולחים את טופס ההרשמה.",
+    "alignments": [
+      {
+        "slot": "minimum_age",
+        "kind": "limit",
+        "value": 28,
+        "reading": "minimum-feminine-age",
+        "digits_span": [
+          23,
+          25
+        ],
+        "cardinal_span": [
+          23,
+          35
+        ],
+        "digits_text": "28",
+        "cardinal_text": "עשרים ושמונה"
+      }
+    ]
+  },
+  "69157e68f1867d7ab5eb": {
+    "id": "1a015e8414242cc3fcf0",
+    "archetype_id": "map_scale",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "scale": 100000
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 12,
+      "end": 18
+    },
+    "continuation": 0,
+    "digits": "המפה הגאולוגית נערכה בקנה מידה של 1:100,000 ביומן השינויים.",
+    "cardinal": "המפה הגאולוגית נערכה בקנה מידה של אחד למאה אלף ביומן השינויים.",
+    "alignments": [
+      {
+        "slot": "scale",
+        "kind": "ratio",
+        "value": "100,000",
+        "reading": "one-to-scale",
+        "digits_span": [
+          34,
+          43
+        ],
+        "cardinal_span": [
+          34,
+          46
+        ],
+        "digits_text": "1:100,000",
+        "cardinal_text": "אחד למאה אלף"
+      }
+    ]
+  },
+  "de3831c24a73cd1602e7": {
+    "id": "e944ddf6d55196f6deaf",
+    "archetype_id": "approximate",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "סוללה",
+        "plural": "סוללות",
+        "gender": "f"
+      },
+      "quantity": 5
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 1,
+      "end": 4
+    },
+    "continuation": 1,
+    "digits": "לאחר שבדקתי את הרשימה קניתי כ-5 סוללות על פי הרשימה, בהתאם לרשימה שהוכנה מראש.",
+    "cardinal": "לאחר שבדקתי את הרשימה קניתי כחמש סוללות על פי הרשימה, בהתאם לרשימה שהוכנה מראש.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "approximate_quantity",
+        "value": 5,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          28,
+          38
+        ],
+        "cardinal_span": [
+          28,
+          39
+        ],
+        "digits_text": "כ-5 סוללות",
+        "cardinal_text": "כחמש סוללות"
+      }
+    ]
+  },
+  "96da770ac30653e08afd": {
+    "id": "e2b59478d06be29d7d67",
+    "archetype_id": "version",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "major": 13,
+      "minor": 9,
+      "patch": 1
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "reading_variant": "natural",
+    "context": {
+      "start": 5,
+      "end": 8
+    },
+    "continuation": 1,
+    "digits": "סביבת הבדיקות עודכנה לגרסה 13.9.1 עבור כלל המשתמשים, אחרי שהצוות סיים לבדוק את העדכון.",
+    "cardinal": "סביבת הבדיקות עודכנה לגרסה שלוש עשרה תשע אחת עבור כלל המשתמשים, אחרי שהצוות סיים לבדוק את העדכון.",
+    "alignments": [
+      {
+        "slot": "version",
+        "kind": "version",
+        "value": "13.9.1",
+        "reading": "natural-version-components",
+        "digits_span": [
+          27,
+          33
+        ],
+        "cardinal_span": [
+          27,
+          44
+        ],
+        "digits_text": "13.9.1",
+        "cardinal_text": "שלוש עשרה תשע אחת"
+      }
+    ]
+  },
+  "2ef28359ea35662405fe": {
+    "id": "1e96d76193a2974c4855",
+    "archetype_id": "bulk_purchase",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "מנורה",
+        "plural": "מנורות",
+        "gender": "f"
+      },
+      "quantity": 420
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 16,
+      "end": 12
+    },
+    "continuation": 2,
+    "digits": "במשלוח המרוכז הגיעו 420 מנורות בכמה משלוחים, כדי שאפשר יהיה לחלק את הפריטים בין המחסנים בהתאם לצרכים של כל סניף.",
+    "cardinal": "במשלוח המרוכז הגיעו ארבע מאות ועשרים מנורות בכמה משלוחים, כדי שאפשר יהיה לחלק את הפריטים בין המחסנים בהתאם לצרכים של כל סניף.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "quantity",
+        "value": 420,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          20,
+          30
+        ],
+        "cardinal_span": [
+          20,
+          43
+        ],
+        "digits_text": "420 מנורות",
+        "cardinal_text": "ארבע מאות ועשרים מנורות"
+      }
+    ]
+  },
+  "56b6a8bbd7862ee4fdca": {
+    "id": "4cd2578f775d0b60447a",
+    "archetype_id": "ranking",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "rank": 9
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 13,
+      "end": 17
+    },
+    "continuation": 2,
+    "digits": "השחמטאי דורג במקום ה-9 במקצה המהיר, לאחר השלמת כל השלבים וההמתנה לפרסום התוצאות הרשמיות של המקצה.",
+    "cardinal": "השחמטאי דורג במקום התשיעי במקצה המהיר, לאחר השלמת כל השלבים וההמתנה לפרסום התוצאות הרשמיות של המקצה.",
+    "alignments": [
+      {
+        "slot": "rank",
+        "kind": "ordinal",
+        "value": 9,
+        "reading": "masculine-ordinal",
+        "digits_span": [
+          19,
+          22
+        ],
+        "cardinal_span": [
+          19,
+          25
+        ],
+        "digits_text": "ה-9",
+        "cardinal_text": "התשיעי"
+      }
+    ]
+  },
+  "14189efe310d6057fab8": {
+    "id": "352f33252e27173fad1f",
+    "archetype_id": "pill_range",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minimum": 2,
+      "maximum": 5
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 6,
+      "end": 17
+    },
+    "continuation": 0,
+    "digits": "בכל שלב של הטיפול לוקחים 2-5 גלולות בימים הראשונים.",
+    "cardinal": "בכל שלב של הטיפול לוקחים בין שתיים לחמש גלולות בימים הראשונים.",
+    "alignments": [
+      {
+        "slot": "pill_range",
+        "kind": "range",
+        "value": "2-5",
+        "reading": "between-feminine",
+        "digits_span": [
+          25,
+          28
+        ],
+        "cardinal_span": [
+          25,
+          39
+        ],
+        "digits_text": "2-5",
+        "cardinal_text": "בין שתיים לחמש"
+      }
+    ]
+  },
+  "459d54116038251025ff": {
+    "id": "864609ce4ed774627a2c",
+    "archetype_id": "million_exact",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "number": 1708653
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "context": {
+      "start": 6,
+      "end": 7
+    },
+    "continuation": 0,
+    "digits": "בקובץ המאוחד נמצאו 1,708,653 רשומות בקובץ המאוחד.",
+    "cardinal": "בקובץ המאוחד נמצאו מיליון, שבע מאות ושמונה אלף, שש מאות חמישים ושלוש רשומות בקובץ המאוחד.",
+    "alignments": [
+      {
+        "slot": "number",
+        "kind": "large_quantity",
+        "value": "1,708,653",
+        "reading": "million-group-pauses",
+        "digits_span": [
+          19,
+          28
+        ],
+        "cardinal_span": [
+          19,
+          68
+        ],
+        "digits_text": "1,708,653",
+        "cardinal_text": "מיליון, שבע מאות ושמונה אלף, שש מאות חמישים ושלוש"
+      }
+    ]
+  },
+  "f3135cfc9585be6b7442": {
+    "id": "990274881cba9ffb4e8d",
+    "archetype_id": "large_shekels",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "shekels_large": 845732
+    },
+    "catalog_version": "starter-16",
+    "renderer_version": "15",
+    "reading_variant": "natural",
+    "context": {
+      "start": 10,
+      "end": 12
+    },
+    "continuation": 1,
+    "digits": "סך המענק המחקרי היה 845,732 ₪ כולל עבודות תשתית, לפי החישוב שנערך בסיום העבודה.",
+    "cardinal": "סך המענק המחקרי היה שמונה מאות ארבעים וחמישה אלף שבע מאות שלושים ושניים שקל כולל עבודות תשתית, לפי החישוב שנערך בסיום העבודה.",
+    "alignments": [
+      {
+        "slot": "shekels_large",
+        "kind": "money",
+        "value": "845,732",
+        "reading": "natural-large-shekel",
+        "digits_span": [
+          20,
+          29
+        ],
+        "cardinal_span": [
+          20,
+          75
+        ],
+        "digits_text": "845,732 ₪",
+        "cardinal_text": "שמונה מאות ארבעים וחמישה אלף שבע מאות שלושים ושניים שקל"
+      }
+    ]
+  }
+}

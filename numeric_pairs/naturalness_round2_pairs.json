@@ -1,0 +1,798 @@
+{
+  "fd33803c149e9a9502fb": {
+    "id": "232954f6a3801db09719",
+    "archetype_id": "approximate",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "שולחן",
+        "plural": "שולחנות",
+        "gender": "m"
+      },
+      "quantity": 6500
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 1,
+      "end": 2
+    },
+    "continuation": 0,
+    "digits": "לאחר שבדקתי את הרשימה קניתי כ-6500 שולחנות אחרי העבודה.",
+    "cardinal": "לאחר שבדקתי את הרשימה קניתי כששת אלפים חמש מאות שולחנות אחרי העבודה.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "approximate_quantity",
+        "value": 6500,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          28,
+          42
+        ],
+        "cardinal_span": [
+          28,
+          55
+        ],
+        "digits_text": "כ-6500 שולחנות",
+        "cardinal_text": "כששת אלפים חמש מאות שולחנות"
+      }
+    ]
+  },
+  "36caa30ac1d67fca5e28": {
+    "id": "d047bc6cf52a34cd1d7f",
+    "archetype_id": "approximate",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "ארגז",
+        "plural": "ארגזים",
+        "gender": "m"
+      },
+      "quantity": 450
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 4,
+      "end": 0
+    },
+    "continuation": 2,
+    "digits": "במחסן ספרנו כ-450 ארגזים בחנות, כדי להשלים את כל מה שנדרש בזמן בלי לפצל את ההזמנה לכמה הזמנות נפרדות.",
+    "cardinal": "במחסן ספרנו כארבע מאות וחמישים ארגזים בחנות, כדי להשלים את כל מה שנדרש בזמן בלי לפצל את ההזמנה לכמה הזמנות נפרדות.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "approximate_quantity",
+        "value": 450,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          12,
+          24
+        ],
+        "cardinal_span": [
+          12,
+          37
+        ],
+        "digits_text": "כ-450 ארגזים",
+        "cardinal_text": "כארבע מאות וחמישים ארגזים"
+      }
+    ]
+  },
+  "9d8208b46968feee06bc": {
+    "id": "46cf646e8502c696842d",
+    "archetype_id": "purchase",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "שולחן",
+        "plural": "שולחנות",
+        "gender": "m"
+      },
+      "quantity": 28
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 1,
+      "end": 3
+    },
+    "continuation": 0,
+    "digits": "בדרך הביתה קניתי 28 שולחנות אחרי העבודה.",
+    "cardinal": "בדרך הביתה קניתי עשרים ושמונה שולחנות אחרי העבודה.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "quantity",
+        "value": 28,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          17,
+          27
+        ],
+        "cardinal_span": [
+          17,
+          37
+        ],
+        "digits_text": "28 שולחנות",
+        "cardinal_text": "עשרים ושמונה שולחנות"
+      }
+    ]
+  },
+  "bbfa9754ced3a3e4bf88": {
+    "id": "343a4af13253e110044f",
+    "archetype_id": "purchase",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "מלפפון",
+        "plural": "מלפפונים",
+        "gender": "m"
+      },
+      "quantity": 4
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 1,
+      "end": 8
+    },
+    "continuation": 2,
+    "digits": "בדרך הביתה קניתי 4 מלפפונים במחסן המרכזי, כדי להשלים את כל מה שנדרש בזמן בלי לפצל את ההזמנה לכמה הזמנות נפרדות.",
+    "cardinal": "בדרך הביתה קניתי ארבעה מלפפונים במחסן המרכזי, כדי להשלים את כל מה שנדרש בזמן בלי לפצל את ההזמנה לכמה הזמנות נפרדות.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "quantity",
+        "value": 4,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          17,
+          27
+        ],
+        "cardinal_span": [
+          17,
+          31
+        ],
+        "digits_text": "4 מלפפונים",
+        "cardinal_text": "ארבעה מלפפונים"
+      }
+    ]
+  },
+  "cf341a533be31cfbf01b": {
+    "id": "d81f508e3f7eae4a1d20",
+    "archetype_id": "full_date",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "day": 14,
+      "month": "מאי",
+      "year": 1948
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "reading_variant": "natural",
+    "context": {
+      "start": 12,
+      "end": 3
+    },
+    "continuation": 1,
+    "digits": "לפי הארכיון, מועד הפתיחה נקבע ל-14.5.1948 במתנ״ס, כפי שעולה מן הרשומות שנשמרו בארכיון.",
+    "cardinal": "לפי הארכיון, מועד הפתיחה נקבע לארבעה עשר במאי, אלף תשע מאות ארבעים ושמונה במתנ״ס, כפי שעולה מן הרשומות שנשמרו בארכיון.",
+    "alignments": [
+      {
+        "slot": "full_date",
+        "kind": "date",
+        "value": "14.5.1948",
+        "reading": "natural-day-month-year",
+        "digits_span": [
+          30,
+          41
+        ],
+        "cardinal_span": [
+          30,
+          73
+        ],
+        "digits_text": "ל-14.5.1948",
+        "cardinal_text": "לארבעה עשר במאי, אלף תשע מאות ארבעים ושמונה"
+      }
+    ]
+  },
+  "977c0d7cc9900cdb86f1": {
+    "id": "c0d282e7c14e77859d9a",
+    "archetype_id": "slash_date",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "day": 5,
+      "month": "פברואר",
+      "year": 1948
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 15,
+      "end": 2
+    },
+    "continuation": 1,
+    "digits": "בתיק ההיסטורי, מועד הבדיקה נקבע ל-5/2/1948 לבקשת הצוות, כפי שעולה מן הרשומות שנשמרו בארכיון.",
+    "cardinal": "בתיק ההיסטורי, מועד הבדיקה נקבע לחמישה בפברואר, אלף תשע מאות ארבעים ושמונה לבקשת הצוות, כפי שעולה מן הרשומות שנשמרו בארכיון.",
+    "alignments": [
+      {
+        "slot": "slash_date",
+        "kind": "date",
+        "value": "5/2/1948",
+        "reading": "day-month-year-slash",
+        "digits_span": [
+          32,
+          42
+        ],
+        "cardinal_span": [
+          32,
+          74
+        ],
+        "digits_text": "ל-5/2/1948",
+        "cardinal_text": "לחמישה בפברואר, אלף תשע מאות ארבעים ושמונה"
+      }
+    ]
+  },
+  "e061b1dab245d2573902": {
+    "id": "e188f52d3d87d3ee904e",
+    "archetype_id": "full_date",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "day": 9,
+      "month": "נובמבר",
+      "year": 2030
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "reading_variant": "natural",
+    "context": {
+      "start": 19,
+      "end": 23
+    },
+    "continuation": 2,
+    "digits": "מועד סיום העבודות המתוכנן נקבע ל-9.11.2030 בנוכחות המוזמנים, ומי שמתכנן להגיע יקבל הודעה נוספת עם הוראות הגעה ושעת פתיחת המקום.",
+    "cardinal": "מועד סיום העבודות המתוכנן נקבע לתשעה בנובמבר, אלפיים ושלושים בנוכחות המוזמנים, ומי שמתכנן להגיע יקבל הודעה נוספת עם הוראות הגעה ושעת פתיחת המקום.",
+    "alignments": [
+      {
+        "slot": "full_date",
+        "kind": "date",
+        "value": "9.11.2030",
+        "reading": "natural-day-month-year",
+        "digits_span": [
+          31,
+          42
+        ],
+        "cardinal_span": [
+          31,
+          60
+        ],
+        "digits_text": "ל-9.11.2030",
+        "cardinal_text": "לתשעה בנובמבר, אלפיים ושלושים"
+      }
+    ]
+  },
+  "513e3eb1fed650c35024": {
+    "id": "5c443c6aa181b287c110",
+    "archetype_id": "maximum_attendees",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "capacity": 50
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 0,
+      "end": 6
+    },
+    "continuation": 0,
+    "digits": "אפשר לרשום לכל היותר 50 משתתפים לכל היותר.",
+    "cardinal": "אפשר לרשום לכל היותר חמישים משתתפים לכל היותר.",
+    "alignments": [
+      {
+        "slot": "capacity",
+        "kind": "limit",
+        "value": 50,
+        "reading": "maximum-masculine",
+        "digits_span": [
+          21,
+          23
+        ],
+        "cardinal_span": [
+          21,
+          27
+        ],
+        "digits_text": "50",
+        "cardinal_text": "חמישים"
+      }
+    ]
+  },
+  "784bcad34fbad64854ce": {
+    "id": "1b7550139e1d76e73aae",
+    "archetype_id": "maximum_attendees",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "capacity": 180
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 14,
+      "end": 3
+    },
+    "continuation": 0,
+    "digits": "בכל שולחן עגול יישבו עד 180 משתתפים על פי התקן.",
+    "cardinal": "בכל שולחן עגול יישבו עד מאה ושמונים משתתפים על פי התקן.",
+    "alignments": [
+      {
+        "slot": "capacity",
+        "kind": "limit",
+        "value": 180,
+        "reading": "maximum-masculine",
+        "digits_span": [
+          24,
+          27
+        ],
+        "cardinal_span": [
+          24,
+          35
+        ],
+        "digits_text": "180",
+        "cardinal_text": "מאה ושמונים"
+      }
+    ]
+  },
+  "eb3d844b3d1d8311e9ac": {
+    "id": "9d3c8be6d8f5273b31a9",
+    "archetype_id": "pill_range",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minimum": 2,
+      "maximum": 4
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 0,
+      "end": 15
+    },
+    "continuation": 1,
+    "digits": "לפי המלצת הרופא נוטלים 2-4 גלולות ולא לעבור את המינון, ומעדכנים את הרופא במצב.",
+    "cardinal": "לפי המלצת הרופא נוטלים בין שתיים לארבע גלולות ולא לעבור את המינון, ומעדכנים את הרופא במצב.",
+    "alignments": [
+      {
+        "slot": "pill_range",
+        "kind": "range",
+        "value": "2-4",
+        "reading": "between-feminine",
+        "digits_span": [
+          23,
+          26
+        ],
+        "cardinal_span": [
+          23,
+          38
+        ],
+        "digits_text": "2-4",
+        "cardinal_text": "בין שתיים לארבע"
+      }
+    ]
+  },
+  "193d1846a65d09f9bf43": {
+    "id": "60270b9ec4c151fc77a1",
+    "archetype_id": "pill_range",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minimum": 2,
+      "maximum": 4
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 7,
+      "end": 9
+    },
+    "continuation": 0,
+    "digits": "לפי הוראת הרופאה נוטלים 2-4 גלולות לפי הוראת הרופא.",
+    "cardinal": "לפי הוראת הרופאה נוטלים בין שתיים לארבע גלולות לפי הוראת הרופא.",
+    "alignments": [
+      {
+        "slot": "pill_range",
+        "kind": "range",
+        "value": "2-4",
+        "reading": "between-feminine",
+        "digits_span": [
+          24,
+          27
+        ],
+        "cardinal_span": [
+          24,
+          39
+        ],
+        "digits_text": "2-4",
+        "cardinal_text": "בין שתיים לארבע"
+      }
+    ]
+  },
+  "64746b6c84caf4e5ac88": {
+    "id": "a50fd041b4c2a3b9e221",
+    "archetype_id": "stopwatch_seconds",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "seconds": 9,
+      "hundredths": 58
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 17,
+      "end": 4
+    },
+    "continuation": 0,
+    "digits": "בשלב המוקדמות נרשמה תוצאה של 9.58 שניות בשלב הגמר.",
+    "cardinal": "בשלב המוקדמות נרשמה תוצאה של תשע נקודה חמישים ושמונה שניות בשלב הגמר.",
+    "alignments": [
+      {
+        "slot": "stopwatch",
+        "kind": "duration",
+        "value": "9.58",
+        "reading": "spoken-decimal-seconds",
+        "digits_span": [
+          29,
+          39
+        ],
+        "cardinal_span": [
+          29,
+          58
+        ],
+        "digits_text": "9.58 שניות",
+        "cardinal_text": "תשע נקודה חמישים ושמונה שניות"
+      }
+    ]
+  },
+  "ec5ef49d95f8bd1d9a80": {
+    "id": "8420c4377da46738c5bf",
+    "archetype_id": "stopwatch_seconds",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "seconds": 11,
+      "hundredths": 42
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 7,
+      "end": 8
+    },
+    "continuation": 0,
+    "digits": "הרץ חצה את קו הסיום בזמן של 11.42 שניות בבריכה האולימפית.",
+    "cardinal": "הרץ חצה את קו הסיום בזמן של אחת עשרה נקודה ארבעים ושתיים שניות בבריכה האולימפית.",
+    "alignments": [
+      {
+        "slot": "stopwatch",
+        "kind": "duration",
+        "value": "11.42",
+        "reading": "spoken-decimal-seconds",
+        "digits_span": [
+          28,
+          39
+        ],
+        "cardinal_span": [
+          28,
+          62
+        ],
+        "digits_text": "11.42 שניות",
+        "cardinal_text": "אחת עשרה נקודה ארבעים ושתיים שניות"
+      }
+    ]
+  },
+  "991198ff170aec20b04a": {
+    "id": "c801915fb27c4910a7d4",
+    "archetype_id": "stopwatch_minute",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minutes": 2,
+      "seconds": 15,
+      "hundredths": 40
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 10,
+      "end": 5
+    },
+    "continuation": 0,
+    "digits": "הרוכב סיים את המקטע בזמן של 2:15.40 בבריכה האולימפית.",
+    "cardinal": "הרוכב סיים את המקטע בזמן של שתי דקות, חמש עשרה שניות וארבעים מאיות בבריכה האולימפית.",
+    "alignments": [
+      {
+        "slot": "stopwatch",
+        "kind": "duration",
+        "value": "2:15.40",
+        "reading": "minute-second-hundredth",
+        "digits_span": [
+          28,
+          35
+        ],
+        "cardinal_span": [
+          28,
+          66
+        ],
+        "digits_text": "2:15.40",
+        "cardinal_text": "שתי דקות, חמש עשרה שניות וארבעים מאיות"
+      }
+    ]
+  },
+  "04defb11d4ab45595737": {
+    "id": "dc6fbdf374d6b3098cef",
+    "archetype_id": "ranking",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "rank": 2
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 20,
+      "end": 1
+    },
+    "continuation": 2,
+    "digits": "הנבחרת דורגה במקום ה-2 בטורניר, לאחר שהשלים את כל השלבים והמתין לפרסום התוצאות הרשמיות של המקצה.",
+    "cardinal": "הנבחרת דורגה במקום השני בטורניר, לאחר שהשלים את כל השלבים והמתין לפרסום התוצאות הרשמיות של המקצה.",
+    "alignments": [
+      {
+        "slot": "rank",
+        "kind": "ordinal",
+        "value": 2,
+        "reading": "masculine-ordinal",
+        "digits_span": [
+          19,
+          22
+        ],
+        "cardinal_span": [
+          19,
+          23
+        ],
+        "digits_text": "ה-2",
+        "cardinal_text": "השני"
+      }
+    ]
+  },
+  "7b6e71dfd35bf60171c3": {
+    "id": "83f16a45850855df7200",
+    "archetype_id": "road_route",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "road": 4,
+      "route": 389
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 13,
+      "end": 0
+    },
+    "continuation": 0,
+    "digits": "האוטובוס נסע על כביש 4 ומשם המשכנו בקו 389 בדרך לעיר.",
+    "cardinal": "האוטובוס נסע על כביש ארבע ומשם המשכנו בקו שלוש מאות שמונים ותשע בדרך לעיר.",
+    "alignments": [
+      {
+        "slot": "road",
+        "kind": "cardinal",
+        "value": 4,
+        "reading": "cardinal",
+        "digits_span": [
+          21,
+          22
+        ],
+        "cardinal_span": [
+          21,
+          25
+        ],
+        "digits_text": "4",
+        "cardinal_text": "ארבע"
+      },
+      {
+        "slot": "route",
+        "kind": "cardinal",
+        "value": 389,
+        "reading": "cardinal",
+        "digits_span": [
+          39,
+          42
+        ],
+        "cardinal_span": [
+          42,
+          63
+        ],
+        "digits_text": "389",
+        "cardinal_text": "שלוש מאות שמונים ותשע"
+      }
+    ]
+  },
+  "3383bb0a816e3567413f": {
+    "id": "e2b5899d1f8ac30ce311",
+    "archetype_id": "delivery",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "street": "הרצל",
+      "house": 15,
+      "include_apartment": true,
+      "apartment": 4
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "context": {
+      "start": 18,
+      "end": 7
+    },
+    "continuation": 0,
+    "digits": "תיאמתי איסוף מרחוב הרצל 15, דירה 4 עם שליח עד הבית.",
+    "cardinal": "תיאמתי איסוף מרחוב הרצל חמש עשרה, דירה ארבע עם שליח עד הבית.",
+    "alignments": [
+      {
+        "slot": "house",
+        "kind": "cardinal",
+        "value": 15,
+        "reading": "cardinal",
+        "digits_span": [
+          24,
+          26
+        ],
+        "cardinal_span": [
+          24,
+          32
+        ],
+        "digits_text": "15",
+        "cardinal_text": "חמש עשרה"
+      },
+      {
+        "slot": "apartment",
+        "kind": "cardinal",
+        "value": 4,
+        "reading": "cardinal",
+        "digits_span": [
+          33,
+          34
+        ],
+        "cardinal_span": [
+          39,
+          43
+        ],
+        "digits_text": "4",
+        "cardinal_text": "ארבע"
+      }
+    ]
+  },
+  "66009d32f22342a716c6": {
+    "id": "b9c7462c57faffb59601",
+    "archetype_id": "numeric_calendar",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "day": 17,
+      "month_number": 10,
+      "spoken_style": "named"
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "reading_variant": "natural",
+    "context": {
+      "start": 2,
+      "end": 15
+    },
+    "continuation": 1,
+    "digits": "אנחנו טסים לחופשה ב-17.10 במוזיאון העירוני, והפרטים המלאים יישלחו למשתתפים בהמשך.",
+    "cardinal": "אנחנו טסים לחופשה בשבע עשרה לאוקטובר במוזיאון העירוני, והפרטים המלאים יישלחו למשתתפים בהמשך.",
+    "alignments": [
+      {
+        "slot": "day",
+        "kind": "date",
+        "value": "17.10",
+        "reading": "natural-named-month",
+        "digits_span": [
+          18,
+          25
+        ],
+        "cardinal_span": [
+          18,
+          36
+        ],
+        "digits_text": "ב-17.10",
+        "cardinal_text": "בשבע עשרה לאוקטובר"
+      }
+    ]
+  },
+  "bfce49989f896644770c": {
+    "id": "21d1bbc4df888e7bc88b",
+    "archetype_id": "large_shekels",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "shekels_large": 125001
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "reading_variant": "natural",
+    "context": {
+      "start": 2,
+      "end": 1
+    },
+    "continuation": 0,
+    "digits": "עלות השיפוץ הייתה 125,001 ₪ בסך הכול.",
+    "cardinal": "עלות השיפוץ הייתה מאה ועשרים וחמישה אלף ואחד שקל בסך הכול.",
+    "alignments": [
+      {
+        "slot": "shekels_large",
+        "kind": "money",
+        "value": "125,001",
+        "reading": "natural-large-shekel",
+        "digits_span": [
+          18,
+          27
+        ],
+        "cardinal_span": [
+          18,
+          48
+        ],
+        "digits_text": "125,001 ₪",
+        "cardinal_text": "מאה ועשרים וחמישה אלף ואחד שקל"
+      }
+    ]
+  },
+  "40cc6f971d6cb2c8ff02": {
+    "id": "3ffc8f70f848bff2f3ec",
+    "archetype_id": "money_cents",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "shekels": 36,
+      "agorot": 50
+    },
+    "catalog_version": "starter-14",
+    "renderer_version": "13",
+    "reading_variant": "natural",
+    "context": {
+      "start": 2,
+      "end": 4
+    },
+    "continuation": 0,
+    "digits": "מחיר המשלוח הוא 36.50 ₪ כולל משלוח.",
+    "cardinal": "מחיר המשלוח הוא שלושים ושש וחצי שקל כולל משלוח.",
+    "alignments": [
+      {
+        "slot": "money",
+        "kind": "money",
+        "value": "36.50",
+        "reading": "natural-half-shekel-price",
+        "digits_span": [
+          16,
+          23
+        ],
+        "cardinal_span": [
+          16,
+          35
+        ],
+        "digits_text": "36.50 ₪",
+        "cardinal_text": "שלושים ושש וחצי שקל"
+      }
+    ]
+  }
+}

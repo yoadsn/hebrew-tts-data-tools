@@ -14,3 +14,8 @@ data/
 *.mp3
 .env
 .openchamber
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+.secrets

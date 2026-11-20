@@ -1,0 +1,938 @@
+{
+  "b1980b918fb98555cd29": {
+    "id": "6c0d1e29ef85c9fb222c",
+    "archetype_id": "delivery",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "street": "הנביאים",
+      "house": 6474,
+      "include_apartment": true,
+      "apartment": 964
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 1,
+      "end": 0
+    },
+    "continuation": 0,
+    "digits": "ביקשתי משלוח לרחוב הנביאים 6474, דירה 964 לקראת הערב.",
+    "cardinal": "ביקשתי משלוח לרחוב הנביאים ששת אלפים ארבע מאות שבעים וארבע, דירה תשע מאות שישים וארבע לקראת הערב.",
+    "alignments": [
+      {
+        "slot": "house",
+        "kind": "cardinal",
+        "value": 6474,
+        "reading": "cardinal",
+        "digits_span": [
+          27,
+          31
+        ],
+        "cardinal_span": [
+          27,
+          58
+        ],
+        "digits_text": "6474",
+        "cardinal_text": "ששת אלפים ארבע מאות שבעים וארבע"
+      },
+      {
+        "slot": "apartment",
+        "kind": "cardinal",
+        "value": 964,
+        "reading": "cardinal",
+        "digits_span": [
+          38,
+          41
+        ],
+        "cardinal_span": [
+          65,
+          85
+        ],
+        "digits_text": "964",
+        "cardinal_text": "תשע מאות שישים וארבע"
+      }
+    ]
+  },
+  "6dfa1bb9bd60f5b0ea75": {
+    "id": "167902859416fc94b8bd",
+    "archetype_id": "purchase",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "שולחן",
+        "plural": "שולחנות",
+        "gender": "m"
+      },
+      "quantity": 4380
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 1,
+      "end": 3
+    },
+    "continuation": 2,
+    "digits": "בדרך הביתה קניתי 4380 שולחנות אחרי העבודה, כי רציתי לסיים את הקניות לפני שהחנות תיסגר ולא לחזור לשם שוב מחר.",
+    "cardinal": "בדרך הביתה קניתי ארבעת אלפים שלוש מאות ושמונים שולחנות אחרי העבודה, כי רציתי לסיים את הקניות לפני שהחנות תיסגר ולא לחזור לשם שוב מחר.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "quantity",
+        "value": 4380,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          17,
+          29
+        ],
+        "cardinal_span": [
+          17,
+          54
+        ],
+        "digits_text": "4380 שולחנות",
+        "cardinal_text": "ארבעת אלפים שלוש מאות ושמונים שולחנות"
+      }
+    ]
+  },
+  "a9a5a1b3af8e1d7a0880": {
+    "id": "76073fa097de8780433d",
+    "archetype_id": "purchase",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "אבן",
+        "plural": "אבנים",
+        "gender": "f"
+      },
+      "quantity": 12
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 0,
+      "end": 0
+    },
+    "continuation": 1,
+    "digits": "אתמול קניתי 12 אבנים בחנות, אחרי שבדקתי מה עוד חסר בבית.",
+    "cardinal": "אתמול קניתי שתים עשרה אבנים בחנות, אחרי שבדקתי מה עוד חסר בבית.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "quantity",
+        "value": 12,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          12,
+          20
+        ],
+        "cardinal_span": [
+          12,
+          27
+        ],
+        "digits_text": "12 אבנים",
+        "cardinal_text": "שתים עשרה אבנים"
+      }
+    ]
+  },
+  "19580d3cd1b75f1337ba": {
+    "id": "6c6c1aeeb59c4905abe7",
+    "archetype_id": "approximate",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "עגבנייה",
+        "plural": "עגבניות",
+        "gender": "f"
+      },
+      "quantity": 743
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 1,
+      "end": 2
+    },
+    "continuation": 0,
+    "digits": "לאחר שבדקתי את הרשימה קניתי כ-743 עגבניות אחרי העבודה.",
+    "cardinal": "לאחר שבדקתי את הרשימה קניתי כשבע מאות ארבעים ושלוש עגבניות אחרי העבודה.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "approximate_quantity",
+        "value": 743,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          28,
+          41
+        ],
+        "cardinal_span": [
+          28,
+          58
+        ],
+        "digits_text": "כ-743 עגבניות",
+        "cardinal_text": "כשבע מאות ארבעים ושלוש עגבניות"
+      }
+    ]
+  },
+  "b9cb6080ff4de9edaf7f": {
+    "id": "43553343ce4c6d39c7d6",
+    "archetype_id": "opening_hours",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "start_hour": 8,
+      "end_hour": 14
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 0,
+      "end": 0
+    },
+    "continuation": 0,
+    "digits": "הסניף פתוח בין השעות 8:00–14:00 בימי חול.",
+    "cardinal": "הסניף פתוח בין השעות שמונה לארבע עשרה בימי חול.",
+    "alignments": [
+      {
+        "slot": "hours",
+        "kind": "time_range",
+        "value": "8:00–14:00",
+        "reading": "between-clock-hours",
+        "digits_span": [
+          21,
+          31
+        ],
+        "cardinal_span": [
+          21,
+          37
+        ],
+        "digits_text": "8:00–14:00",
+        "cardinal_text": "שמונה לארבע עשרה"
+      }
+    ]
+  },
+  "5a7f89934f9a2370f4c4": {
+    "id": "7fba6a224e2d5881cd1d",
+    "archetype_id": "numeric_calendar",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "day": 23,
+      "month_number": 8
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 0,
+      "end": 0
+    },
+    "continuation": 0,
+    "digits": "הסדנה תתקיים ב-23.8 במרכז העיר.",
+    "cardinal": "הסדנה תתקיים בעשרים ושלושה לשמיני במרכז העיר.",
+    "alignments": [
+      {
+        "slot": "day",
+        "kind": "date",
+        "value": "23.8",
+        "reading": "numeric-day-month",
+        "digits_span": [
+          13,
+          19
+        ],
+        "cardinal_span": [
+          13,
+          33
+        ],
+        "digits_text": "ב-23.8",
+        "cardinal_text": "בעשרים ושלושה לשמיני"
+      }
+    ]
+  },
+  "867bf6ec0bc58c8fb250": {
+    "id": "2228199779a22590d3cb",
+    "archetype_id": "full_date",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "day": 20,
+      "month": "פברואר",
+      "year": 2026
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "reading_variant": "natural",
+    "context": {
+      "start": 0,
+      "end": 1
+    },
+    "continuation": 0,
+    "digits": "הפגישה נקבעה ל-20.2.2026 במרכז העיר.",
+    "cardinal": "הפגישה נקבעה לעשרים בפברואר, אלפיים עשרים ושש במרכז העיר.",
+    "alignments": [
+      {
+        "slot": "full_date",
+        "kind": "date",
+        "value": "20.2.2026",
+        "reading": "natural-day-month-year",
+        "digits_span": [
+          13,
+          24
+        ],
+        "cardinal_span": [
+          13,
+          45
+        ],
+        "digits_text": "ל-20.2.2026",
+        "cardinal_text": "לעשרים בפברואר, אלפיים עשרים ושש"
+      }
+    ]
+  },
+  "ce053d6e60daa5718f8a": {
+    "id": "e390ed2b76d5b173a55d",
+    "archetype_id": "slash_date",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "day": 5,
+      "month": "פברואר",
+      "year": 1948
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 1,
+      "end": 2
+    },
+    "continuation": 0,
+    "digits": "מועד הבדיקה נקבע ל-5/2/1948 לבקשת הצוות.",
+    "cardinal": "מועד הבדיקה נקבע לחמישה בפברואר, אלף תשע מאות ארבעים ושמונה לבקשת הצוות.",
+    "alignments": [
+      {
+        "slot": "slash_date",
+        "kind": "date",
+        "value": "5/2/1948",
+        "reading": "day-month-year-slash",
+        "digits_span": [
+          17,
+          27
+        ],
+        "cardinal_span": [
+          17,
+          59
+        ],
+        "digits_text": "ל-5/2/1948",
+        "cardinal_text": "לחמישה בפברואר, אלף תשע מאות ארבעים ושמונה"
+      }
+    ]
+  },
+  "c3346fb40ab6c60fdf0c": {
+    "id": "dc34573902ead45f9dfb",
+    "archetype_id": "age",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "age": 39
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 1,
+      "end": 1
+    },
+    "continuation": 0,
+    "digits": "הוא חוגג 39 בחודש הקרוב.",
+    "cardinal": "הוא חוגג שלושים ותשע בחודש הקרוב.",
+    "alignments": [
+      {
+        "slot": "age",
+        "kind": "age",
+        "value": 39,
+        "reading": "feminine-age",
+        "digits_span": [
+          9,
+          11
+        ],
+        "cardinal_span": [
+          9,
+          20
+        ],
+        "digits_text": "39",
+        "cardinal_text": "שלושים ותשע"
+      }
+    ]
+  },
+  "cfaf8de987aa9f0e4f2e": {
+    "id": "d9ad21cf91f4cff259be",
+    "archetype_id": "decimal_temp",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "whole": 45,
+      "fractional": "8"
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "reading_variant": "natural",
+    "context": {
+      "start": 0,
+      "end": 3
+    },
+    "continuation": 0,
+    "digits": "התחזית צופה 45.8 מעלות בשעות הבוקר.",
+    "cardinal": "התחזית צופה ארבעים וחמש נקודה שמונה מעלות בשעות הבוקר.",
+    "alignments": [
+      {
+        "slot": "temperature",
+        "kind": "decimal",
+        "value": "45.8",
+        "reading": "point-temperature",
+        "digits_span": [
+          12,
+          16
+        ],
+        "cardinal_span": [
+          12,
+          35
+        ],
+        "digits_text": "45.8",
+        "cardinal_text": "ארבעים וחמש נקודה שמונה"
+      }
+    ]
+  },
+  "83d77ee2d1514c2f2d85": {
+    "id": "ac7109896bd88430d0fd",
+    "archetype_id": "negative_temp",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "magnitude": 19
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 0,
+      "end": 1
+    },
+    "continuation": 1,
+    "digits": "בבוקר נמדדו -19 מעלות בחוץ, ולכן כדאי להתלבש בהתאם לפני היציאה.",
+    "cardinal": "בבוקר נמדדו מינוס תשע עשרה מעלות בחוץ, ולכן כדאי להתלבש בהתאם לפני היציאה.",
+    "alignments": [
+      {
+        "slot": "temperature",
+        "kind": "signed",
+        "value": -19,
+        "reading": "minus-feminine",
+        "digits_span": [
+          12,
+          15
+        ],
+        "cardinal_span": [
+          12,
+          26
+        ],
+        "digits_text": "-19",
+        "cardinal_text": "מינוס תשע עשרה"
+      }
+    ]
+  },
+  "be179444af08383501b1": {
+    "id": "f19448527f706fecf8f9",
+    "archetype_id": "road_route",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "road": 11,
+      "route": 5
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 0,
+      "end": 1
+    },
+    "continuation": 1,
+    "digits": "עברנו דרך כביש 11 ולקחנו קו 5 בדרך חזרה, אחרי ששינינו את המסלול הרגיל.",
+    "cardinal": "עברנו דרך כביש אחת עשרה ולקחנו קו חמש בדרך חזרה, אחרי ששינינו את המסלול הרגיל.",
+    "alignments": [
+      {
+        "slot": "road",
+        "kind": "cardinal",
+        "value": 11,
+        "reading": "cardinal",
+        "digits_span": [
+          15,
+          17
+        ],
+        "cardinal_span": [
+          15,
+          23
+        ],
+        "digits_text": "11",
+        "cardinal_text": "אחת עשרה"
+      },
+      {
+        "slot": "route",
+        "kind": "cardinal",
+        "value": 5,
+        "reading": "cardinal",
+        "digits_span": [
+          28,
+          29
+        ],
+        "cardinal_span": [
+          34,
+          37
+        ],
+        "digits_text": "5",
+        "cardinal_text": "חמש"
+      }
+    ]
+  },
+  "6751b495fa001401ec9e": {
+    "id": "d72a0f1213f6cb1b32b9",
+    "archetype_id": "large_shekels",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "shekels_large": 673822
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 0,
+      "end": 1
+    },
+    "continuation": 1,
+    "digits": "עלות העבודות הייתה 673,822 ₪ בסך הכול, לפי החישוב שנערך בסיום העבודה.",
+    "cardinal": "עלות העבודות הייתה שש מאות שבעים ושלושה אלף שמונה מאות עשרים ושניים שקלים בסך הכול, לפי החישוב שנערך בסיום העבודה.",
+    "alignments": [
+      {
+        "slot": "shekels_large",
+        "kind": "money",
+        "value": "673,822",
+        "reading": "large-shekels",
+        "digits_span": [
+          19,
+          28
+        ],
+        "cardinal_span": [
+          19,
+          73
+        ],
+        "digits_text": "673,822 ₪",
+        "cardinal_text": "שש מאות שבעים ושלושה אלף שמונה מאות עשרים ושניים שקלים"
+      }
+    ]
+  },
+  "430c2a64b2436eba208b": {
+    "id": "105260a0f62869144dea",
+    "archetype_id": "million_exact",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "number": 1762889
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 0,
+      "end": 2
+    },
+    "continuation": 1,
+    "digits": "הארכיון מכיל 1,762,889 רשומות בבדיקה, לאחר שהסתיים העדכון האחרון של המאגר.",
+    "cardinal": "הארכיון מכיל מיליון שבע מאות שישים ושניים אלף שמונה מאות שמונים ותשע רשומות בבדיקה, לאחר שהסתיים העדכון האחרון של המאגר.",
+    "alignments": [
+      {
+        "slot": "number",
+        "kind": "large_quantity",
+        "value": "1,762,889",
+        "reading": "exact-to-units",
+        "digits_span": [
+          13,
+          22
+        ],
+        "cardinal_span": [
+          13,
+          68
+        ],
+        "digits_text": "1,762,889",
+        "cardinal_text": "מיליון שבע מאות שישים ושניים אלף שמונה מאות שמונים ותשע"
+      }
+    ]
+  },
+  "08567d2e89025b4c7fa7": {
+    "id": "075cc3b3be2c89f7e455",
+    "archetype_id": "area",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "square_meters": 152
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 0,
+      "end": 3
+    },
+    "continuation": 0,
+    "digits": "שטח הבית הוא 152 מ\"ר לפי הדוח.",
+    "cardinal": "שטח הבית הוא מאה וחמישים ושניים מטרים רבועים לפי הדוח.",
+    "alignments": [
+      {
+        "slot": "square_meters",
+        "kind": "measurement",
+        "value": 152,
+        "reading": "square-meters",
+        "digits_span": [
+          13,
+          20
+        ],
+        "cardinal_span": [
+          13,
+          44
+        ],
+        "digits_text": "152 מ\"ר",
+        "cardinal_text": "מאה וחמישים ושניים מטרים רבועים"
+      }
+    ]
+  },
+  "7aa38ca283161fd03906": {
+    "id": "7c448ef2d5e9d6caac8c",
+    "archetype_id": "stopwatch_minute",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minutes": 1,
+      "seconds": 52,
+      "hundredths": 75
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 0,
+      "end": 2
+    },
+    "continuation": 0,
+    "digits": "הזמן במקצה היה 1:52.75 על המסלול.",
+    "cardinal": "הזמן במקצה היה דקה אחת, חמישים ושתיים שניות ושבעים וחמש מאיות על המסלול.",
+    "alignments": [
+      {
+        "slot": "stopwatch",
+        "kind": "duration",
+        "value": "1:52.75",
+        "reading": "minute-second-hundredth",
+        "digits_span": [
+          15,
+          22
+        ],
+        "cardinal_span": [
+          15,
+          61
+        ],
+        "digits_text": "1:52.75",
+        "cardinal_text": "דקה אחת, חמישים ושתיים שניות ושבעים וחמש מאיות"
+      }
+    ]
+  },
+  "e4f7cf8d93df19b43a3f": {
+    "id": "d27f3ecbb2136139a906",
+    "archetype_id": "postal",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "postal_code": "29152"
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 0,
+      "end": 1
+    },
+    "continuation": 0,
+    "digits": "כתובת המשלוח כוללת מיקוד 29152 לפי הרישום.",
+    "cardinal": "כתובת המשלוח כוללת מיקוד שתיים תשע אחת חמש שתיים לפי הרישום.",
+    "alignments": [
+      {
+        "slot": "postal_code",
+        "kind": "identifier",
+        "value": "29152",
+        "reading": "digit-by-digit",
+        "digits_span": [
+          25,
+          30
+        ],
+        "cardinal_span": [
+          25,
+          48
+        ],
+        "digits_text": "29152",
+        "cardinal_text": "שתיים תשע אחת חמש שתיים"
+      }
+    ]
+  },
+  "4184334410d83c834aed": {
+    "id": "cda8458de2891d780f43",
+    "archetype_id": "bank_account",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "branch": 802,
+      "account": "000794"
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 1,
+      "end": 2
+    },
+    "continuation": 1,
+    "digits": "העברה פיקטיבית נרשמה לסניף 802, חשבון 000794 בטופס הבדיקה, והפרטים האלה משמשים רק לבדיקת המערכת.",
+    "cardinal": "העברה פיקטיבית נרשמה לסניף שמונה מאות ושתיים, חשבון אפס אפס אפס שבע תשע ארבע בטופס הבדיקה, והפרטים האלה משמשים רק לבדיקת המערכת.",
+    "alignments": [
+      {
+        "slot": "account",
+        "kind": "identifier",
+        "value": "לסניף 802, חשבון 000794",
+        "reading": "synthetic-bank-branch-account",
+        "digits_span": [
+          21,
+          44
+        ],
+        "cardinal_span": [
+          21,
+          76
+        ],
+        "digits_text": "לסניף 802, חשבון 000794",
+        "cardinal_text": "לסניף שמונה מאות ושתיים, חשבון אפס אפס אפס שבע תשע ארבע"
+      }
+    ]
+  },
+  "ce90de89688fb3f1af67": {
+    "id": "dee898fd640d20ef73e8",
+    "archetype_id": "purchase",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "noun": {
+        "singular": "אבן",
+        "plural": "אבנים",
+        "gender": "f"
+      },
+      "quantity": 6006
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 22,
+      "end": 1
+    },
+    "continuation": 1,
+    "digits": "עבור המשרד הזמנו 6006 אבנים בסניף, אחרי שבדקתי מה עוד חסר בבית.",
+    "cardinal": "עבור המשרד הזמנו ששת אלפים ושש אבנים בסניף, אחרי שבדקתי מה עוד חסר בבית.",
+    "alignments": [
+      {
+        "slot": "quantity",
+        "kind": "quantity",
+        "value": 6006,
+        "reading": "construct-cardinal",
+        "digits_span": [
+          17,
+          27
+        ],
+        "cardinal_span": [
+          17,
+          36
+        ],
+        "digits_text": "6006 אבנים",
+        "cardinal_text": "ששת אלפים ושש אבנים"
+      }
+    ]
+  },
+  "86ad09f9c15a6ff908bc": {
+    "id": "a9186d8edc33a78161f1",
+    "archetype_id": "duration_half",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "duration": "4.5"
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "reading_variant": "natural",
+    "context": {
+      "start": 15,
+      "end": 9
+    },
+    "continuation": 2,
+    "digits": "המבחן נמשך 4.5 שעות לפי הרישום, אחרי שנאלצנו לעצור בדרך כמה פעמים אף על פי שתכננו להגיע מוקדם יותר.",
+    "cardinal": "המבחן נמשך ארבע וחצי שעות לפי הרישום, אחרי שנאלצנו לעצור בדרך כמה פעמים אף על פי שתכננו להגיע מוקדם יותר.",
+    "alignments": [
+      {
+        "slot": "duration",
+        "kind": "duration",
+        "value": "4.5",
+        "reading": "natural-hours-and-half",
+        "digits_span": [
+          11,
+          19
+        ],
+        "cardinal_span": [
+          11,
+          25
+        ],
+        "digits_text": "4.5 שעות",
+        "cardinal_text": "ארבע וחצי שעות"
+      }
+    ]
+  },
+  "bc97317949c4f4126bcc": {
+    "id": "e488d2294964e52203e4",
+    "archetype_id": "decimal_temp",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "whole": 20,
+      "fractional": "6"
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "reading_variant": "natural",
+    "context": {
+      "start": 14,
+      "end": 3
+    },
+    "continuation": 1,
+    "digits": "במעבדה נשמרה טמפרטורה של 20.6 מעלות בשעות הבוקר, ולכן כדאי להתלבש בהתאם לפני היציאה.",
+    "cardinal": "במעבדה נשמרה טמפרטורה של עשרים נקודה שש מעלות בשעות הבוקר, ולכן כדאי להתלבש בהתאם לפני היציאה.",
+    "alignments": [
+      {
+        "slot": "temperature",
+        "kind": "decimal",
+        "value": "20.6",
+        "reading": "point-temperature",
+        "digits_span": [
+          25,
+          29
+        ],
+        "cardinal_span": [
+          25,
+          39
+        ],
+        "digits_text": "20.6",
+        "cardinal_text": "עשרים נקודה שש"
+      }
+    ]
+  },
+  "cacc36319226925ef337": {
+    "id": "156e2367830dc9c40cad",
+    "archetype_id": "negative_temp",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "magnitude": 5
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 12,
+      "end": 8
+    },
+    "continuation": 1,
+    "digits": "במיכל הקירור נרשמו -5 מעלות לפי התחזית, ולכן כדאי להתלבש בהתאם לפני היציאה.",
+    "cardinal": "במיכל הקירור נרשמו מינוס חמש מעלות לפי התחזית, ולכן כדאי להתלבש בהתאם לפני היציאה.",
+    "alignments": [
+      {
+        "slot": "temperature",
+        "kind": "signed",
+        "value": -5,
+        "reading": "minus-feminine",
+        "digits_span": [
+          19,
+          21
+        ],
+        "cardinal_span": [
+          19,
+          28
+        ],
+        "digits_text": "-5",
+        "cardinal_text": "מינוס חמש"
+      }
+    ]
+  },
+  "1ed7852b4eb7448cb2e6": {
+    "id": "7acd802290dadce34d2f",
+    "archetype_id": "maximum_attendees",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "capacity": 185
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 6,
+      "end": 16
+    },
+    "continuation": 0,
+    "digits": "בכיתה אפשר לשבץ עד 185 משתתפים באודיטוריום.",
+    "cardinal": "בכיתה אפשר לשבץ עד מאה ושמונים וחמישה משתתפים באודיטוריום.",
+    "alignments": [
+      {
+        "slot": "capacity",
+        "kind": "limit",
+        "value": 185,
+        "reading": "maximum-masculine",
+        "digits_span": [
+          19,
+          22
+        ],
+        "cardinal_span": [
+          19,
+          37
+        ],
+        "digits_text": "185",
+        "cardinal_text": "מאה ושמונים וחמישה"
+      }
+    ]
+  },
+  "2cb0714291e3f297529a": {
+    "id": "5e4b48d50c855ea05ac2",
+    "archetype_id": "pill_range",
+    "seed": 0,
+    "index": 0,
+    "sampled": {
+      "minimum": 3,
+      "maximum": 5
+    },
+    "catalog_version": "starter-13",
+    "renderer_version": "12",
+    "context": {
+      "start": 11,
+      "end": 3
+    },
+    "continuation": 1,
+    "digits": "בהתאם להמלצת המומחה נוטלים 3-5 גלולות אחרי האוכל, ולאחר מכן לעדכן את הרופא במצב.",
+    "cardinal": "בהתאם להמלצת המומחה נוטלים בין שלוש לחמש גלולות אחרי האוכל, ולאחר מכן לעדכן את הרופא במצב.",
+    "alignments": [
+      {
+        "slot": "pill_range",
+        "kind": "range",
+        "value": "3-5",
+        "reading": "between-feminine",
+        "digits_span": [
+          27,
+          30
+        ],
+        "cardinal_span": [
+          27,
+          40
+        ],
+        "digits_text": "3-5",
+        "cardinal_text": "בין שלוש לחמש"
+      }
+    ]
+  }
+}
