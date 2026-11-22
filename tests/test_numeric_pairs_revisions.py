@@ -45,6 +45,14 @@ def test_reviewed_readings_and_variants():
                   reading_variant="formal")["alignments"][0]["cardinal_text"] == "בעשרים ושלושה באוגוסט"
     assert "בראשון לשמיני" in render("numeric_calendar", {
         "day": 1, "month_number": 8, "spoken_style": "ordinal"})["cardinal"]
+    assert render("numeric_calendar", {
+        "day": 2, "month_number": 8, "spoken_style": "ordinal"})["alignments"][0]["cardinal_text"] == "בשני לשמיני"
+    assert render("numeric_calendar", {
+        "day": 2, "month_number": 8, "spoken_style": "named"})["alignments"][0]["cardinal_text"] == "בשני לאוגוסט"
+    assert render("numeric_calendar", {
+        "day": 5, "month_number": 10, "spoken_style": "named"})["alignments"][0]["cardinal_text"] == "בחמישי לאוקטובר"
+    assert render("numeric_calendar", {
+        "day": 10, "month_number": 4, "spoken_style": "ordinal"})["alignments"][0]["cardinal_text"] == "בעשירי לרביעי"
     assert "שקל" in render("large_shekels", {"shekels_large": 673822})["cardinal"]
     assert "שקלים" in render("large_shekels", {"shekels_large": 673822},
                             reading_variant="formal")["cardinal"]

@@ -567,7 +567,7 @@ def domain_fragment(kind: str, values: dict[str, Any], variant: str = "natural")
         written = f"{day}.{month}"
         spoken_month = {4: "רביעי", 6: "שישי", 8: "שמיני", 10: "עשירי"}[month]
         month_name = MONTHS[month - 1]
-        day_spoken = "ראשון" if day == 1 else cardinal(day, "f")
+        day_spoken = ordinal_masculine(day) if day <= 10 else cardinal(day, "f")
         if variant == "formal":
             spoken, reading = f"ב{cardinal(day, 'm')} ב{month_name}", "formal-named-month"
         elif values.get("spoken_style", "ordinal") == "named":
