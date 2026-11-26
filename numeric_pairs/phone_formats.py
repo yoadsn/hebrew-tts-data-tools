@@ -16,10 +16,28 @@ MOBILE_PREFIXES = ("050", "051", "052", "053", "054", "055", "058")
 GEOGRAPHIC_PREFIXES = ("02", "03", "04", "08", "09")
 NATIONAL_PREFIXES = ("072", "073", "074", "076", "077", "079")
 BUSINESS_PREFIXES = ("1599", "1700", "1800")
+STAR_PHONE_KINDS = ("business_line", "national_line")
+STAR_LENGTH_CHOICES = (4, 5, 3)
+STAR_LENGTH_WEIGHTS = (70, 20, 10)
+STAR_PHONE_PROBABILITY = {
+    "business_line": 0.50,
+    "national_line": 0.40,
+}
 
 
 def _last_four(rng: random.Random) -> str:
     return f"{rng.randrange(10000):04d}"
+
+
+def sample_star_phone(rng: random.Random) -> str:
+    length = rng.choices(STAR_LENGTH_CHOICES, weights=STAR_LENGTH_WEIGHTS, k=1)[0]
+    first = str(rng.randint(1, 9))
+    rest = "".join(str(rng.randrange(10)) for _ in range(length - 1))
+    return f"*{first}{rest}"
+
+
+def is_star_phone(value: str) -> bool:
+    return isinstance(value, str) and value.isascii() and bool(re.fullmatch(r"\*\d{3,5}", value))
 
 
 def sample_phone(kind: str, rng: random.Random) -> str:
@@ -33,12 +51,16 @@ def sample_phone(kind: str, rng: random.Random) -> str:
     if kind == "local_landline":
         return f"000-{last}"
     if kind == "national_line":
+        if rng.random() < STAR_PHONE_PROBABILITY[kind]:
+            return sample_star_phone(rng)
         prefix = rng.choice(NATIONAL_PREFIXES)
         return rng.choice((f"{prefix}-000-{last}", f"{prefix} 000 {last}"))
     if kind == "israeli_international":
         prefix = rng.choice(MOBILE_PREFIXES + GEOGRAPHIC_PREFIXES + NATIONAL_PREFIXES)[1:]
         return rng.choice((f"+972 {prefix}-000-{last}", f"+972-{prefix}-000-{last}"))
     if kind == "business_line":
+        if rng.random() < STAR_PHONE_PROBABILITY[kind]:
+            return sample_star_phone(rng)
         prefix = rng.choice(BUSINESS_PREFIXES)
         suffix = f"{rng.randrange(1000):03d}"
         return rng.choice((f"1-{prefix[1:]}-000-{suffix}", f"1 {prefix[1:]} 000 {suffix}"))
@@ -65,14 +87,18 @@ def validate_phone(kind: str, value: str) -> bool:
     if kind == "local_landline":
         return bool(re.fullmatch(r"000-\d{4}", value))
     if kind == "national_line":
-        return any(bool(re.fullmatch(rf"(?:{prefix}-000-\d{{4}}|{prefix} 000 \d{{4}})", value))
-                   for prefix in NATIONAL_PREFIXES)
+        return is_star_phone(value) or any(
+            bool(re.fullmatch(rf"(?:{prefix}-000-\d{{4}}|{prefix} 000 \d{{4}})", value))
+            for prefix in NATIONAL_PREFIXES
+        )
     if kind == "israeli_international":
         return any(bool(re.fullmatch(rf"\+972[ -]{prefix[1:]}-000-\d{{4}}", value))
                    for prefix in MOBILE_PREFIXES + GEOGRAPHIC_PREFIXES + NATIONAL_PREFIXES)
     if kind == "business_line":
-        return any(bool(re.fullmatch(rf"(?:1-{prefix[1:]}-000-\d{{3}}|1 {prefix[1:]} 000 \d{{3}})", value))
-                   for prefix in BUSINESS_PREFIXES)
+        return is_star_phone(value) or any(
+            bool(re.fullmatch(rf"(?:1-{prefix[1:]}-000-\d{{3}}|1 {prefix[1:]} 000 \d{{3}})", value))
+            for prefix in BUSINESS_PREFIXES
+        )
     return False
 
 
@@ -80,6 +106,10 @@ def spoken_phone(kind: str, value: str) -> tuple[str, str]:
     """Return spoken digits and reading ID, preserving zeros and visible groups."""
     if not validate_phone(kind, value):
         raise ValueError(f"Invalid {kind} test phone")
+    if value.startswith("*"):
+        digits = value[1:]
+        spoken = "כוכבית " + " ".join(cardinal(int(digit), "f") for digit in digits)
+        return spoken, f"digits-star-{len(digits)}"
     digits = _digits(value)
     if kind == "local_landline":
         groups = (3, 4)
