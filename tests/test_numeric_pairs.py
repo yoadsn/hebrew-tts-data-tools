@@ -246,11 +246,12 @@ def test_guide_coverage_and_sampling_constraints():
         ("million_exact", {"number": 1234560}),
         ("meeting_minute", {"minute_of_day": 9 * 60 + 30}),
         ("card_full", {"card_number": "4111111111111111"}),
-        ("international_phone", {"international_phone": "+1 202-555-9999"}),
+        ("international_phone", {"international_phone": "202-555-9999"}),
         ("civil_id", {"civil_id": "000000000"}),
-        ("passport_id", {"passport_id": "AB1234567"}),
-        ("bank_account", {"branch": 630, "account": "123456"}),
-        ("license_plate", {"plate": "23-456-78"}),
+        ("passport_id", {"passport_id": "ABCD1234"}),
+        ("passport_id", {"passport_id": "AB123"}),
+        ("bank_account", {"branch": 630, "account": "12345"}),
+        ("license_plate", {"plate": "1234-56-78"}),
         ("plural_millions", {"millions_value": 1_500_000}),
         ("plural_millions", {"millions_value": 2_000_001}),
         ("child_half_age", {"child_age": "1.5"}),
@@ -296,6 +297,13 @@ def test_new_pending_guide_subcases(archetype, values, digits, spoken):
     ("international_phone", {"international_phone": "+1 202-555-0142"}, "+1 202-555-0142", "פלוס אחת, שתיים אפס שתיים, חמש חמש חמש, אפס אחת ארבע שתיים"),
     ("civil_id", {"civil_id": "000934040"}, "000934040", "אפס אפס אפס, תשע שלוש ארבע, אפס ארבע אפס"),
     ("passport_id", {"passport_id": "XX1234567"}, "XX1234567", "איקס איקס אחת שתיים שלוש ארבע חמש שש שבע"),
+    ("passport_id", {"passport_id": "34819205"}, "34819205", "שלוש ארבע שמונה אחת, תשע שתיים אפס חמש"),
+    ("passport_id", {"passport_id": "987654321"}, "987654321", "תשע שמונה שבע, שש חמש ארבע, שלוש שתיים אחת"),
+    ("passport_id", {"passport_id": "TR1234567"}, "TR1234567", "טי אר אחת שתיים שלוש ארבע חמש שש שבע"),
+    ("passport_id", {"passport_id": "M1234567"}, "M1234567", "אם אחת שתיים שלוש ארבע חמש שש שבע"),
+    ("passport_id", {"passport_id": "C01X00T47"}, "C01X00T47", "סי אפס אחת איקס אפס אפס טי ארבע שבע"),
+    ("international_phone", {"international_phone": "+44 20-7946-0821"}, "+44 20-7946-0821", "פלוס ארבע ארבע, שתיים אפס, שבע תשע ארבע שש, אפס שמונה שתיים אחת"),
+    ("license_plate", {"plate": "234-56-789"}, "234-56-789", "שתיים שלוש ארבע, חמש שש, שבע שמונה תשע"),
     ("stopwatch_minute", {"minutes": 1, "seconds": 46, "hundredths": 30}, "1:46.30", "דקה אחת, ארבעים ושש שניות ושלושים מאיות"),
     ("euro_price", {"euros": 35}, "35 €", "שלושים וחמישה אירו"),
     ("data_plan", {"gigabytes": 100, "megabits": 1000}, "100GB במהירות 1000Mb", "מאה ג'יגה-בייט במהירות אלף מגה ביט"),
@@ -346,21 +354,42 @@ def test_extended_guide_and_long_identifier_spans(archetype, values, digits, spo
 
 
 def test_exact_millions_and_synthetic_identifiers_across_seeds():
-    from numeric_pairs.core import valid_civil_id
+    from numeric_pairs.core import valid_civil_id, valid_luhn
 
     archetypes = ["million_exact", "meeting_minute", "card_full", "international_phone", "civil_id",
                   "passport_id", "stopwatch_minute", "bank_account", "license_plate"]
-    for seed in range(20):
+    seen_passports: list[str] = []
+    seen_plates: list[str] = []
+    seen_intl_cc: set[str] = set()
+    for seed in range(60):
         pairs = {p["archetype_id"]: p for p in generate(seed, len(archetypes), archetypes)}
         million = pairs["million_exact"]["sampled"]["number"]
         assert 1_000_000 < million < 2_000_000 and million % 10 != 0
         assert pairs["meeting_minute"]["sampled"]["minute_of_day"] % 60 not in (0, 15, 30, 45)
-        assert pairs["card_full"]["sampled"]["card_number"].startswith("0000")
-        assert pairs["international_phone"]["sampled"]["international_phone"].startswith("+1 202-555-01")
-        assert not valid_civil_id(pairs["civil_id"]["sampled"]["civil_id"])
-        assert pairs["passport_id"]["sampled"]["passport_id"].startswith("XX")
-        assert pairs["bank_account"]["sampled"]["account"].startswith("000")
-        assert pairs["license_plate"]["sampled"]["plate"].startswith("00-")
+        card = pairs["card_full"]["sampled"]["card_number"]
+        assert len(card) == 16 and not card.startswith("0000") and not valid_luhn(card)
+        intl = pairs["international_phone"]["sampled"]["international_phone"]
+        assert intl.startswith("+")
+        seen_intl_cc.add(intl.split()[0])
+        cid = pairs["civil_id"]["sampled"]["civil_id"]
+        assert len(cid) == 9 and not valid_civil_id(cid)
+        pid = pairs["passport_id"]["sampled"]["passport_id"]
+        assert 8 <= len(pid) <= 9 and pid.isalnum() and pid == pid.upper()
+        seen_passports.append(pid)
+        acct = pairs["bank_account"]["sampled"]["account"]
+        assert len(acct) == 6 and acct.isdigit() and not acct.startswith("000")
+        plate = pairs["license_plate"]["sampled"]["plate"]
+        assert not plate.startswith("00-")
+        seen_plates.append(plate)
+
+    # Passports cover both all-digit (Israeli/US/UK) and varied non-XX alphanumeric ICAO shapes
+    assert any(p.isdigit() and len(p) == 8 for p in seen_passports)
+    assert any(any(c.isalpha() for c in p) and not p.startswith("XX") for p in seen_passports)
+    # License plates cover both 7-digit (XX-XXX-XX) and 8-digit (XXX-XX-XXX) Israeli plates
+    assert any(len(p) == 9 for p in seen_plates)
+    assert any(len(p) == 10 for p in seen_plates)
+    # International phones cover multiple country codes
+    assert len(seen_intl_cc) >= 4
 
 
 def test_every_archetype_has_reusable_contexts_and_exact_alignments():
@@ -620,7 +649,7 @@ def test_web_generation_review_and_validation(tmp_path, monkeypatch):
                    for example in data["examples"] for a in example["alignments"])
     assert client.get("/api/archetypes/delivery/design").json()["template"].count("include_apartment") == 1
     assert client.get("/api/archetypes/purchase/design").json()["sampling"][0]["values"][0]["gender"] in {"m", "f"}
-    assert client.get("/api/archetypes/card_full/design").json()["sampling"][0]["rule"].find("0000") >= 0
+    assert client.get("/api/archetypes/card_full/design").json()["sampling"][0]["rule"].find("Luhn") >= 0
     assert list(tmp_path.iterdir()) == []
     assert set(client.get("/api/archetypes/never-ran").json()["archetypes"]) == set(BY_ID)
     assert client.get("/api/catalog").json()["default_formal_weights"]["version"] == 0.0

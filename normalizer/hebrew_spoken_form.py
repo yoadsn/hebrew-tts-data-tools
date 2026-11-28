@@ -156,6 +156,7 @@ def get_spoken_form(token: str, gender: str) -> Optional[str]:
 # Convert a non-negative integer value into its spoken form.
 def _convert_integer(value: int, gender: str) -> str:
     spoken_form = ''
+    had_millions_or_above = value >= 1_000_000
 
     # Check if the integer value is above 1 billion.
     if value >= 1_000_000_000:
@@ -165,8 +166,8 @@ def _convert_integer(value: int, gender: str) -> str:
             spoken_form = __HEBREW_BILLION
 
         else:
-            # Obtain the spoken form of the number of billions.
-            spoken_form = _convert_integer(billions, 'm') + \
+            # Obtain the spoken form of the number of billions ("שני מיליארד", "שלושה מיליארד").
+            spoken_form = _convert_integer(billions, 'mn') + \
                           ' ' + __HEBREW_BILLION
 
         # Continue with the remainder.
@@ -183,15 +184,21 @@ def _convert_integer(value: int, gender: str) -> str:
         millions = value // 1_000_000
         if millions == 1:
             # Just use the plain form of "one million".
-            spoken_form += __HEBREW_MILLION
+            mill_form = __HEBREW_MILLION
 
         else:
-            # Obtain the spoken form of the number of millions.
-            spoken_form += _convert_integer(millions, 'm') + \
-                           ' ' + __HEBREW_MILLION
+            # Obtain the spoken form of the number of millions ("שני מיליון", "שלושה מיליון").
+            mill_form = _convert_integer(millions, 'mn') + \
+                        ' ' + __HEBREW_MILLION
 
         # Continue with the remainder.
         value %= 1_000_000
+
+        if value == 0 and len(spoken_form) > 0 and (' ' + __HEBREW_AND) not in mill_form:
+            spoken_form += __HEBREW_AND + mill_form
+            return spoken_form
+
+        spoken_form += mill_form
 
         if value == 0:
             return spoken_form
@@ -204,15 +211,21 @@ def _convert_integer(value: int, gender: str) -> str:
         thousands = value // 1000
         if thousands <= 10:
             # Just use a form the thousands' table.
-            spoken_form += __HEBREW_THOUSANDS[thousands]
+            th_form = __HEBREW_THOUSANDS[thousands]
 
         else:
             # Obtain the spoken form of the number of thousands.
-            spoken_form += _convert_integer(thousands, 'm') + \
-                           ' ' + __HEBREW_THOUSANDS[1]
+            th_form = _convert_integer(thousands, 'm') + \
+                      ' ' + __HEBREW_THOUSANDS[1]
 
         # Continue with the remainder.
         value %= 1000
+
+        if value == 0 and len(spoken_form) > 0 and (' ' + __HEBREW_AND) not in th_form:
+            spoken_form += __HEBREW_AND + th_form
+            return spoken_form
+
+        spoken_form += th_form
 
         if value == 0:
             return spoken_form
@@ -223,7 +236,10 @@ def _convert_integer(value: int, gender: str) -> str:
 
     if value >= 100:
         hundreds = value // 100
-        spoken_form += __HEBREW_HUNDREDS[hundreds]
+        if value % 100 == 0 and had_millions_or_above:
+            spoken_form += __HEBREW_AND + __HEBREW_HUNDREDS[hundreds]
+        else:
+            spoken_form += __HEBREW_HUNDREDS[hundreds]
         
         # Continue with the remainder.
         value %= 100
@@ -366,9 +382,14 @@ def _convert_number(token: str, gender: str) -> Optional[str]:
         
     else:
         # The integer part is positive:
-        # We generally use the provided gender (which defaults to 'f' for bare numbers,
-        # but matches the unit gender if one was provided).
-        spoken_form = _convert_integer(int_value, gender)
+        # - Decimals read with "נקודה" (frac_part != '5') are abstract numerals: always feminine ('f').
+        # - ".5" read with "וחצי" agrees with noun gender ('m'/'f'), but never takes construct
+        #   state ('mn'/'fn') before "וחצי" ("שניים וחצי קילומטרים", never *"שני וחצי").
+        if has_frac_part:
+            int_gender = gender[0] if (frac_part == '5' and gender[:1] in ('m', 'f')) else 'f'
+        else:
+            int_gender = gender
+        spoken_form = _convert_integer(int_value, int_gender)
 
     # Append the fractional part, if needed.
     if has_frac_part:

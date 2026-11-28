@@ -11,34 +11,121 @@ from threading import Lock
 from typing import Any
 
 from .catalog import ARCHETYPES, CATALOG_VERSION
-from .core import RENDERER_VERSION, generate
+from .core import RENDERER_VERSION, validate_pair
+from .template_library import (
+    DEFAULT_MICRO_TEMPLATE_RATIO,
+    generate_mixed_dataset,
+    load_library_entries,
+    official_library_file,
+)
 from .variants import resolve_weights
 
 _lock = Lock()
 
 
 class ReviewStore:
-    def __init__(self, root: Path | None = None):
+    def __init__(self, root: Path | None = None, *, official_library: Path | None = None):
         self.root = Path(root or os.environ.get("NUMERIC_PAIRS_DATA_DIR", Path.home() / ".local/share/hebrew-numeric-pairs"))
         self.root.mkdir(parents=True, exist_ok=True)
+        # Default (production) stores merge the official in-repo library with the local overlay.
+        # Isolated stores created with an explicit `root` (e.g. unit tests in tmp_path) stay isolated
+        # unless `official_library` is passed explicitly.
+        if official_library is not None:
+            self.include_official_library = True
+            self.official_library_path: Path | None = Path(official_library)
+        elif root is None:
+            self.include_official_library = True
+            self.official_library_path = official_library_file()
+        else:
+            self.include_official_library = False
+            self.official_library_path = None
 
     def create_run(self, seed: int, count: int, archetypes: list[str] | None = None, *,
                    address_lengths: tuple[int, ...] = (1, 2, 3),
                    boundary_weight: float = 0.25,
-                   variant_weights: dict[str, float] | None = None) -> dict[str, Any]:
+                   variant_weights: dict[str, float] | None = None,
+                   micro_template_ratio: float = DEFAULT_MICRO_TEMPLATE_RATIO,
+                   include_library: bool = True) -> dict[str, Any]:
         weights = resolve_weights(variant_weights)
-        pairs = generate(seed, count, archetypes, address_lengths=address_lengths,
-                         boundary_weight=boundary_weight, variant_weights=weights)
-        identity = {"seed": seed, "count": count, "archetypes": archetypes,
-                    "address_lengths": list(address_lengths), "boundary_weight": boundary_weight,
-                    "variant_weights": weights,
-                    "catalog_version": CATALOG_VERSION, "renderer_version": RENDERER_VERSION}
+        lib_entries = (
+            load_library_entries(
+                self.root,
+                official_path=self.official_library_path,
+                include_official=self.include_official_library,
+                enabled_only=True,
+            )
+            if include_library
+            else []
+        )
+        pairs, mix_meta = generate_mixed_dataset(
+            seed,
+            count,
+            micro_templates=lib_entries,
+            micro_template_ratio=micro_template_ratio,
+            archetypes=archetypes,
+            address_lengths=address_lengths,
+            boundary_weight=boundary_weight,
+            variant_weights=weights,
+        )
+        identity: dict[str, Any] = {
+            "seed": seed,
+            "count": count,
+            "archetypes": archetypes,
+            "address_lengths": list(address_lengths),
+            "boundary_weight": boundary_weight,
+            "variant_weights": weights,
+            "catalog_version": CATALOG_VERSION,
+            "renderer_version": RENDERER_VERSION,
+        }
+        if mix_meta["micro_template_count"] > 0:
+            identity["micro_template_ratio"] = mix_meta["requested_micro_template_ratio"]
+            identity["library_fingerprint"] = mix_meta["library_fingerprint"]
         run_id = sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()[:20]
         path = self.root / f"run-{run_id}.json"
         with _lock:
             if path.exists():
                 return json.loads(path.read_text(encoding="utf-8"))
-            data = {"id": run_id, **identity, "pairs": pairs}
+            data = {
+                "id": run_id,
+                **identity,
+                "micro_template_ratio": mix_meta["requested_micro_template_ratio"],
+                "mix": mix_meta,
+                "pairs": pairs,
+            }
+            temporary = self.root / f"run-{run_id}.tmp"
+            temporary.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+            temporary.replace(path)
+        return data
+
+    def register_pipeline_run(
+        self,
+        *,
+        batch_id: str,
+        seed: int,
+        pairs: list[dict[str, Any]],
+        pipeline_meta: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        for pair in pairs:
+            validate_pair(pair)
+        archetypes = sorted({pair["archetype_id"] for pair in pairs})
+        identity = {
+            "source": "neon_pipeline",
+            "batch_id": batch_id,
+            "seed": seed,
+            "count": len(pairs),
+            "archetypes": archetypes,
+            "address_lengths": [1, 2, 3],
+            "boundary_weight": 0.25,
+            "variant_weights": resolve_weights(None),
+            "catalog_version": CATALOG_VERSION,
+            "renderer_version": RENDERER_VERSION,
+        }
+        run_id = sha256(json.dumps({"identity": identity, "pair_ids": [p["id"] for p in pairs]}, sort_keys=True).encode()).hexdigest()[:20]
+        path = self.root / f"run-{run_id}.json"
+        with _lock:
+            if path.exists():
+                return json.loads(path.read_text(encoding="utf-8"))
+            data = {"id": run_id, **identity, "pipeline_meta": pipeline_meta or {}, "pairs": pairs}
             temporary = self.root / f"run-{run_id}.tmp"
             temporary.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
             temporary.replace(path)
@@ -54,8 +141,16 @@ class ReviewStore:
         runs = []
         for path in sorted(self.root.glob("run-*.json"), key=lambda p: p.stat().st_mtime, reverse=True)[:30]:
             data = json.loads(path.read_text(encoding="utf-8"))
-            runs.append({"id": data["id"], "seed": data["seed"], "count": data["count"],
-                         "catalog_version": data["catalog_version"]})
+            mix = data.get("mix") or {}
+            runs.append({
+                "id": data["id"],
+                "seed": data["seed"],
+                "count": data["count"],
+                "catalog_version": data["catalog_version"],
+                "source": data.get("source"),
+                "micro_template_count": mix.get("micro_template_count"),
+                "tier1_count": mix.get("tier1_count"),
+            })
         return runs
 
     def never_ran_archetypes(self) -> list[str]:

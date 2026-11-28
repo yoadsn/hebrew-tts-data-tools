@@ -25,7 +25,7 @@ def test_israeli_phone_shapes_are_examples_with_exact_spans(kind):
         if kind in STAR_PHONE_KINDS and value.startswith("*"):
             assert is_star_phone(value)
         else:
-            assert "000" in value
+            assert "-000-" not in value and " 000 " not in value and not value.startswith("000-")
         spoken, policy = spoken_phone(kind, value)
         assert policy.startswith("digits-")
         assert not any(char.isdigit() for char in spoken)
@@ -84,25 +84,24 @@ def test_star_phone_digit_length_distribution():
 
 
 @pytest.mark.parametrize("kind,value", [
-    ("landline", "03-555-1234"),
-    ("landline", "07-000-1234"),
+    ("landline", "07-555-1234"),
     ("landline", "*1213"),
-    ("local_landline", "555-1234"),
+    ("local_landline", "55-1234"),
     ("local_landline", "*1213"),
     ("mobile", "*1213"),
-    ("national_line", "070-000-1234"),
+    ("national_line", "070-555-1234"),
     ("national_line", "*12"),
     ("national_line", "*123456"),
-    ("israeli_international", "+972 050-000-1234"),
-    ("israeli_international", "+972 50-123-4567"),
+    ("israeli_international", "+972 050-555-1234"),
+    ("israeli_international", "+972 50-12-4567"),
     ("israeli_international", "*1213"),
-    ("business_line", "1-700-123-456"),
+    ("business_line", "1-900-123-456"),
     ("business_line", "*12"),
     ("business_line", "*123456"),
     ("business_line", "*12-13"),
     ("business_line", "1213"),
 ])
-def test_non_example_subscribers_and_wrong_prefix_classes_are_rejected(kind, value):
+def test_malformed_subscribers_and_wrong_prefix_classes_are_rejected(kind, value):
     assert not validate_phone(kind, value)
     with pytest.raises(ValueError):
         render(kind, {"phone": value})

@@ -15,10 +15,20 @@ For these tests, install `pytest` and `httpx` in the environment as development
 dependencies; the web runtime only needs `numeric_pairs/requirements.txt`.
 
 The app has tabs for archetypes, generation, review, coverage, corpus candidates,
-and export. Generation is deterministic by seed, selected
+naturalness, export, and the live **Neon Pipeline (`08 · צינור Neon`)**. Generation is deterministic by seed, selected
 archetypes, row index, sampling controls, and catalog/renderer version. Runs and append-only reviews are
 stored in `~/.local/share/hebrew-numeric-pairs/` (override with
-`NUMERIC_PAIRS_DATA_DIR`). There is currently no authentication: bind the server to
+`NUMERIC_PAIRS_DATA_DIR`).
+
+### Spoken Micro-Template Neon Pipeline (`08 · צינור Neon`)
+
+From the **Neon Pipeline** tab in `http://127.0.0.1:8766`, choose any target batch size and launch a background `google/gemini-4-neon` OpenChamber session (`numeric_pairs/openchamber_client.py`):
+
+1. **Dispatch:** Creates an OpenChamber session via `/api/session` (auto-discovered from `~/.config/openchamber/settings.json` or `OPENCHAMBER_URL` / `OPENCHAMBER_UI_PASSWORD`) with baked-in instructions and auto-approved tool permissions.
+2. **Mine (`pipeline_cli mine`):** Samples spoken context windows (`center ± 4` segments) from `explore.ivrit.ai` (`numeric_pairs/corpus_miner.py`, using `NUMERIC_PAIRS_DATA_DIR/ivrit_cookie.txt` or `IVRIT_AI_COOKIE`), falling back to built-in spoken exemplars when unconfigured.
+3. **Lift & Deterministic Stress Compile (`pipeline_cli submit-templates`):** Compiles `MicroTemplate` specs (`numeric_pairs/micro_templates.py`) exclusively through `adapter.py` and `core.py` (`Fragment` + `validate_pair`), generating 8 boundary/stress realizations per template.
+4. **Strict 8/8 Critic Gate (`pipeline_cli get-stress-pack` + `submit-verdicts`):** Only templates where all 8 realizations pass naturalness, agreement, and logic checks survive.
+5. **Finalize & Cost Ledger (`pipeline_cli finalize`):** Renders the requested batch size, registers a reviewable/exportable `ReviewStore` run, and tracks real-time token usage and USD session cost (`GET /api/session/{id}` + `/api/openchamber/models-metadata` fallback) per session and cumulatively across batches. There is currently no authentication: bind the server to
 localhost, not a public network.
 
 The **Archetypes** tab opens first. Search for an archetype and expand it to

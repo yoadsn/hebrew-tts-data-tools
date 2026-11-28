@@ -46,6 +46,25 @@ AIRLINE_CODE_SPOKEN = {
     "KL": "קיי אל",
 }
 
+LATIN_LETTER_SPOKEN = {
+    "A": "איי", "B": "בי", "C": "סי", "D": "די", "E": "אי", "F": "אף", "G": "ג'י",
+    "H": "אייץ'", "I": "איי", "J": "ג'יי", "K": "קיי", "L": "אל", "M": "אם", "N": "אן",
+    "O": "או", "P": "פי", "Q": "קיו", "R": "אר", "S": "אס", "T": "טי", "U": "יו",
+    "V": "וי", "W": "דאבליו", "X": "איקס", "Y": "ואי", "Z": "זד",
+}
+_PASSPORT_LETTERS = tuple(LATIN_LETTER_SPOKEN)
+_CARD_PREFIXES = ("4580", "4111", "5326", "5189", "4581", "5299", "4242", "5500")
+_INTL_PHONE_TEMPLATES = (
+    # (country_code, area_choices, mid_len, end_len)
+    ("1", ("212", "310", "415", "305", "617", "312"), 3, 4),
+    ("44", ("20", "161", "113", "131"), 4, 4),
+    ("49", ("30", "40", "89", "221"), 4, 4),
+    ("33", ("1", "4", "6"), 3, 4),
+    ("34", ("91", "93", "96"), 3, 4),
+    ("39", ("02", "06", "011"), 3, 4),
+    ("61", ("2", "3", "7"), 4, 4),
+)
+
 
 @dataclass(frozen=True)
 class Fragment:
@@ -299,6 +318,26 @@ def number(slot: str, value: int, gender: str = "f", prefix: str = "") -> Fragme
                     prefix + cardinal(value, gender), slot, "cardinal", value, "cardinal")
 
 
+HEBREW_DUAL_NOUNS: dict[str, str] = {
+    "יום": "יומיים",
+    "ימים": "יומיים",
+    "חודש": "חודשיים",
+    "חודשים": "חודשיים",
+    "שבוע": "שבועיים",
+    "שבועות": "שבועיים",
+    "שנה": "שנתיים",
+    "שנים": "שנתיים",
+    "שעה": "שעתיים",
+    "שעות": "שעתיים",
+    "פעם": "פעמיים",
+    "פעמים": "פעמיים",
+    "מאה": "מאתיים",
+    "מאות": "מאתיים",
+    "אלף": "אלפיים",
+    "אלפים": "אלפיים",
+}
+
+
 def quantity(value: int, noun: dict[str, str], *, approximate: bool = False) -> Fragment:
     singular, plural, gender = noun["singular"], noun["plural"], noun["gender"]
     if value == 1:
@@ -306,8 +345,13 @@ def quantity(value: int, noun: dict[str, str], *, approximate: bool = False) -> 
             raise ValueError("Approximation is restricted to plural quantities")
         return Fragment(f"1 {singular}", f"{singular} אחת" if gender == "f" else f"{singular} אחד",
                         "quantity", "quantity", value, "cardinal-after-noun")
-    spoken = cardinal(value, gender, construct=True)
+    dual = (HEBREW_DUAL_NOUNS.get(plural) or HEBREW_DUAL_NOUNS.get(singular)) if value == 2 else None
     pfx = "כ" if approximate else ""
+    if dual:
+        return Fragment(f"{pfx + '-' if pfx else ''}{value} {plural}",
+                        f"{pfx}{dual}", "quantity", "approximate_quantity" if approximate else "quantity",
+                        value, "hebrew-dual")
+    spoken = cardinal(value, gender, construct=True)
     return Fragment(f"{pfx + '-' if pfx else ''}{value} {plural}",
                     f"{pfx}{spoken} {plural}", "quantity", "approximate_quantity" if approximate else "quantity",
                     value, "construct-cardinal")
@@ -351,6 +395,74 @@ def valid_civil_id(value: str) -> bool:
     if len(value) != 9 or not value.isascii() or not value.isdigit():
         return False
     return sum(sum(divmod(int(digit) * (1 + i % 2), 10)) for i, digit in enumerate(value)) % 10 == 0
+
+
+def valid_luhn(value: str) -> bool:
+    """Standard Luhn payment-card checksum; generated full cards fail this check."""
+    if not value or not value.isascii() or not value.isdigit():
+        return False
+    total = 0
+    for idx, ch in enumerate(reversed(value)):
+        digit = int(ch)
+        if idx % 2 == 1:
+            digit *= 2
+            if digit > 9:
+                digit -= 9
+        total += digit
+    return total % 10 == 0
+
+
+def _sample_passport_id(rng: random.Random) -> str:
+    """Sample realistic ICAO 8–9 char passport numbers (Israeli 8-digit + international formats)."""
+    style = rng.choices(
+        ("il_8d", "num_9d", "two_let", "one_let", "mixed"),
+        weights=(35, 15, 20, 20, 10),
+        k=1,
+    )[0]
+    if style == "il_8d":
+        return str(rng.randint(1, 9)) + "".join(str(rng.randrange(10)) for _ in range(7))
+    if style == "num_9d":
+        return str(rng.randint(1, 9)) + "".join(str(rng.randrange(10)) for _ in range(8))
+    if style == "two_let":
+        d_len = rng.choice((6, 7))
+        return "".join(rng.choice(_PASSPORT_LETTERS) for _ in range(2)) + "".join(str(rng.randrange(10)) for _ in range(d_len))
+    if style == "one_let":
+        d_len = rng.choice((7, 8))
+        return rng.choice(_PASSPORT_LETTERS) + "".join(str(rng.randrange(10)) for _ in range(d_len))
+    # Mixed alphanumeric 9-char (e.g. France 12AB34567 or Germany C01X00T47)
+    if rng.random() < 0.5:
+        return (
+            "".join(str(rng.randrange(10)) for _ in range(2))
+            + "".join(rng.choice(_PASSPORT_LETTERS) for _ in range(2))
+            + "".join(str(rng.randrange(10)) for _ in range(5))
+        )
+    return (
+        rng.choice(_PASSPORT_LETTERS)
+        + "".join(str(rng.randrange(10)) for _ in range(2))
+        + rng.choice(_PASSPORT_LETTERS)
+        + "".join(str(rng.randrange(10)) for _ in range(2))
+        + rng.choice(_PASSPORT_LETTERS)
+        + "".join(str(rng.randrange(10)) for _ in range(2))
+    )
+
+
+def _spoken_passport_id(value: str) -> tuple[str, str]:
+    if value.isdigit():
+        groups = (4, 4) if len(value) == 8 else (3, 3, 3)
+        return spoken_digits(value, groups), f"icao-digits-{len(value)}"
+    tokens = [
+        LATIN_LETTER_SPOKEN[ch] if ch.isalpha() else cardinal(int(ch), "f")
+        for ch in value
+    ]
+    return " ".join(tokens), "icao-alphanumeric-passport"
+
+
+def _sample_international_phone(rng: random.Random) -> str:
+    cc, areas, mid_len, end_len = rng.choice(_INTL_PHONE_TEMPLATES)
+    area = rng.choice(areas)
+    mid = str(rng.randint(2, 9)) + "".join(str(rng.randrange(10)) for _ in range(mid_len - 1))
+    end = "".join(str(rng.randrange(10)) for _ in range(end_len))
+    return f"+{cc} {area}-{mid}-{end}"
 
 
 def domain_fragment(kind: str, values: dict[str, Any], variant: str = "natural") -> Fragment:
@@ -523,17 +635,20 @@ def domain_fragment(kind: str, values: dict[str, Any], variant: str = "natural")
                         "card_number", "identifier", written, "synthetic-card-4-4-4-4")
     if kind == "international_phone":
         value = values["international_phone"]
-        digits = value.replace("+", "").replace(" ", "").replace("-", "")
-        return Fragment(value, "פלוס " + spoken_digits(digits, (1, 3, 3, 4)),
-                        "international_phone", "identifier", value, "reserved-us-1-3-3-4")
+        parts = re.split(r"[ -]+", value.lstrip("+"))
+        digits = "".join(parts)
+        groups = tuple(len(part) for part in parts)
+        return Fragment(value, "פלוס " + spoken_digits(digits, groups),
+                        "international_phone", "identifier", value,
+                        "intl-phone-" + "-".join(str(g) for g in groups))
     if kind == "civil_id":
         value = values["civil_id"]
         return Fragment(value, spoken_digits(value, (3, 3, 3)),
                         "civil_id", "identifier", value, "invalid-checksum-3-3-3")
     if kind == "passport_id":
         value = values["passport_id"]
-        return Fragment(value, "איקס איקס " + spoken_digits(value[2:]),
-                        "passport_id", "identifier", value, "fictional-xx-digits")
+        spoken, reading = _spoken_passport_id(value)
+        return Fragment(value, spoken, "passport_id", "identifier", value, reading)
     if kind == "stopwatch_minute":
         minutes, seconds, hundredths = (values[key] for key in ("minutes", "seconds", "hundredths"))
         written = f"{minutes}:{seconds:02d}.{hundredths:02d}"
@@ -556,8 +671,11 @@ def domain_fragment(kind: str, values: dict[str, Any], variant: str = "natural")
         return Fragment(written, spoken, "account", "identifier", written, "synthetic-bank-3-3")
     if kind == "license_plate":
         value = values["plate"]
-        return Fragment(value, spoken_digits(value.replace("-", ""), (2, 3, 2)),
-                        "plate", "identifier", value, "fictional-plate-2-3-2")
+        parts = value.split("-")
+        groups = tuple(len(part) for part in parts)
+        return Fragment(value, spoken_digits("".join(parts), groups),
+                        "plate", "identifier", value,
+                        "israeli-plate-" + "-".join(str(g) for g in groups))
     if kind == "flight_number":
         value = values["flight"]
         return Fragment(f"LY{value}", "אל ואיי " + spoken_digits(str(value)),
@@ -716,18 +834,29 @@ def sample(archetype_id: str, rng: random.Random, *,
             values[spec.key] = rng.randrange(6, 24) * 60 + rng.choice(
                 [minute for minute in range(1, 60) if minute not in (15, 30, 45)])
         elif spec.generator == "card_full":
-            values[spec.key] = "0000" + "".join(str(rng.randrange(10)) for _ in range(12))
+            prefix = rng.choice(_CARD_PREFIXES) + "".join(str(rng.randrange(10)) for _ in range(11))
+            invalid_digits = [str(d) for d in range(10) if not valid_luhn(prefix + str(d))]
+            values[spec.key] = prefix + rng.choice(invalid_digits)
         elif spec.generator == "international_phone":
-            values[spec.key] = f"+1 202-555-01{rng.randrange(100):02d}"
+            values[spec.key] = _sample_international_phone(rng)
         elif spec.generator == "civil_id":
-            prefix = "000" + "".join(str(rng.randrange(10)) for _ in range(5))
-            values[spec.key] = next(prefix + str(d) for d in range(10) if not valid_civil_id(prefix + str(d)))
+            prefix = rng.choice(("0", "2", "3")) + "".join(str(rng.randrange(10)) for _ in range(7))
+            invalid_digits = [str(d) for d in range(10) if not valid_civil_id(prefix + str(d))]
+            values[spec.key] = prefix + rng.choice(invalid_digits)
         elif spec.generator == "passport_id":
-            values[spec.key] = "XX" + "".join(str(rng.randrange(10)) for _ in range(7))
+            values[spec.key] = _sample_passport_id(rng)
         elif spec.generator == "demo_account":
-            values[spec.key] = "000" + "".join(str(rng.randrange(10)) for _ in range(3))
+            values[spec.key] = str(rng.randint(100000, 999999))
         elif spec.generator == "demo_plate":
-            values[spec.key] = "00-" + "".join(str(rng.randrange(10)) for _ in range(3)) + "-" + "".join(str(rng.randrange(10)) for _ in range(2))
+            if rng.random() < 0.5:
+                p1 = f"{rng.randint(10, 99)}"
+                p2 = f"{rng.randrange(1000):03d}"
+                p3 = f"{rng.randrange(100):02d}"
+            else:
+                p1 = f"{rng.randint(100, 999)}"
+                p2 = f"{rng.randrange(100):02d}"
+                p3 = f"{rng.randrange(1000):03d}"
+            values[spec.key] = f"{p1}-{p2}-{p3}"
         elif spec.generator == "plural_millions":
             millions = rng.randint(2, 9)
             mode = rng.randrange(3)
@@ -798,23 +927,23 @@ def validate_values(archetype_id: str, values: dict[str, Any]) -> None:
             if type(value) is not int or not 6 * 60 <= value < 24 * 60 or value % 60 in (0, 15, 30, 45):
                 raise ValueError("meeting must have a non-round minute")
         elif spec.generator == "card_full":
-            if not isinstance(value, str) or len(value) != 16 or not value.startswith("0000") or not value.isascii() or not value.isdigit():
-                raise ValueError("card must be a 16-digit non-issuable 0000 test number")
+            if not isinstance(value, str) or len(value) != 16 or not value.isascii() or not value.isdigit() or (not value.startswith("0000") and valid_luhn(value)):
+                raise ValueError("card must be a 16-digit non-issuable (invalid-Luhn or 0000) number")
         elif spec.generator == "international_phone":
-            if not isinstance(value, str) or len(value) != 15 or not value.startswith("+1 202-555-01") or not value[-2:].isascii() or not value[-2:].isdigit():
-                raise ValueError("international phone must use the reserved +1 202-555-01xx range")
+            if not isinstance(value, str) or not value.isascii() or not re.fullmatch(r"\+[1-9]\d{0,2} \d{1,3}-\d{3,4}-\d{4}", value):
+                raise ValueError("international phone must match '+<cc> <area>-<mid>-<end>'")
         elif spec.generator == "civil_id":
-            if not isinstance(value, str) or len(value) != 9 or not value.startswith("000") or not value.isascii() or not value.isdigit() or valid_civil_id(value):
-                raise ValueError("civil ID must be a 9-digit fictitious invalid-checksum value")
+            if not isinstance(value, str) or len(value) != 9 or not value.isascii() or not value.isdigit() or valid_civil_id(value):
+                raise ValueError("civil ID must be a 9-digit invalid-checksum value")
         elif spec.generator == "passport_id":
-            if not isinstance(value, str) or len(value) != 9 or not value.startswith("XX") or not value[2:].isascii() or not value[2:].isdigit():
-                raise ValueError("passport must start with fictional XX and have seven digits")
+            if not isinstance(value, str) or not value.isascii() or not re.fullmatch(r"[A-Z0-9]{8,9}", value) or sum(c.isdigit() for c in value) < 5:
+                raise ValueError("passport must be an 8–9 char uppercase ICAO alphanumeric identifier with at least 5 digits")
         elif spec.generator == "demo_account":
-            if not isinstance(value, str) or len(value) != 6 or not value.startswith("000") or not value.isascii() or not value.isdigit():
-                raise ValueError("demo account must be six digits beginning 000")
+            if not isinstance(value, str) or len(value) != 6 or not value.isascii() or not value.isdigit():
+                raise ValueError("account must be six ASCII digits")
         elif spec.generator == "demo_plate":
-            if not isinstance(value, str) or len(value) != 9 or not value.startswith("00-") or value[6] != "-" or not (value[3:6] + value[7:]).isascii() or not (value[3:6] + value[7:]).isdigit():
-                raise ValueError("demo plate must use 00-xxx-xx")
+            if not isinstance(value, str) or not value.isascii() or not re.fullmatch(r"(?:\d{2}-\d{3}-\d{2}|\d{3}-\d{2}-\d{3})", value):
+                raise ValueError("plate must match XX-XXX-XX or XXX-XX-XXX")
         elif spec.generator == "plural_millions":
             if type(value) is not int or not 2_000_000 <= value <= 9_999_999 or value % 1000 == 1:
                 raise ValueError("plural_millions must be 2,000,000..9,999,999 without 001 remainder")

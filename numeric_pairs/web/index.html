@@ -67,6 +67,21 @@
     .design-structure { display: block; white-space: pre-wrap; overflow-wrap: anywhere; background: #f1f6f3; border-radius: 9px; padding: 13px; margin: 12px 0; line-height: 1.8; }
     .design-structure, .design-rule { unicode-bidi: plaintext; }
     details.panel > summary { cursor: pointer; font-weight: 750; font-size: 1.25rem; }
+    .step-list { display: grid; gap: 10px; margin: 16px 0; }
+    .step-row { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 13px 16px; border-radius: 12px; border: 1px solid #e1e9e5; background: #fbfdfb; }
+    .step-row.running { border-color: #168c73; background: #eef8f4; box-shadow: 0 0 0 2px #168c731c; }
+    .step-row.done { border-color: #bfe0d0; background: #f4fbf7; }
+    .step-row.failed { border-color: #f0c2be; background: #fff5f4; }
+    .step-dot { width: 26px; height: 26px; border-radius: 99px; display: inline-flex; align-items: center; justify-content: center; font-size: .82rem; font-weight: 800; background: #e5ece8; color: #587074; }
+    .step-row.running .step-dot { background: #168c73; color: #fff; animation: ocPulse 1.3s ease-in-out infinite; }
+    .step-row.done .step-dot { background: #136f60; color: #fff; }
+    .step-row.failed .step-dot { background: #ae3139; color: #fff; }
+    .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 99px; background: #168c73; margin-inline-start: 6px; animation: ocPulse 1.2s ease-in-out infinite; }
+    .pill-warn { background: #fff4e5; color: #8a4b08; }
+    .pill-err { background: #fdecea; color: #a1262e; }
+    .pill-ok { background: #dff3e8; color: #115e46; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .82rem; direction: ltr; unicode-bidi: isolate; }
+    @keyframes ocPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.92); } }
     [x-cloak] { display: none !important; }
     @media (max-width: 800px) { .grid, .pair, .coverage-grid, .design-grid { grid-template-columns: 1fr; } .metric-grid { grid-template-columns: repeat(2, 1fr); } .shell { padding: 20px 15px 50px; } header { align-items: start; flex-direction: column; } }
   </style>
@@ -82,6 +97,7 @@
     <button :class="{active:tab==='candidates'}" @click="tab='candidates'; loadCandidates()">05 · מועמדים</button>
     <button :class="{active:tab==='naturalness'}" @click="tab='naturalness'; loadNaturalness()">06 · טבעיות הדיבור</button>
     <button :class="{active:tab==='export'}" @click="tab='export'">07 · ייצוא</button>
+    <button :class="{active:tab==='pipeline'}" @click="openPipelineTab()">08 · צינור Neon <span class="live-dot" x-show="pipelineBatch?.status === 'running'" x-cloak></span></button>
   </nav>
   <p class="error" role="alert" x-show="error" x-text="error" x-cloak></p>
 
@@ -115,24 +131,59 @@
   </section>
 
   <section x-show="tab==='generate'" x-cloak>
-    <div class="grid"><div class="panel"><h2>הרצת דגימה</h2><p class="subtle">אותו זרע, אותם ארכיטיפים ואותה גרסת קטלוג יפיקו בדיוק את אותם משפטים. עד 200 דוגמאות בהרצה.</p>
-      <div class="fields"><label class="field">זרע אקראי <input type="number" x-model.number="seed" step="1"></label><label class="field">מספר דוגמאות <input type="number" x-model.number="count" min="1" max="200"></label><button class="primary" :disabled="busy" @click="createRun()" x-text="busy ? 'מייצר…' : 'יצירת דוגמאות'"></button></div>
+    <div class="grid"><div class="panel"><h2>יצירת מערך נתונים (מיקרו-תבניות + Tier-1)</h2><p class="subtle">דגימה דטרמיניסטית ב-$0 עלות מודל מתוך ספריית תבניות המיקרו השמורה + תבניות Tier-1 הפשוטות. אותו זרע ואותו יחס יפיקו בדיוק את אותם משפטים.</p>
+      <div class="view" style="margin:12px 0 16px">
+        <div class="row">
+          <div>
+            <strong>ספריית תבניות המיקרו הפעילה:</strong>
+            <span class="pill" :class="(library?.enabled_templates || 0) > 0 ? 'pill-ok' : 'pill-warn'" x-text="(library?.enabled_templates || 0) + ' תבניות פעילות (מתוך ' + (library?.total_templates || 0) + ')'"></span>
+            <span class="pill" x-show="(library?.covered_usages_count || 0) > 0" x-text="(library?.covered_usages_count || 0) + ' / ' + (library?.total_archetypes || 69) + ' שימושים מספריים'"></span>
+          </div>
+          <div class="meta">
+            <button type="button" class="secondary" @click="syncLibrary(true)" x-text="(library?.total_templates || 0) ? 'סנכרון ספרייה מאצוות' : 'ייבוא תבניות מאצוות Neon'"></button>
+            <button type="button" class="secondary" @click="openPipelineTab()">ניהול ספרייה ←</button>
+          </div>
+        </div>
+        <p class="muted" style="margin:6px 0 0" x-show="(library?.enabled_templates || 0) === 0">אין כרגע תבניות מיקרו פעילות בספרייה — אם יוזמן תמהיל מעורב המערכת תשתמש ב-Tier-1 כגיבוי אוטומטי.</p>
+      </div>
+      <div class="fields">
+        <label class="field">זרע אקראי <input type="number" x-model.number="seed" step="1"></label>
+        <label class="field">מספר משפטים <input type="number" x-model.number="count" min="1" max="50000"></label>
+        <label class="field">יחס מיקרו-תבניות (<span x-text="Math.round(microTemplateRatio * 100) + '% מיקרו · ' + Math.round((1 - microTemplateRatio) * 100) + '% Tier-1'"></span>)
+          <input type="range" min="0" max="1" step="0.05" x-model.number="microTemplateRatio">
+        </label>
+        <button class="primary" :disabled="busy" @click="createRun()" x-text="busy ? 'מייצר…' : 'יצירת דוגמאות'"></button>
+      </div>
+      <div class="coverage-list" style="margin:0 0 12px">
+        <template x-for="preset in [69, 200, 1000, 5000, 10000]" :key="preset">
+          <button type="button" class="secondary" :class="{selected: count === preset}" @click="count = preset" x-text="preset.toLocaleString() + ' משפטים'"></button>
+        </template>
+      </div>
+      <div class="coverage-list" style="margin:0 0 16px">
+        <template x-for="rp in [{v:1, l:'100% מיקרו-תבניות'}, {v:0.8, l:'80% מיקרו · 20% Tier-1 (ברירת מחדל)'}, {v:0.5, l:'50% / 50%'}, {v:0, l:'0% (Tier-1 בלבד)'}]" :key="rp.v">
+          <button type="button" class="secondary" :class="{selected: Math.abs(microTemplateRatio - rp.v) < 0.001}" @click="microTemplateRatio = rp.v" x-text="rp.l"></button>
+        </template>
+      </div>
+      <p class="muted" style="margin:0 0 16px" x-text="previewMixSummary()"></p>
       <div><strong>בחירת ארכיטיפים</strong><p class="subtle">יש לבחור לפחות אחד. ״טרם נדגמו״ מתייחס לכל ההרצות השמורות, גם אם לא נשארו ברשימת ההרצות האחרונות.</p><div class="feedback"><button class="secondary" @click="selectNeverRan()">בחירת ארכיטיפים שטרם נדגמו</button><button class="secondary" @click="selected = catalog.archetypes.map(a => a.id); count = selected.length">בחירת הכול</button><span class="muted" x-text="selected.length + ' נבחרו'"></span></div><template x-for="item in catalog?.archetypes || []" :key="item.id"><label class="check"><input type="checkbox" :value="item.id" x-model="selected"><span x-text="item.title"></span></label></template></div>
       <div style="margin-top:22px"><strong>התפלגות מספרי בתים</strong><p class="subtle">אורך הספרות לבחירה; שאר הקטגוריות שומרות על תחום הערכים שלהן.</p><template x-for="n in [1,2,3,4,5]" :key="n"><label class="check"><input type="checkbox" :value="n" x-model="addressLengths"><span x-text="n + ' ספרות'"></span></label></template></div>
       <label class="field" style="margin-top:18px">משקל ערכי גבול (לעומת ערך מקרי)<select x-model.number="boundaryWeight"><option value="0">0%</option><option value="0.25">25%</option><option value="0.5">50%</option><option value="1">100%</option></select></label>
       <details style="margin-top:18px"><summary>סגנון הקראה: טבעי לעומת תקני</summary><p class="subtle">ברירת מחדל: 100% דיבור טבעי. הצורות התקניות שמורות, אך לא יידגמו כל עוד המשקל שלהן הוא 0%. שינוי המשקל ייצור הרצה נפרדת.</p>
         <template x-for="id in Object.keys(catalog?.default_formal_weights || {})" :key="id"><label class="field" style="margin-top:12px"><span x-text="titleFor(id) + ' · משקל הצורה התקנית'"></span><select x-model.number="variantWeights[id]"><option value="0">0%</option><option value="0.1">10%</option><option value="0.25">25%</option><option value="0.5">50%</option><option value="1">100%</option></select></label></template>
       </details>
-    </div><aside class="panel"><h2>הרצות קודמות</h2><p class="subtle" x-show="!runs.length">אין עדיין הרצות שמורות.</p><template x-for="item in runs" :key="item.id"><button class="secondary archive" @click="loadRun(item.id)"><strong x-text="item.count + ' משפטים'"></strong><br><small x-text="'זרע ' + item.seed + ' · ' + item.id.slice(0,8)"></small></button></template></aside></div>
+    </div><aside class="panel"><h2>הרצות קודמות</h2><p class="subtle" x-show="!runs.length">אין עדיין הרצות שמורות.</p><template x-for="item in runs" :key="item.id"><button class="secondary archive" @click="loadRun(item.id)"><strong x-text="item.count.toLocaleString() + ' משפטים'"></strong><br><small x-text="'זרע ' + item.seed + ' · ' + item.id.slice(0,8) + (item.micro_template_count > 0 ? ' · ' + item.micro_template_count + ' מיקרו / ' + item.tier1_count + ' Tier-1' : (item.source === 'neon_pipeline' ? ' · אצוות Neon' : ''))"></small></button></template></aside></div>
   </section>
 
   <section x-show="tab==='review'" x-cloak>
-    <div class="panel row" x-show="run"><div><h2>סקירת דוגמאות</h2><span class="muted" x-text="run ? 'הרצה ' + run.id + ' · זרע ' + run.seed + ' · גרסה ' + run.catalog_version : ''"></span><p class="subtle">כל דוגמה תקינה כברירת מחדל. השתמשו בדחייה או בהצעת תיקון רק כשצריך.</p></div><button class="secondary" @click="rerun()">הרצה חוזרת</button></div>
+    <div class="panel row" x-show="run"><div><h2>סקירת דוגמאות</h2><span class="muted" x-text="run ? 'הרצה ' + run.id + ' · זרע ' + run.seed + ' · גרסה ' + run.catalog_version + (run.mix?.micro_template_count ? ' · ' + run.mix.micro_template_count + ' מיקרו-תבניות (' + Math.round((run.mix.actual_micro_template_ratio || 0) * 100) + '%) + ' + run.mix.tier1_count + ' Tier-1' : '') : ''"></span><p class="subtle">כל דוגמה תקינה כברירת מחדל. השתמשו בדחייה או בהצעת תיקון רק כשצריך.</p></div><button class="secondary" @click="rerun()">הרצה חוזרת</button></div>
     <div class="panel empty" x-show="!run">אין דוגמאות להצגה. עברו ללשונית ״יצירה״ כדי להתחיל.</div>
-    <template x-for="pair in run?.pairs || []" :key="pair.id"><article class="sample"><div class="row"><div class="meta"><span class="pill" x-text="titleFor(pair.archetype_id)"></span><span x-text="'#' + (pair.index + 1)"></span><span x-text="pair.alignments.map(a => a.slot + ': ' + a.value).join(' · ')"></span><span class="pill" x-show="pair.reading_variant" x-text="pair.reading_variant === 'formal' ? 'קריאה תקנית' : 'קריאה טבעית'"></span></div><span class="pill" x-text="feedback[pair.id] ? verdictText(feedback[pair.id].verdict) : 'תקין כברירת מחדל'"></span></div>
+    <template x-for="pair in (run?.pairs || []).slice(0, reviewDisplayLimit)" :key="pair.id"><article class="sample"><div class="row"><div class="meta"><span class="pill" x-text="titleFor(pair.archetype_id)"></span><span class="pill" :class="pair.micro_template_id ? 'pill-ok' : ''" x-text="pair.micro_template_id ? ('מיקרו-תבנית · ' + pair.micro_template_id) : 'Tier-1'"></span><span x-text="'#' + (pair.index + 1)"></span><span x-text="pair.alignments.map(a => a.slot + ': ' + a.value).join(' · ')"></span><span class="pill" x-show="pair.reading_variant" x-text="pair.reading_variant === 'formal' ? 'קריאה תקנית' : 'קריאה טבעית'"></span></div><span class="pill" x-text="feedback[pair.id] ? verdictText(feedback[pair.id].verdict) : 'תקין כברירת מחדל'"></span></div>
       <div class="pair"><div class="view"><small>צורה כתובה · ספרות</small><div class="sentence" dir="rtl" x-html="highlight(pair, 'digits')"></div></div><div class="view"><small>צורה נאמרת · מילים</small><div class="sentence" dir="rtl" x-html="highlight(pair, 'cardinal')"></div></div></div>
       <div class="feedback"><label class="field">הערה או הצעת תיקון <textarea x-model="notes[pair.id]" placeholder="מה לא טבעי? איזו צורה עדיפה?" maxlength="2000"></textarea></label><button class="secondary" @click="submit(pair, 'reject')">לדחות</button><button class="secondary" @click="submit(pair, 'correct')">להציע תיקון</button><button class="secondary" x-show="feedback[pair.id] && feedback[pair.id].verdict !== 'accept'" @click="submit(pair, 'accept')">להחזיר לתקין</button><span class="success" x-show="saved===pair.id">המשוב נשמר</span></div>
     </article></template>
+    <div class="panel" style="margin-top:14px; text-align:center" x-show="(run?.pairs?.length || 0) > reviewDisplayLimit">
+      <button class="secondary" @click="reviewDisplayLimit += 100" x-text="'הצג עוד 100 דוגמאות (מוצגות ' + Math.min(reviewDisplayLimit, run?.pairs?.length || 0) + ' מתוך ' + (run?.pairs?.length || 0) + ')'"></button>
+    </div>
   </section>
   <section x-show="tab==='coverage'" x-cloak>
     <div class="panel empty" x-show="!run">בחרו הרצה קיימת או צרו דוגמאות כדי לראות את הכיסוי.</div>
@@ -177,28 +228,575 @@
       <p x-show="run" x-text="run ? 'הרצה: ' + run.id + ' · גרסת קטלוג: ' + run.catalog_version : ''"></p>
       <button class="primary" :disabled="!run || busy" @click="exportRun()">יצירת ייצוא להרצה הנבחרת</button>
       <div x-show="exportResult" style="margin-top:18px"><div class="metric-grid"><template x-for="[name,count] in Object.entries(exportResult?.manifest?.splits || {})" :key="name"><div class="metric"><strong x-text="count"></strong><span x-text="name"></span></div></template></div>
-        <p class="subtle" x-text="exportResult ? exportResult.manifest.exported + ' מתוך ' + exportResult.manifest.generated + ' דוגמאות עברו את שערי האיכות' : ''"></p>
+        <p class="subtle" x-text="exportResult ? exportResult.manifest.exported + ' מתוך ' + exportResult.manifest.generated + ' דוגמאות עברו את שערי האיכות' + (exportResult.manifest.source_tiers ? ' · מיקרו-תבניות: ' + (exportResult.manifest.source_tiers.micro_template || 0) + ' · Tier-1: ' + (exportResult.manifest.source_tiers.tier1 || 0) : '') + (exportResult.manifest.quality_gates?.zero_template_leakage ? ' · ✓ ללא זליגת תבניות בין splits' : '') : ''"></p>
         <div class="coverage-list"><template x-for="filename in ['manifest.json','train.jsonl','dev.jsonl','test.jsonl']" :key="filename"><a class="secondary" :href="exportResult ? '/api/exports/'+exportResult.id+'/'+filename : '#'" x-text="filename" download></a></template></div>
       </div>
+    </div>
+  </section>
+
+  <section x-show="tab==='pipeline'" x-cloak>
+    <div class="panel">
+      <div class="row">
+        <div>
+          <h2>צינור Gemini 4 Neon · תבניות מיקרו מדוברות</h2>
+          <p class="subtle">משגר סשן Gemini 4 Neon מאחורי הקלעים ב-OpenChamber: דגימת הקשרי שיחה מ-explore.ivrit.ai ← חילוץ תבניות מיקרו ← קומפילציה דטרמיניסטית ו-8 דגימות קצה ← שער בקרה מחמיר (8/8) ← הפקת זוגות מיושרים ומעקב עלות מלא.</p>
+        </div>
+        <div class="meta">
+          <span class="pill" :class="pipelineEnv?.openchamber?.configured ? 'pill-ok' : 'pill-err'" x-text="pipelineEnv?.openchamber?.configured ? 'OpenChamber מחובר (' + pipelineEnv.openchamber.base_url + ')' : 'OpenChamber לא זוהה'"></span>
+          <span class="pill" :class="pipelineEnv?.ivrit_cookie?.configured ? 'pill-ok' : 'pill-warn'" x-text="pipelineEnv?.ivrit_cookie?.configured ? 'ivrit.ai מחובר (עוגייה פעילה)' : 'ivrit.ai: דוגמאות מובנות'"></span>
+          <span class="pill pill-ok" x-show="(pipelineEnv?.corpus_sources?.enabled_count || 0) > 0" x-text="'מקורות טקסט: ' + (pipelineEnv?.corpus_sources?.enabled_count || 0) + ' פעילים'"></span>
+          <span class="pill pill-err" x-show="pipelineLedger.total_engine_bugs > 0" x-text="'⚠️ ' + pipelineLedger.total_engine_bugs + ' באגי מנוע שסומנו'"></span>
+        </div>
+      </div>
+      <div class="metric-grid" style="margin-top:16px">
+        <div class="metric"><strong x-text="(library?.official_templates || 0) + ' בגיט · ' + (library?.enabled_templates || 0) + ' פעילות'"></strong>ספריית תבניות המיקרו</div>
+        <div class="metric"><strong class="mono" x-text="'$' + formatUsd(pipelineLedger.total_cost_usd)"></strong>סה״כ עלות סשנים (USD)</div>
+        <div class="metric"><strong class="mono" x-text="'$' + formatUsd(pipelineLedger.avg_cost_per_100_pairs_usd)"></strong>עלות ממוצעת ל-100 משפטים</div>
+        <div class="metric"><strong x-text="pipelineTier1Coverage.covered_count + ' / ' + pipelineTier1Coverage.total_archetypes"></strong>שימושי Tier-1 מכוסים בדיבור חי</div>
+        <div class="metric"><strong x-text="pipelineLedger.succeeded_batches + ' / ' + pipelineLedger.total_batches"></strong>אצוות שהושלמו</div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <div class="row">
+        <div>
+          <h2>ספריית תבניות המיקרו (רשמי בגיט + שכבה מקומית)</h2>
+          <p class="subtle">אצוות Neon חדשות נשמרות אוטומטית מקומית (<code class="mono">~/.local/share/.../micro_template_library.json</code>). כדי להפוך תבניות לרשמיות בקוד המקור (<code class="mono">numeric_pairs/micro_template_library.json</code>), בחרו אותן למטה ולחצו על <strong>פרסום לריפו</strong>. בלשונית ״02 · יצירה״ וב-CLI (<code class="mono">python -m numeric_pairs</code>) נוצרים משפטים ב-$0 בתמהיל 80/20.</p>
+          <div class="meta" style="margin-top:8px">
+            <span class="pill pill-ok" x-text="'רשמיות בגיט: ' + (library?.official_templates || 0)"></span>
+            <span class="pill" :class="(library?.unpublished_enabled_templates || 0) > 0 ? 'pill-warn' : ''" x-text="'פעילות שטרם פורסמו: ' + (library?.unpublished_enabled_templates || 0)"></span>
+            <span class="pill" x-show="(library?.unpublished_templates || 0) > (library?.unpublished_enabled_templates || 0)" x-text="'סה״כ לא פורסמו (כולל מושבתות): ' + (library?.unpublished_templates || 0)"></span>
+          </div>
+        </div>
+        <div class="meta">
+          <button type="button" class="secondary" @click="syncLibrary(false)">סנכרון כל האצוות</button>
+          <button type="button" class="secondary" @click="syncLibrary(true)">סנכרון (השבתת אצוות ישנות חד-מספריות)</button>
+          <a class="secondary" href="/api/library/download?scope=official" x-show="library?.exists" download="micro_template_library.json" style="text-decoration:none; padding:9px 14px; border-radius:10px; border:1px solid #c9d9d7; color:#18474b; font-weight:600">הורדת JSON</a>
+          <button type="button" class="primary" @click="tab='generate'">לייצור דאטאסט 80/20 ←</button>
+        </div>
+      </div>
+      <p class="success" x-show="libraryMsg" x-text="libraryMsg" style="margin:8px 0 0"></p>
+
+      <div class="view" style="margin-top:14px; border:1px solid #b8d8d0" x-show="unpublishedTemplates(true).length > 0">
+        <div class="row">
+          <div>
+            <strong>פרסום לריפו · בחירת תבניות שטרם פורסמו ל-<code class="mono">numeric_pairs/micro_template_library.json</code></strong>
+            <p class="muted" style="margin:4px 0 0">תבניות שיפורסמו עוברות אימות מלא מול המנוע ומוכנות ל-<code class="mono">git commit</code> (ללא טרנסקריפטים גולמיים או הגדרות מקומיות).</p>
+          </div>
+          <div class="meta">
+            <button type="button" class="primary" :disabled="!publishSelected.length || busy" @click="publishSelectedToRepo()" x-text="'פרסום ' + publishSelected.length + ' נבחרות לריפו (Git)'"></button>
+          </div>
+        </div>
+        <div class="feedback" style="margin-top:10px">
+          <button type="button" class="secondary" @click="selectAllUnpublished()">בחר הכול (<span x-text="unpublishedTemplates().length"></span>)</button>
+          <button type="button" class="secondary" @click="publishSelected = []">נקה בחירה</button>
+          <label class="check" style="margin:0"><input type="checkbox" x-model="publishIncludeDisabled" @change="reconcilePublishSelection()"><span>הצג גם תבניות מושבתות שטרם פורסמו</span></label>
+          <span class="muted" x-text="publishSelected.length + ' נבחרו לפרסום'"></span>
+        </div>
+        <div class="coverage-list" style="margin-top:8px" x-show="unpublishedBatches().length > 1">
+          <template x-for="ub in unpublishedBatches()" :key="ub.batch_id">
+            <button type="button" class="secondary" @click="selectUnpublishedBatch(ub.batch_id)" x-text="'+ בחר אצווה ' + ub.batch_id + ' (' + ub.count + ')'"></button>
+          </template>
+        </div>
+        <div style="margin-top:10px; max-height:320px; overflow-y:auto; display:grid; gap:8px; padding-left:4px">
+          <template x-for="ut in unpublishedTemplates()" :key="ut.id">
+            <label class="view" style="display:block; cursor:pointer; padding:10px 12px">
+              <div class="row">
+                <div class="meta">
+                  <input type="checkbox" :value="ut.id" x-model="publishSelected">
+                  <strong class="mono" x-text="ut.id"></strong>
+                  <span class="pill" x-text="ut.source_batch_id"></span>
+                  <span class="pill" x-text="titleFor(ut.archetype_id)"></span>
+                  <span class="pill pill-warn" x-text="ut.publish_status === 'modified' ? 'שונה מקומית' : 'טרם פורסם'"></span>
+                  <span class="pill" x-show="!ut.enabled">מושבתת (תופעל בפרסום)</span>
+                </div>
+              </div>
+              <p dir="rtl" style="margin:6px 0 2px; font-size:.92rem" x-text="ut.preview?.digits"></p>
+              <small class="muted" dir="rtl" x-text="ut.preview?.cardinal"></small>
+            </label>
+          </template>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; display:grid; gap:8px" x-show="(library?.batches || []).length">
+        <template x-for="lb in library?.batches || []" :key="lb.batch_id">
+          <div class="view row">
+            <div class="meta">
+              <strong class="mono" x-text="lb.batch_id"></strong>
+              <span class="pill" :class="lb.enabled > 0 ? 'pill-ok' : 'pill-warn'" x-text="lb.enabled + ' / ' + lb.total + ' פעילות'"></span>
+              <span class="pill" :class="lb.published === lb.total ? 'pill-ok' : (lb.published > 0 ? '' : 'pill-warn')" x-text="'בגיט: ' + (lb.published || 0) + ' / ' + lb.total"></span>
+              <span class="pill" x-text="lb.multi_num + ' רב-מספריות'"></span>
+            </div>
+            <div class="meta">
+              <button type="button" class="secondary" x-show="lb.enabled < lb.total" @click="toggleLibraryBatch(lb.batch_id, true)">הפעל אצווה בספרייה</button>
+              <button type="button" class="secondary" x-show="lb.enabled > 0" @click="toggleLibraryBatch(lb.batch_id, false)">השבת אצווה</button>
+            </div>
+          </div>
+        </template>
+      </div>
+      <details style="margin-top:12px" x-show="(library?.templates || []).length">
+        <summary style="cursor:pointer; font-weight:700; color:#28565a" x-text="'עיון וניהול תבניות בודדות בספרייה (' + (library?.templates?.length || 0) + ')'"></summary>
+        <div style="margin-top:10px; display:grid; gap:8px">
+          <template x-for="lt in (library?.templates || []).slice(0, libraryPreviewLimit)" :key="lt.id">
+            <div class="view">
+              <div class="row">
+                <div class="meta">
+                  <strong class="mono" x-text="lt.id"></strong>
+                  <span class="pill" x-text="lt.source_batch_id"></span>
+                  <span class="pill" x-text="titleFor(lt.archetype_id)"></span>
+                  <span class="pill" :class="lt.publish_status === 'published' ? 'pill-ok' : 'pill-warn'" x-text="lt.publish_status === 'published' ? 'רשמי בגיט' : (lt.publish_status === 'modified' ? 'שונה מקומית' : 'מקומי · טרם פורסם')"></span>
+                  <span class="pill" :class="lt.enabled ? 'pill-ok' : 'pill-warn'" x-text="lt.enabled ? 'פעילה' : 'מושבתת'"></span>
+                </div>
+                <div class="meta">
+                  <button type="button" class="secondary" @click="toggleLibraryTemplate(lt.id, !lt.enabled)" x-text="lt.enabled ? 'השבת' : 'הפעל'"></button>
+                  <button type="button" class="secondary" x-show="lt.publish_status === 'published'" @click="unpublishLibraryTemplate(lt.id)">הסר מגיט</button>
+                  <button type="button" class="secondary" x-show="lt.source_scope !== 'official'" @click="deleteLibraryTemplate(lt.id)">מחק מקומית</button>
+                </div>
+              </div>
+              <p dir="rtl" style="margin:6px 0 2px" x-text="lt.preview?.digits"></p>
+              <small class="muted" dir="rtl" x-text="lt.preview?.cardinal"></small>
+            </div>
+          </template>
+          <button type="button" class="secondary" x-show="(library?.templates?.length || 0) > libraryPreviewLimit" @click="libraryPreviewLimit += 30" x-text="'הצג עוד 30 תבניות'"></button>
+        </div>
+      </details>
+    </div>
+
+    <div class="grid" style="margin-top:16px">
+      <div>
+        <div class="panel">
+          <h2>שיגור אצווה חדשה לחילוץ תבניות מיקרו</h2>
+          <div class="fields">
+            <label class="field">תבניות מיקרו לחילוץ (3–55) <input type="number" x-model.number="pipelineForm.template_count" min="3" max="55" step="1"></label>
+            <label class="field">משפטי תצוגה מקדימה <input type="number" x-model.number="pipelineForm.target_count" min="1" max="5000" step="1"></label>
+            <label class="field">זרע אקראי <input type="number" x-model.number="pipelineForm.seed" step="1"></label>
+            <label class="field">תמהיל קורפוס מול מזהים
+              <select x-model.number="pipelineForm.corpus_ratio">
+                <option value="1">100% השראת קורפוס דיבור</option>
+                <option value="0.75">75% קורפוס · 25% טלפונים/מזהים/כתובות</option>
+                <option value="0.5">50% קורפוס · 50% טלפונים/מזהים/כתובות</option>
+                <option value="0">100% תרחישי שיחה למזהים וטלפונים</option>
+              </select>
+            </label>
+            <label class="field">מאמץ חשיבה (Neon)
+              <select x-model="pipelineForm.variant">
+                <option value="default">ברירת מחדל</option>
+                <option value="low">מהיר (low)</option>
+                <option value="medium">מאוזן (medium)</option>
+                <option value="high">מעמיק (high)</option>
+              </select>
+            </label>
+            <label class="field">מקור השראות דיבור
+              <select x-model="pipelineForm.snippet_source_mode">
+                <option value="live">דגימה חיה חדשה (ivrit.ai + מקורות טקסט)</option>
+                <option value="reuse_all" x-show="(pipelineEnv?.reusable_snippets?.total_unique_snippets || 0) > 0" x-text="'שימוש חוזר בהשראות קיימות (' + (pipelineEnv?.reusable_snippets?.total_unique_snippets || 0) + ' קטעים ייחודיים)'"></option>
+                <template x-for="rb in (pipelineEnv?.reusable_snippets?.batches || []).slice(0, 6)" :key="rb.id">
+                  <option :value="'batch:' + rb.id" x-text="'שימוש חוזר מאצווה ' + rb.id + ' (' + rb.snippet_count + ' קטעים)'"></option>
+                </template>
+              </select>
+            </label>
+          </div>
+          <div class="coverage-list" style="margin:0 0 14px">
+            <template x-for="preset in [{t:15, p:60, l:'15 תבניות (60 דוגמאות)'}, {t:30, p:150, l:'30 תבניות (150 דוגמאות)'}, {t:55, p:300, l:'55 תבניות — מקסימום לאצווה (300 דוגמאות)'}]" :key="preset.t">
+              <button type="button" class="secondary" :class="{selected: pipelineForm.template_count === preset.t}" @click="pipelineForm.template_count = preset.t; pipelineForm.target_count = preset.p" x-text="preset.l"></button>
+            </template>
+          </div>
+          <label class="field">הנחיה אופציונלית לסשן Gemini 4 Neon (ריק = כיסוי אוטומטי של ארכיטיפי Tier-1 שטרם כוסו)
+            <textarea x-model="pipelineForm.notes" maxlength="2000" placeholder="ברירת מחדל (כשריק): המערכת בוחרת אוטומטית ארכיטיפי Tier-1 שטרם כוסו בדיבור חי, מחפשת עבורם השראה ממוקדת ב-explore.ivrit.ai, ומייצרת להם תבניות טבעיות. הזן טקסט רק אם תרצה למקד נושא אחר באצווה הזו."></textarea>
+          </label>
+          <details style="margin-top:14px">
+            <summary style="cursor:pointer; font-weight:700; color:#28565a">הגדרות עוגיית סשן explore.ivrit.ai (לדגימה חיה מהקורפוס)</summary>
+            <p class="subtle" style="margin-top:8px">העוגייה נשמרת מקומית בלבד בתיקיית הנתונים של המשתמש (הרשאות 0600) ואינה נכנסת לריפו. ניתן להדביק את ערך ה-Cookie מתוך הדפדפן.</p>
+            <textarea x-model="ivritCookieDraft" placeholder="ph_phc_...; __Host-xhost_id=..." style="margin-top:8px; direction:ltr"></textarea>
+            <div style="margin-top:8px; display:flex; gap:8px; align-items:center">
+              <button type="button" class="secondary" @click="saveIvritCookie()">שמירת עוגייה</button>
+              <span class="success" x-show="cookieSavedMsg" x-text="cookieSavedMsg"></span>
+            </div>
+          </details>
+          <details style="margin-top:10px">
+            <summary style="cursor:pointer; font-weight:700; color:#28565a" x-text="'מקורות קורפוס נוספים · קובצי טקסט מקומיים / SSH (' + (pipelineEnv?.corpus_sources?.count || 0) + ')'"></summary>
+            <p class="subtle" style="margin-top:8px">תצורת מקורות נשמרת מקומית בלבד (<code class="mono" x-text="pipelineEnv?.corpus_sources?.path || 'corpus_sources.json'"></code>) ואינה נכנסת לקוד. סוכן Neon יכול לחפש בהם באמצעות <code class="mono">pipeline_cli search-source</code>.</p>
+            <div x-show="(pipelineEnv?.corpus_sources?.sources || []).length" style="display:grid; gap:8px; margin-top:10px">
+              <template x-for="src in pipelineEnv?.corpus_sources?.sources || []" :key="src.id">
+                <div class="view">
+                  <div class="row">
+                    <div class="meta">
+                      <strong x-text="src.name"></strong>
+                      <code class="mono" x-text="src.id"></code>
+                      <span class="pill" x-text="src.location === 'ssh' ? ('SSH · ' + src.ssh_host) : 'קובץ מקומי'"></span>
+                    </div>
+                    <button type="button" class="secondary" @click="deleteCorpusSource(src.id)">הסרה</button>
+                  </div>
+                  <div class="mono muted" style="font-size:.82rem; margin-top:4px; direction:ltr; text-align:left" x-text="src.path"></div>
+                  <p class="subtle" style="margin:4px 0 0" x-show="src.description" x-text="src.description"></p>
+                </div>
+              </template>
+            </div>
+            <div class="fields" style="margin-top:12px">
+              <label class="field">מזהה מקור (slug באנגלית)<input type="text" x-model="sourceForm.id" placeholder="knesset_committees" style="direction:ltr"></label>
+              <label class="field">שם תצוגה<input type="text" x-model="sourceForm.name" placeholder="פרוטוקולי ועדות הכנסת"></label>
+              <label class="field">מיקום הקובץ
+                <select x-model="sourceForm.location">
+                  <option value="ssh">מרוחק (SSH)</option>
+                  <option value="local">מקומי (Local)</option>
+                </select>
+              </label>
+              <label class="field" x-show="sourceForm.location === 'ssh'">שרת SSH<input type="text" x-model="sourceForm.ssh_host" placeholder="my-compute-host" style="direction:ltr"></label>
+              <label class="field">נתיב לקובץ הטקסט (שורה למשפט)<input type="text" x-model="sourceForm.path" placeholder="/path/to/corpus.txt" style="direction:ltr"></label>
+              <label class="field">תיאור קצר (אופציונלי)<input type="text" x-model="sourceForm.description" placeholder="פרוטוקולי ועדות — משפט אחד לשורה"></label>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+              <button type="button" class="secondary" @click="saveCorpusSource()">שמירת מקור טקסט</button>
+              <span class="success" x-show="sourceSavedMsg" x-text="sourceSavedMsg"></span>
+            </div>
+            <div x-show="(pipelineEnv?.corpus_sources?.sources || []).length" style="margin-top:14px; padding-top:12px; border-top:1px solid #d7e2df">
+              <strong>בדיקת חיפוש ישיר (Regexp / מחרוזת):</strong>
+              <div class="fields" style="margin-top:8px">
+                <label class="field">מקור
+                  <select x-model="sourceSearch.source_id">
+                    <template x-for="src in pipelineEnv?.corpus_sources?.sources || []" :key="src.id">
+                      <option :value="src.id" x-text="src.name + ' (' + src.id + ')'"></option>
+                    </template>
+                  </select>
+                </label>
+                <label class="field">דפוס חיפוש<input type="text" x-model="sourceSearch.query" placeholder="סעיף\s+\d+"></label>
+                <label class="field">מצב
+                  <select x-model="sourceSearch.mode">
+                    <option value="regex">Regexp (PCRE)</option>
+                    <option value="fixed">מחרוזת מדויקת (Fixed)</option>
+                    <option value="ere">POSIX ERE</option>
+                  </select>
+                </label>
+                <label class="field">מגבלת תוצאות<input type="number" x-model.number="sourceSearch.limit" min="1" max="50"></label>
+              </div>
+              <button type="button" class="secondary" :disabled="sourceSearchBusy" @click="runSourceSearch()" x-text="sourceSearchBusy ? 'מחפש…' : 'הרצת חיפוש'"></button>
+              <div x-show="sourceSearchResult" style="margin-top:10px">
+                <small class="muted" x-text="sourceSearchResult ? ('נמצאו ' + sourceSearchResult.match_count + ' התאמות' + (sourceSearchResult.truncated ? ' (יש עוד)' : '')) : ''"></small>
+                <ol class="design-list" style="margin-top:6px">
+                  <template x-for="m in sourceSearchResult?.matches || []" :key="m.line_number">
+                    <li><span class="mono muted" x-text="'#' + m.line_number + ' · '"></span><span dir="rtl" x-text="m.text"></span></li>
+                  </template>
+                </ol>
+              </div>
+            </div>
+          </details>
+          <div class="row" style="margin-top:18px">
+            <button class="primary" :disabled="busy || pipelineBatch?.status === 'running'" @click="startPipelineBatch()" x-text="pipelineBatch?.status === 'running' ? 'אצווה פעילה כעת…' : 'שיגור אצווה לסשן Gemini 4 Neon'"></button>
+            <span class="muted" x-show="pipelineBatch?.status === 'running'">פולינג חי מתבצע כל 2 שניות עד להשלמת התוצאה…</span>
+          </div>
+        </div>
+
+        <template x-if="pipelineBatch">
+          <div>
+            <div class="panel" style="margin-top:16px">
+              <div class="row">
+                <div>
+                  <h2 x-text="'מעקב חי · אצווה ' + pipelineBatch.id"></h2>
+                  <p class="subtle" x-text="'יעד: ' + pipelineBatch.target_count + ' משפטים · זרע ' + pipelineBatch.seed + ' · מודל ' + pipelineBatch.model"></p>
+                </div>
+                <div class="meta">
+                  <span class="pill" :class="batchStatusClass(pipelineBatch.status)" x-text="batchStatusLabel(pipelineBatch.status)"></span>
+                  <button class="secondary" x-show="pipelineBatch.status === 'running'" @click="cancelPipelineBatch(pipelineBatch.id)">עצירת סשן</button>
+                  <button class="primary" x-show="pipelineBatch.run_id" @click="openPipelineRun(pipelineBatch.run_id)">פתיחה בסקירה וייצוא מלאים ←</button>
+                </div>
+              </div>
+
+              <p class="error" x-show="pipelineBatch.error" x-text="pipelineBatch.error"></p>
+
+              <div class="view" x-show="(pipelineBatch.target_archetypes || []).length" style="margin-top:12px">
+                <strong>מניפת שימושים מספריים לשילוב טבעי באצווה זו (ללא כפיית תבנית 1-ל-1):</strong>
+                <div class="coverage-list" style="margin-top:8px">
+                  <template x-for="ta in pipelineBatch.target_archetypes || []" :key="ta.id">
+                    <span class="pill" x-text="ta.title + ' (' + ta.id + ')'"></span>
+                  </template>
+                </div>
+              </div>
+
+              <div :class="(pipelineBatch.engine_bugs || []).some(b => !b.resolved) ? 'error' : 'view'" x-show="(pipelineBatch.engine_bugs || []).length" style="margin-top:12px">
+                <div class="row">
+                  <strong x-text="(pipelineBatch.engine_bugs || []).some(b => !b.resolved) ? ('⚠️ זוהו ' + (pipelineBatch.engine_bugs || []).filter(b => !b.resolved).length + ' באגים פתוחים במנוע ההקראה הדטרמיניסטי:') : ('✓ כל באגי המנוע באצווה זו תוקנו והתבניות אושרו (' + (pipelineBatch.engine_bugs?.length || 0) + ')')"></strong>
+                  <button class="secondary" x-show="(pipelineBatch.engine_bugs || []).some(b => !b.resolved || !b.approved_after_fix)" @click="recheckEngineBugs(pipelineBatch.id)">בדוק מול המנוע ואשר תבניות מתוקנות</button>
+                </div>
+                <ul class="design-list">
+                  <template x-for="bug in pipelineBatch.engine_bugs || []" :key="bug.template_id">
+                    <li>
+                      <code class="mono" x-text="bug.template_id"></code>
+                      <span class="pill" :class="bug.resolved ? 'pill-ok' : 'pill-err'" x-text="bug.approved_after_fix ? 'תוקן ואושר (8/8)' : (bug.resolved ? 'תוקן במנוע' : 'פתוח')"></span>
+                      — <span x-text="bug.reason"></span>
+                      <div class="muted" dir="rtl" x-show="bug.sample_digits" x-text="'קלט: ' + bug.sample_digits"></div>
+                      <div class="muted" dir="rtl" x-show="bug.sample_cardinal && !bug.resolved" x-text="'לפני תיקון: ' + bug.sample_cardinal"></div>
+                      <div dir="rtl" style="color:#116453" x-show="bug.fixed_cardinal" x-text="'אחרי תיקון: ' + bug.fixed_cardinal"></div>
+                    </li>
+                  </template>
+                </ul>
+              </div>
+
+              <template x-for="sess in pipelineBatch.sessions || []" :key="sess.session_id">
+                <div class="view" style="margin-top:14px">
+                  <div class="row">
+                    <div class="meta">
+                      <strong>סשן OpenChamber:</strong>
+                      <code class="mono" x-text="sess.session_id"></code>
+                      <span class="pill" x-text="sess.model + (sess.variant && sess.variant !== 'default' ? ' #' + sess.variant : '')"></span>
+                      <span class="pill" :class="sess.status === 'busy' ? 'pill-ok' : ''" x-text="sess.status === 'busy' ? 'פעיל כעת' : sess.status"></span>
+                    </div>
+                    <div>
+                      <strong class="mono" style="font-size:1.2rem; color:#116453" x-text="'$' + formatUsd(sess.cost_usd)"></strong>
+                      <small class="muted" style="display:inline; margin-right:6px" x-text="pipelineBatch.pairs?.length ? '($' + formatUsd((sess.cost_usd / pipelineBatch.pairs.length) * 100) + ' ל-100 משפטים)' : ''"></small>
+                    </div>
+                  </div>
+                  <div class="coverage-list" style="margin-top:10px">
+                    <span><b>קלט:</b> <span class="mono" x-text="(sess.tokens?.input || 0).toLocaleString()"></span></span>
+                    <span><b>פלט:</b> <span class="mono" x-text="(sess.tokens?.output || 0).toLocaleString()"></span></span>
+                    <span><b>חשיבה:</b> <span class="mono" x-text="(sess.tokens?.reasoning || 0).toLocaleString()"></span></span>
+                    <span><b>מטמון (קריאה):</b> <span class="mono" x-text="(sess.tokens?.cache_read || 0).toLocaleString()"></span></span>
+                    <span><b>תורות מודל:</b> <span x-text="sess.assistant_turns || 0"></span></span>
+                  </div>
+                  <p class="muted" style="margin:10px 0 0" x-show="sess.last_activity"><b>פעולה אחרונה בסשן:</b> <span x-text="sess.last_activity"></span></p>
+                </div>
+              </template>
+
+              <h3 style="margin:20px 0 10px">שלבי הצינור</h3>
+              <div class="step-list">
+                <template x-for="step in pipelineBatch.steps || []" :key="step.id">
+                  <div class="step-row" :class="step.status">
+                    <span class="step-dot" x-text="stepIcon(step.status)"></span>
+                    <div>
+                      <strong x-text="step.title"></strong>
+                      <div class="muted" style="font-size:.88rem; margin-top:3px" x-text="step.detail || (step.status === 'pending' ? 'ממתין לשלב הקודם' : '')"></div>
+                    </div>
+                    <small class="mono muted" x-text="stepDuration(step)"></small>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <details class="panel" style="margin-top:16px" x-show="(pipelineBatch.mined_snippets || []).length">
+              <summary x-text="'הקשרי שיחה שנדגמו בשלב 02 (' + (pipelineBatch.mined_snippets?.length || 0) + ')'"></summary>
+              <div style="margin-top:14px; display:grid; gap:10px">
+                <template x-for="snip in pipelineBatch.mined_snippets || []" :key="snip.id">
+                  <div class="view">
+                    <div class="meta">
+                      <span class="pill" x-text="snip.source"></span>
+                      <span class="pill pill-ok" x-show="snip.target_archetype" x-text="'יעד Tier-1: ' + titleFor(snip.target_archetype) + ' (' + snip.target_archetype + ')'"></span>
+                      <span x-text="snip.episode_title"></span>
+                      <span class="mono muted" x-text="snip.bucket"></span>
+                    </div>
+                    <p style="margin:8px 0 0" dir="rtl" x-text="snip.context_window"></p>
+                  </div>
+                </template>
+              </div>
+            </details>
+
+            <details class="panel" style="margin-top:16px" x-show="(pipelineBatch.templates || []).length" :open="pipelineBatch.status === 'running' && (pipelineBatch.templates || []).length > 0">
+              <summary x-text="'תבניות מיקרו ושער בקרת 8/8 (' + (pipelineBatch.templates || []).filter(t => t.verdict?.approved).length + ' אושרו מתוך ' + (pipelineBatch.templates?.length || 0) + ')'"></summary>
+              <div style="margin-top:14px; display:grid; gap:12px">
+                <template x-for="tpl in pipelineBatch.templates || []" :key="tpl.id">
+                  <div class="view">
+                    <div class="row">
+                      <div class="meta">
+                        <strong class="mono" x-text="tpl.id"></strong>
+                        <span class="pill" x-text="titleFor(tpl.archetype_id) + ' (' + tpl.category + ')'"></span>
+                        <template x-for="u in (tpl.covered_usages || []).filter(x => x !== tpl.archetype_id)" :key="u">
+                          <span class="pill pill-ok" x-text="'+ ' + titleFor(u)"></span>
+                        </template>
+                        <span class="pill" x-text="tpl.track === 'corpus_inspired' ? 'השראת קורפוס' : 'תרחיש מזהים/טלפון'"></span>
+                      </div>
+                      <span class="pill" :class="!tpl.verdict ? 'pill-warn' : (tpl.verdict.approved ? 'pill-ok' : (tpl.verdict.verdict_kind === 'engine_bug' || tpl.verdict.verdict_kind === 'spec_repairable' ? 'pill-warn' : 'pill-err'))" x-text="templateVerdictBadge(tpl.verdict)"></span>
+                    </div>
+                    <p class="subtle" style="margin:8px 0 4px" x-show="tpl.inspiration_summary" x-text="tpl.inspiration_summary"></p>
+                    <p class="muted" style="margin:4px 0" x-show="tpl.verdict?.reason"><b>נימוק הבקר:</b> <span x-text="tpl.verdict?.reason"></span></p>
+                    <details style="margin-top:8px">
+                      <summary style="cursor:pointer; font-size:.88rem; color:#146859">הצגת 8 דגימות הקצה שרונדרו דטרמיניסטית</summary>
+                      <ol class="design-list">
+                        <template x-for="s in tpl.stress_samples || []" :key="s.index">
+                          <li><span dir="rtl" x-text="s.digits"></span><br><small class="muted" dir="rtl" x-text="s.cardinal"></small></li>
+                        </template>
+                      </ol>
+                    </details>
+                  </div>
+                </template>
+              </div>
+            </details>
+
+            <div class="panel" style="margin-top:16px" x-show="(pipelineBatch.pairs || []).length">
+              <div class="row">
+                <div>
+                  <h2 x-text="'תוצאות האצווה (' + (pipelineBatch.pairs?.length || 0) + ' זוגות משפטים מיושרים)'"></h2>
+                  <p class="subtle">כל משפט קומפל דטרמיניסטית דרך מנוע הקריאה העברי ואומת מול בדיקות היישור.</p>
+                </div>
+                <button class="primary" x-show="pipelineBatch.run_id" @click="openPipelineRun(pipelineBatch.run_id)">מעבר לסקירה וייצוא מלאים ←</button>
+              </div>
+              <template x-for="pair in (pipelineBatch.pairs || []).slice(0, pipelinePreviewLimit)" :key="pair.id">
+                <article class="sample">
+                  <div class="row">
+                    <div class="meta">
+                      <span class="pill" x-text="titleFor(pair.archetype_id)"></span>
+                      <span class="mono muted" x-text="pair.micro_template_id || ''"></span>
+                      <span x-text="'#' + (pair.index + 1)"></span>
+                    </div>
+                    <span class="muted" x-text="pair.alignments.map(a => a.slot + ': ' + a.value).join(' · ')"></span>
+                  </div>
+                  <div class="pair">
+                    <div class="view"><small>צורה כתובה · ספרות</small><div class="sentence" dir="rtl" x-html="highlight(pair, 'digits')"></div></div>
+                    <div class="view"><small>צורה נאמרת · מילים</small><div class="sentence" dir="rtl" x-html="highlight(pair, 'cardinal')"></div></div>
+                  </div>
+                </article>
+              </template>
+              <div style="margin-top:14px; text-align:center" x-show="(pipelineBatch.pairs || []).length > pipelinePreviewLimit">
+                <button class="secondary" @click="pipelinePreviewLimit += 50" x-text="'הצגת עוד משפטים (' + ((pipelineBatch.pairs?.length || 0) - pipelinePreviewLimit) + ' נוספים)'"></button>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <aside class="panel">
+        <h2>היסטוריית אצוות וסשנים</h2>
+        <p class="subtle" x-show="!pipelineBatches.length">טרם שוגרו אצוות לצינור Neon.</p>
+        <template x-for="item in pipelineBatches" :key="item.id">
+          <button class="secondary archive" :class="{selected: pipelineBatch?.id === item.id}" @click="selectPipelineBatch(item.id)">
+            <div class="row">
+              <strong x-text="(item.generated_count || item.target_count) + ' משפטים'"></strong>
+              <span class="pill" :class="batchStatusClass(item.status)" x-text="batchStatusLabel(item.status)"></span>
+            </div>
+            <small class="mono" x-text="item.id + ' · $' + formatUsd(item.total_cost_usd)"></small><br>
+            <small class="muted" x-show="item.session_id" x-text="'סשן ' + item.session_id.slice(0, 12) + '…'"></small>
+          </button>
+        </template>
+      </aside>
     </div>
   </section>
 </main>
 <script>
 function workbench() { return {
   tab: 'archetypes', catalog: null, run: null, runs: [], coverage: null, feedback: {}, notes: {}, seed: 42, count: 69,
-  selected: [], addressLengths: [1,2,3], boundaryWeight: .25, variantWeights: {}, error: '', busy: false, saved: '',
+  selected: [], addressLengths: [1,2,3], boundaryWeight: .25, variantWeights: {}, microTemplateRatio: 0.8, reviewDisplayLimit: 100, error: '', busy: false, saved: '',
+  library: null, libraryMsg: '', libraryPreviewLimit: 30, publishSelected: [], publishIncludeDisabled: false,
   candidates: [], candidateDrafts: {}, candidateMessage: '',
   naturalness: [], naturalnessNotes: {}, naturalnessFilter: 'unrated',
   exportResult: null, archetypeQuery: '', openArchetype: null, loadingDesign: false, designs: {},
   candidateFields: [{key:'grammar',title:'דקדוק'}, {key:'slots',title:'משבצות סמנטיות'}, {key:'safe_ranges',title:'טווחי החלפה בטוחים'}, {key:'written_policy',title:'כללי כתיבה'}, {key:'spoken_policy',title:'כללי הקראה'}],
   corpus: {sentences:'', source:'', license:'', restrictions:'', approved_for_derivation:false, purpose:'derivation'},
+  pipelineEnv: null, pipelineBatches: [], pipelineBatch: null, pipelinePollTimer: null, pipelinePreviewLimit: 30,
+  pipelineLedger: {total_batches:0, succeeded_batches:0, total_pairs_generated:0, total_cost_usd:0, avg_cost_per_100_pairs_usd:0, total_engine_bugs:0},
+  pipelineTier1Coverage: {total_archetypes:69, covered_count:0, uncovered_count:69, covered_ids:[], uncovered_ids:[]},
+  pipelineForm: {template_count: 30, target_count: 150, seed: 42, corpus_ratio: 0.75, variant: 'default', snippet_source_mode: 'live', notes: ''},
+  ivritCookieDraft: '', cookieSavedMsg: '',
+  sourceForm: {id: '', name: '', location: 'ssh', ssh_host: '', path: '', description: ''},
+  sourceSavedMsg: '', sourceSearch: {source_id: '', query: '', mode: 'regex', limit: 10},
+  sourceSearchBusy: false, sourceSearchResult: null,
   async request(url, options) {
     const response = await fetch(url, options);
     const data = await response.json();
     if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'בקשה נכשלה');
     return data;
   },
-  async init() { try { this.catalog = await this.request('/api/catalog'); this.count = this.catalog.archetypes.length; this.selected = this.catalog.archetypes.map(a => a.id); this.variantWeights = {...this.catalog.default_formal_weights}; this.runs = await this.request('/api/runs'); } catch(e) { this.error = e.message; } },
+  async init() { try { this.catalog = await this.request('/api/catalog'); this.count = this.catalog.archetypes.length; this.selected = this.catalog.archetypes.map(a => a.id); this.variantWeights = {...this.catalog.default_formal_weights}; this.runs = await this.request('/api/runs'); await this.loadLibrary(); await this.loadPipelineOverview(); } catch(e) { this.error = e.message; } },
+  async loadLibrary() {
+    try {
+      this.library = await this.request('/api/library');
+      this.reconcilePublishSelection(true);
+    } catch(e) { this.error = e.message; }
+  },
+  unpublishedTemplates(includeAll = null) {
+    const showDisabled = includeAll === null ? this.publishIncludeDisabled : includeAll;
+    return (this.library?.templates || []).filter(t => t.publish_status !== 'published' && (showDisabled || t.enabled));
+  },
+  unpublishedBatches() {
+    const counts = {};
+    for (const t of this.unpublishedTemplates()) {
+      counts[t.source_batch_id] = (counts[t.source_batch_id] || 0) + 1;
+    }
+    return Object.entries(counts).map(([batch_id, count]) => ({batch_id, count}));
+  },
+  reconcilePublishSelection(autoSelectIfEmpty = false) {
+    const visibleIds = new Set(this.unpublishedTemplates().map(t => t.id));
+    this.publishSelected = this.publishSelected.filter(id => visibleIds.has(id));
+    if (autoSelectIfEmpty && this.publishSelected.length === 0 && visibleIds.size > 0) {
+      this.publishSelected = Array.from(visibleIds);
+    }
+  },
+  selectAllUnpublished() {
+    this.publishSelected = this.unpublishedTemplates().map(t => t.id);
+  },
+  selectUnpublishedBatch(batchId) {
+    const set = new Set(this.publishSelected);
+    for (const t of this.unpublishedTemplates()) {
+      if (t.source_batch_id === batchId) set.add(t.id);
+    }
+    this.publishSelected = Array.from(set);
+  },
+  async publishSelectedToRepo() {
+    if (!this.publishSelected.length) return;
+    this.error = ''; this.libraryMsg = ''; this.busy = true;
+    try {
+      const res = await this.request('/api/library/publish', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({template_ids: this.publishSelected})
+      });
+      this.publishSelected = [];
+      await this.loadLibrary();
+      this.libraryMsg = '✓ פורסמו ' + res.published_count + ' תבניות ל-' + res.official_path + ' (' + res.total_official_templates + ' תבניות רשמיות בגיט — מוכן ל-git commit)';
+    } catch(e) { this.error = e.message; } finally { this.busy = false; }
+  },
+  async unpublishLibraryTemplate(templateId) {
+    this.error = ''; this.libraryMsg = '';
+    try {
+      await this.request('/api/library/official/' + encodeURIComponent(templateId), {method: 'DELETE'});
+      await this.loadLibrary();
+      this.libraryMsg = 'התבנית ' + templateId + ' הוסרה מקובץ הריפו הרשמי (נותרה בעותק המקומי אם הייתה קיימת).';
+    } catch(e) { this.error = e.message; }
+  },
+  async syncLibrary(disableSingleNumberBatches = false) {
+    this.error = ''; this.libraryMsg = '';
+    try {
+      const res = await this.request('/api/library/sync', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({disable_single_number_batches: !!disableSingleNumberBatches})
+      });
+      await this.loadLibrary();
+      this.libraryMsg = 'סונכרנו ' + res.scanned_batches + ' אצוות (' + res.added + ' נוספו, ' + res.updated + ' עודכנו · ' + res.summary.enabled_templates + ' תבניות פעילות)';
+    } catch(e) { this.error = e.message; }
+  },
+  async toggleLibraryBatch(batchId, enabled) {
+    this.error = '';
+    try {
+      await this.request('/api/library/batches/' + encodeURIComponent(batchId) + '/toggle', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({enabled: !!enabled})
+      });
+      await this.loadLibrary();
+    } catch(e) { this.error = e.message; }
+  },
+  async toggleLibraryTemplate(templateId, enabled) {
+    this.error = '';
+    try {
+      await this.request('/api/library/templates/' + encodeURIComponent(templateId), {
+        method: 'PATCH', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({enabled: !!enabled})
+      });
+      await this.loadLibrary();
+    } catch(e) { this.error = e.message; }
+  },
+  async deleteLibraryTemplate(templateId) {
+    this.error = '';
+    try {
+      await this.request('/api/library/templates/' + encodeURIComponent(templateId), {method: 'DELETE'});
+      await this.loadLibrary();
+    } catch(e) { this.error = e.message; }
+  },
+  previewMixSummary() {
+    const n = Math.max(1, Number(this.count || 0));
+    const hasLib = (this.library?.enabled_templates || 0) > 0;
+    const r = hasLib ? Number(this.microTemplateRatio ?? 0.8) : 0;
+    const m = r === 1 ? n : Math.round(n * r);
+    const t = n - m;
+    if (!hasLib && Number(this.microTemplateRatio ?? 0.8) > 0) {
+      return 'צפי הפקה (גיבוי Tier-1 כי הספרייה ריקה): ' + n.toLocaleString() + ' משפטי Tier-1.';
+    }
+    return 'צפי הפקה: ' + m.toLocaleString() + ' משפטי מיקרו-תבניות (' + Math.round((m / n) * 100) + '%) + ' + t.toLocaleString() + ' משפטי Tier-1 (' + Math.round((t / n) * 100) + '%).';
+  },
   async selectNeverRan() { this.error = ''; try { const data = await this.request('/api/archetypes/never-ran'); this.selected = data.archetypes; if (this.selected.length) this.count = this.selected.length; else this.error = 'כל הארכיטיפים כבר נדגמו לפחות פעם אחת. ניתן לבחור אותם ידנית או לבחור הכול.'; } catch(e) { this.error = e.message; } },
   filteredArchetypes() { const query = this.archetypeQuery.trim().toLowerCase(); return (this.catalog?.archetypes || []).filter(item => !query || [item.title,item.id,item.category,item.description].some(text => text.toLowerCase().includes(query))); },
   formatOption(value) { return typeof value === 'object' ? Object.entries(value).map(([key, text]) => key + ': ' + text).join(' · ') : String(value); },
@@ -215,16 +813,17 @@ function workbench() { return {
   async createRun() {
     this.error = ''; this.busy = true;
     try {
-      const data = await this.request('/api/runs', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({seed:this.seed, count:this.count, archetypes:this.selected, address_lengths:this.addressLengths.map(Number), boundary_weight:this.boundaryWeight, variant_weights:this.variantWeights})});
+      const data = await this.request('/api/runs', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({seed:this.seed, count:this.count, archetypes:this.selected, address_lengths:this.addressLengths.map(Number), boundary_weight:this.boundaryWeight, variant_weights:this.variantWeights, micro_template_ratio:Number(this.microTemplateRatio)})});
       await this.loadRun(data.id); this.runs = await this.request('/api/runs'); this.tab = 'review';
     } catch(e) { this.error = e.message; } finally { this.busy = false; }
   },
   async loadRun(id) {
     this.error = '';
-    try { const data = await this.request('/api/runs/' + id); this.run = data; this.feedback = data.feedback;
+    try { const data = await this.request('/api/runs/' + id); this.run = data; this.feedback = data.feedback; this.reviewDisplayLimit = 100;
       this.seed = data.seed; this.count = data.count; this.selected = data.archetypes || this.catalog.archetypes.map(a => a.id);
       this.addressLengths = data.address_lengths || [1,2,3]; this.boundaryWeight = data.boundary_weight ?? .25;
       this.variantWeights = data.variant_weights || {...this.catalog.default_formal_weights};
+      if (typeof data.micro_template_ratio === 'number') this.microTemplateRatio = data.micro_template_ratio;
       this.coverage = await this.request('/api/runs/' + id + '/coverage');
       this.notes = Object.fromEntries(Object.entries(data.feedback).map(([key, item]) => [key, item.note])); this.tab = 'review';
     } catch(e) { this.error = e.message; }
@@ -279,6 +878,181 @@ function workbench() { return {
     this.error = ''; this.busy = true; this.exportResult = null;
     try { this.exportResult = await this.request('/api/runs/'+this.run.id+'/export', {method:'POST'}); }
     catch(e) { this.error = e.message; } finally { this.busy = false; }
+  },
+  formatUsd(val) { const n = Number(val || 0); return n === 0 ? '0.0000' : (n < 0.01 ? n.toFixed(4) : n.toFixed(3)); },
+  batchStatusLabel(s) { return ({running:'פעיל ב-OpenChamber', succeeded:'הושלם', failed:'נכשל', queued:'בתור'})[s] || s; },
+  batchStatusClass(s) { return ({running:'pill-ok', succeeded:'pill-ok', failed:'pill-err'})[s] || ''; },
+  templateVerdictBadge(v) {
+    if (!v) return 'ממתין לבקרת 8/8';
+    if (v.approved) return v.rescued_from_engine_bug ? '✓ עבר 8/8 (לאחר תיקון מנוע)' : ('עבר ' + v.passed_count + '/8');
+    if (v.verdict_kind === 'engine_bug') return v.resolved ? '✓ באג מנוע תוקן' : '⚠️ באג מנוע (' + v.passed_count + '/8)';
+    if (v.verdict_kind === 'spec_repairable') return 'ניתן לתיקון מפרט (' + v.passed_count + '/8)';
+    return 'נפסל בניסוח (' + v.passed_count + '/8)';
+  },
+  async recheckEngineBugs(batchId) {
+    this.error = '';
+    try {
+      this.pipelineBatch = await this.request('/api/pipeline/batches/' + batchId + '/recheck-engine-bugs', {method: 'POST'});
+      const listData = await this.request('/api/pipeline/batches');
+      this.pipelineBatches = listData.batches || [];
+      this.pipelineLedger = listData.ledger || this.pipelineLedger;
+      this.pipelineTier1Coverage = listData.tier1_coverage || this.pipelineTier1Coverage;
+    } catch(e) { this.error = e.message; }
+  },
+  stepIcon(s) { return ({done:'✓', running:'●', failed:'!', pending:'·'})[s] || '·'; },
+  stepDuration(step) {
+    if (!step.started_at) return '';
+    const start = Date.parse(step.started_at);
+    const end = step.completed_at ? Date.parse(step.completed_at) : Date.now();
+    const sec = Math.max(0, Math.round((end - start) / 1000));
+    return sec + 's';
+  },
+  async openPipelineTab() { this.tab = 'pipeline'; await Promise.all([this.loadPipelineOverview(), this.loadLibrary()]); },
+  async loadPipelineOverview() {
+    try {
+      this.pipelineEnv = await this.request('/api/pipeline/status');
+      const cfgSources = this.pipelineEnv?.corpus_sources?.sources || [];
+      if (cfgSources.length && !cfgSources.some(s => s.id === this.sourceSearch.source_id)) {
+        this.sourceSearch.source_id = cfgSources[0].id;
+      }
+      const listData = await this.request('/api/pipeline/batches');
+      this.pipelineBatches = listData.batches || [];
+      this.pipelineLedger = listData.ledger || this.pipelineLedger;
+      this.pipelineTier1Coverage = listData.tier1_coverage || this.pipelineTier1Coverage;
+      if (!this.pipelineBatch && this.pipelineBatches.length) {
+        await this.selectPipelineBatch(this.pipelineBatches[0].id);
+      } else if (this.pipelineBatch?.status === 'running') {
+        this.ensurePipelinePolling();
+      }
+    } catch(e) { this.error = e.message; }
+  },
+  async saveIvritCookie() {
+    this.error = ''; this.cookieSavedMsg = '';
+    try {
+      this.pipelineEnv = await this.request('/api/pipeline/settings', {
+        method: 'PUT', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ivrit_cookie: this.ivritCookieDraft})
+      });
+      this.ivritCookieDraft = '';
+      this.cookieSavedMsg = this.pipelineEnv.ivrit_cookie.configured ? 'העוגייה נשמרה מקומית' : 'העוגייה נוקתה';
+    } catch(e) { this.error = e.message; }
+  },
+  async saveCorpusSource() {
+    this.error = ''; this.sourceSavedMsg = '';
+    try {
+      const payload = {
+        id: this.sourceForm.id.trim(),
+        name: this.sourceForm.name.trim(),
+        type: 'text_file',
+        location: this.sourceForm.location,
+        path: this.sourceForm.path.trim(),
+        description: this.sourceForm.description.trim(),
+        enabled: true,
+      };
+      if (payload.location === 'ssh') payload.ssh_host = this.sourceForm.ssh_host.trim();
+      await this.request('/api/pipeline/sources', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      this.pipelineEnv = await this.request('/api/pipeline/status');
+      this.sourceSearch.source_id = payload.id;
+      this.sourceForm = {id: '', name: '', location: 'ssh', ssh_host: '', path: '', description: ''};
+      this.sourceSavedMsg = 'המקור נשמר בהצלחה';
+    } catch(e) { this.error = e.message; }
+  },
+  async deleteCorpusSource(id) {
+    this.error = '';
+    try {
+      await this.request('/api/pipeline/sources/' + encodeURIComponent(id), {method: 'DELETE'});
+      this.pipelineEnv = await this.request('/api/pipeline/status');
+      const cfgSources = this.pipelineEnv?.corpus_sources?.sources || [];
+      this.sourceSearch.source_id = cfgSources[0]?.id || '';
+      this.sourceSearchResult = null;
+    } catch(e) { this.error = e.message; }
+  },
+  async runSourceSearch() {
+    if (!this.sourceSearch.source_id || !this.sourceSearch.query.trim()) return;
+    this.error = ''; this.sourceSearchBusy = true;
+    try {
+      this.sourceSearchResult = await this.request('/api/pipeline/sources/' + encodeURIComponent(this.sourceSearch.source_id) + '/search', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          query: this.sourceSearch.query.trim(),
+          mode: this.sourceSearch.mode,
+          limit: Number(this.sourceSearch.limit || 10),
+          context_lines: 0
+        })
+      });
+    } catch(e) { this.error = e.message; } finally { this.sourceSearchBusy = false; }
+  },
+  async startPipelineBatch() {
+    this.error = ''; this.busy = true; this.pipelinePreviewLimit = 30;
+    try {
+      const reuseMode = this.pipelineForm.snippet_source_mode || 'live';
+      const reuseFrom = reuseMode === 'reuse_all'
+        ? ['all']
+        : (reuseMode.startsWith('batch:') ? [reuseMode.slice(6)] : null);
+      const batch = await this.request('/api/pipeline/batches', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          template_count: Number(this.pipelineForm.template_count),
+          target_count: Number(this.pipelineForm.target_count),
+          seed: Number(this.pipelineForm.seed),
+          corpus_ratio: Number(this.pipelineForm.corpus_ratio),
+          variant: this.pipelineForm.variant,
+          reuse_snippets_from: reuseFrom,
+          notes: this.pipelineForm.notes || ''
+        })
+      });
+      this.pipelineBatch = batch;
+      const listData = await this.request('/api/pipeline/batches');
+      this.pipelineBatches = listData.batches || [];
+      this.pipelineLedger = listData.ledger || this.pipelineLedger;
+      this.pipelineTier1Coverage = listData.tier1_coverage || this.pipelineTier1Coverage;
+      this.ensurePipelinePolling();
+    } catch(e) { this.error = e.message; } finally { this.busy = false; }
+  },
+  async selectPipelineBatch(id) {
+    this.error = ''; this.pipelinePreviewLimit = 30;
+    try {
+      this.pipelineBatch = await this.request('/api/pipeline/batches/' + encodeURIComponent(id));
+      if (this.pipelineBatch.status === 'running') this.ensurePipelinePolling();
+    } catch(e) { this.error = e.message; }
+  },
+  ensurePipelinePolling() {
+    if (this.pipelinePollTimer) return;
+    this.pipelinePollTimer = setInterval(() => this.pollActiveBatch(), 2000);
+  },
+  stopPipelinePolling() {
+    if (this.pipelinePollTimer) { clearInterval(this.pipelinePollTimer); this.pipelinePollTimer = null; }
+  },
+  async pollActiveBatch() {
+    if (!this.pipelineBatch) { this.stopPipelinePolling(); return; }
+    try {
+      const updated = await this.request('/api/pipeline/batches/' + encodeURIComponent(this.pipelineBatch.id));
+      const wasRunning = this.pipelineBatch.status === 'running';
+      this.pipelineBatch = updated;
+      const listData = await this.request('/api/pipeline/batches');
+      this.pipelineBatches = listData.batches || [];
+      this.pipelineLedger = listData.ledger || this.pipelineLedger;
+      this.pipelineTier1Coverage = listData.tier1_coverage || this.pipelineTier1Coverage;
+      if (updated.status !== 'running') {
+        this.stopPipelinePolling();
+        if (wasRunning && updated.run_id) this.runs = await this.request('/api/runs');
+      }
+    } catch(e) { /* transient poll hiccup ignored */ }
+  },
+  async cancelPipelineBatch(id) {
+    this.error = '';
+    try {
+      this.pipelineBatch = await this.request('/api/pipeline/batches/' + encodeURIComponent(id) + '/cancel', {method: 'POST'});
+      this.stopPipelinePolling();
+      await this.loadPipelineOverview();
+    } catch(e) { this.error = e.message; }
+  },
+  async openPipelineRun(runId) {
+    this.runs = await this.request('/api/runs');
+    await this.loadRun(runId);
   }
 }; }
 </script>

@@ -14,6 +14,7 @@ data/
 *.mp3
 .env
 .openchamber
+.DS_Store
 
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 /graft/
@@ -34,6 +35,7 @@ evaluation-sources.json
 # Temporary and throw-away scripts / scratch files
 tmp*
 temp*
+!template*
 _tmp*
 scratch*
 throwaway*

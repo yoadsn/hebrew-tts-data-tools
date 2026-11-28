@@ -29,6 +29,10 @@ def _last_four(rng: random.Random) -> str:
     return f"{rng.randrange(10000):04d}"
 
 
+def _exchange_three(rng: random.Random) -> str:
+    return f"{rng.randint(200, 999)}"
+
+
 def sample_star_phone(rng: random.Random) -> str:
     length = rng.choices(STAR_LENGTH_CHOICES, weights=STAR_LENGTH_WEIGHTS, k=1)[0]
     first = str(rng.randint(1, 9))
@@ -41,29 +45,30 @@ def is_star_phone(value: str) -> bool:
 
 
 def sample_phone(kind: str, rng: random.Random) -> str:
+    mid = _exchange_three(rng)
     last = _last_four(rng)
     if kind == "mobile":
         prefix = rng.choice(MOBILE_PREFIXES)
-        return rng.choice((f"{prefix}-000-{last}", f"{prefix}-000{last}"))
+        return rng.choice((f"{prefix}-{mid}-{last}", f"{prefix}-{mid}{last}"))
     if kind == "landline":
         prefix = rng.choice(GEOGRAPHIC_PREFIXES)
-        return rng.choice((f"{prefix}-000-{last}", f"({prefix}) 000-{last}", f"{prefix} 000 {last}"))
+        return rng.choice((f"{prefix}-{mid}-{last}", f"({prefix}) {mid}-{last}", f"{prefix} {mid} {last}"))
     if kind == "local_landline":
-        return f"000-{last}"
+        return f"{mid}-{last}"
     if kind == "national_line":
         if rng.random() < STAR_PHONE_PROBABILITY[kind]:
             return sample_star_phone(rng)
         prefix = rng.choice(NATIONAL_PREFIXES)
-        return rng.choice((f"{prefix}-000-{last}", f"{prefix} 000 {last}"))
+        return rng.choice((f"{prefix}-{mid}-{last}", f"{prefix} {mid} {last}"))
     if kind == "israeli_international":
         prefix = rng.choice(MOBILE_PREFIXES + GEOGRAPHIC_PREFIXES + NATIONAL_PREFIXES)[1:]
-        return rng.choice((f"+972 {prefix}-000-{last}", f"+972-{prefix}-000-{last}"))
+        return rng.choice((f"+972 {prefix}-{mid}-{last}", f"+972-{prefix}-{mid}-{last}"))
     if kind == "business_line":
         if rng.random() < STAR_PHONE_PROBABILITY[kind]:
             return sample_star_phone(rng)
         prefix = rng.choice(BUSINESS_PREFIXES)
         suffix = f"{rng.randrange(1000):03d}"
-        return rng.choice((f"1-{prefix[1:]}-000-{suffix}", f"1 {prefix[1:]} 000 {suffix}"))
+        return rng.choice((f"1-{prefix[1:]}-{mid}-{suffix}", f"1 {prefix[1:]} {mid} {suffix}"))
     raise ValueError(f"Unknown phone format: {kind}")
 
 
@@ -75,28 +80,26 @@ def validate_phone(kind: str, value: str) -> bool:
     if not isinstance(value, str) or not value.isascii():
         return False
     if kind == "mobile":
-        # Keep earlier reviewed hand-rendered 050-XXXXXXX fixtures valid;
-        # generated samples use 000-XXXX and several documented prefixes.
         prefix = value[:3]
         return prefix in MOBILE_PREFIXES and bool(re.fullmatch(
             rf"{prefix}-(?:\d{{7}}|\d{{3}}-\d{{4}})", value))
     if kind == "landline":
         return any(bool(re.fullmatch(
-            rf"(?:{prefix}-000-\d{{4}}|\({prefix}\) 000-\d{{4}}|{prefix} 000 \d{{4}})", value))
+            rf"(?:{prefix}-\d{{3}}-\d{{4}}|\({prefix}\) \d{{3}}-\d{{4}}|{prefix} \d{{3}} \d{{4}})", value))
             for prefix in GEOGRAPHIC_PREFIXES)
     if kind == "local_landline":
-        return bool(re.fullmatch(r"000-\d{4}", value))
+        return bool(re.fullmatch(r"\d{3}-\d{4}", value))
     if kind == "national_line":
         return is_star_phone(value) or any(
-            bool(re.fullmatch(rf"(?:{prefix}-000-\d{{4}}|{prefix} 000 \d{{4}})", value))
+            bool(re.fullmatch(rf"(?:{prefix}-\d{{3}}-\d{{4}}|{prefix} \d{{3}} \d{{4}})", value))
             for prefix in NATIONAL_PREFIXES
         )
     if kind == "israeli_international":
-        return any(bool(re.fullmatch(rf"\+972[ -]{prefix[1:]}-000-\d{{4}}", value))
+        return any(bool(re.fullmatch(rf"\+972[ -]{prefix[1:]}-\d{{3}}-\d{{4}}", value))
                    for prefix in MOBILE_PREFIXES + GEOGRAPHIC_PREFIXES + NATIONAL_PREFIXES)
     if kind == "business_line":
         return is_star_phone(value) or any(
-            bool(re.fullmatch(rf"(?:1-{prefix[1:]}-000-\d{{3}}|1 {prefix[1:]} 000 \d{{3}})", value))
+            bool(re.fullmatch(rf"(?:1-{prefix[1:]}-\d{{3}}-\d{{3}}|1 {prefix[1:]} \d{{3}} \d{{3}})", value))
             for prefix in BUSINESS_PREFIXES
         )
     return False

@@ -19,7 +19,8 @@ def summarize(pairs: list[dict[str, Any]], feedback: dict[str, dict[str, Any]]) 
     for pair in pairs:
         archetypes[pair["archetype_id"]] += 1
         categories[BY_ID[pair["archetype_id"]].category] += 1
-        gender = pair["sampled"].get("noun", {}).get("gender")
+        noun_val = pair["sampled"].get("noun")
+        gender = noun_val.get("gender") if isinstance(noun_val, dict) else None
         if gender:
             genders[gender] += 1
         verdicts[feedback.get(pair["id"], {}).get("verdict", "implicit_valid")] += 1
